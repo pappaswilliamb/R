@@ -1,0 +1,178 @@
+---
+title: 'Matrix Algebra - Lab'
+author: "Blake Pappas"
+date: 'Sep 15, 2022'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+## Motor Trend Car Road Tests
+
+The data was extracted from the 1974 Motor *Trend US* magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles.
+
+### Load the Dataset
+
+**Code:**
+
+```{r}
+data(mtcars)
+```
+
+
+**Question:** What is the sample size of this data set and how many variables are there?
+
+```{r}
+# Sample Size
+(sample_size <- dim(mtcars)[1]) 
+
+# Number of Variables
+(num_variables <- dim(mtcars)[2]) 
+```
+
+**Answer:** The sample size of this data set is 32 and there are 11 variables.
+
+### Subset the Data
+
+We will focus on the following variables:
+
+1. mpg:	Miles/gallon
+2. disp: Displacement (cu.in.)
+3. hp:	Gross horsepower
+4. drat:	Rear axle ratio
+5. wt:	Weight (1000 lbs)
+
+**Question:** Create a new data set from *mtcars* that only contains these 5 variables.   
+
+**Code:**
+
+```{r}
+vars <- which(names(mtcars) %in% c("mpg", "disp", "hp", "drat", "wt"))
+(cars <- mtcars[, vars])
+```
+
+**Question:** Compute the sample mean vector and the sample covariance matrix for this new data set. 
+
+**Code:**
+
+```{r}
+# Sample Mean Vector
+n <- dim(cars)[1]
+p <- dim(cars)[2]
+X <- as.matrix(cars)
+ones <- rep(1, n) # Creates a vector of 1's with a length of n
+(meanCal <- (1 / n) * t(X) %*% ones)
+
+# Sample Covariance Matrix
+(S <- cov(cars))
+```
+
+
+### Plot the Data
+
+Please summarize this new data set using only one graph that contains most of the information.
+
+**Code:**
+
+```{r}
+# Chernoff Faces
+library(aplpack)
+par(mar = rep(0, 4))
+faces(cars, cex = 0.8)
+```
+
+
+## Multivariate Normal Distributions
+
+In this section, we will simulate data from bivariate normal distributions with different correlation coefficients. Let's start with $\rho = 0$, that is, these two variables are independent to each other.
+
+**Code:**
+
+```{r, message = FALSE}
+library(MASS)
+n = 1000
+rho <- 0
+sigma <- 1
+Sigma = matrix(c(sigma, sigma * rho,
+                 sigma * rho, sigma), 2)
+x1 <- mvrnorm(n = n, mu = c(0, 0), Sigma = Sigma)
+```
+
+### Plot This Simulated Data Set
+
+**Code:**
+
+```{r}
+par(mar = c(3.6, 3.6, 0.8, 0.6), las = 1)
+layout(matrix(c(1, 1, 2, 3), nrow = 2, ncol = 2))
+plot(x1, pch = 16, las = 1, xlab = "", ylab = "")
+mtext(expression(X[j]), 1, line = 2); mtext(expression(X[k]), 2, line = 2)
+text(-4, 2, expression(paste(S[jk], " = ")))
+text(-3.3, 2, round(cov(x1[, 1], x1[, 2]), 2))
+abline(h = mean(x1[, 2]), lty = 2); abline(v = mean(x1[, 1]), lty = 2)
+
+plot(1:n, x1[, 1], pch = 16, xlab = "", ylab = "")
+abline(h = mean(x1[, 1]))
+mtext(expression(X[j]), 1, line = 2)
+
+plot(1:n, x1[, 2], pch = 16, xlab = "", ylab = "")
+abline(h = mean(x1[, 2]))
+mtext(expression(X[k]), 1, line = 2)
+```
+
+### Compute the Eigenvalues of the Sample Covariance Matrix
+
+**Code:**
+
+```{r}
+eigen <- eigen(S)
+
+# Eigenvalues
+(S %*% eigen$vectors[, 1] / eigen$vectors[, 1])
+
+# Eigenvectors
+t(eigen$vectors[, 1]) %*% eigen$vectors[, 1]
+t(eigen$vectors[, 2]) %*% eigen$vectors[, 2]
+t(eigen$vectors[, 3]) %*% eigen$vectors[, 3]
+t(eigen$vectors[, 4]) %*% eigen$vectors[, 4]
+t(eigen$vectors[, 5]) %*% eigen$vectors[, 5]
+```
+
+**Question:** What are the theoretical eigenvalues and eigenvectors?
+
+**Answer:** The theoretical eigennvectors are the direction in which the eigenvalues are stretched. The theoretical eigenvalues are the factor by which the eigenvectors are stretched.
+
+### Repeat the Exercises Above but with $\rho = 0.9$
+```{r, message = FALSE}
+library(MASS)
+n = 1000
+rho <- 0.9
+sigma <- 1
+Sigma = matrix(c(sigma, sigma * rho,
+                 sigma * rho, sigma), 2)
+x1 <- mvrnorm(n = n, mu = c(0, 0), Sigma = Sigma)
+```
+
+```{r}
+par(mar = c(3.6, 3.6, 0.8, 0.6), las = 1)
+layout(matrix(c(1, 1, 2, 3), nrow = 2, ncol = 2))
+plot(x1, pch = 16, las = 1, xlab = "", ylab = "")
+mtext(expression(X[j]), 1, line = 2); mtext(expression(X[k]), 2, line = 2)
+text(-4, 2, expression(paste(S[jk], " = ")))
+text(-3.3, 2, round(cov(x1[, 1], x1[, 2]), 2))
+abline(h = mean(x1[, 2]), lty = 2); abline(v = mean(x1[, 1]), lty = 2)
+
+plot(1:n, x1[, 1], pch = 16, xlab = "", ylab = "")
+abline(h = mean(x1[, 1]))
+mtext(expression(X[j]), 1, line = 2)
+
+plot(1:n, x1[, 2], pch = 16, xlab = "", ylab = "")
+abline(h = mean(x1[, 2]))
+mtext(expression(X[k]), 1, line = 2)
+```

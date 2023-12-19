@@ -1,0 +1,163 @@
+---
+title: "Canonical Correlation Analysis"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load the Data and Libraries
+```{r, message = FALSE, warning = FALSE}
+Packages <- c("ggplot2","GGally", "ellipse", "RColorBrewer",
+              "CCA", "CCP")
+lapply(Packages, library, character.only = TRUE)
+
+dat1 <- read.table("sales.txt") # Loads the data set
+colnames(dat1) <- c("Growth", "Profit", "New",
+                    "Creativity", "Mechanical", "Abstract", "Math") # Gives column names to the variables in the data set
+```
+
+## Summarize the Data 
+
+```{r}
+library(GGally)
+summary(dat1) # Summarizes each variable in the data set
+ggpairs(dat1) # Shows the scatterplot matrix of all variables in the data set
+
+my_colors <- brewer.pal(5, "Spectral")
+plotcorr(cor(dat1), col = my_colors) # Visualizes the correlations based on ellipses. The narrower the ellipses, the stronger the correlation between the two variables
+```
+
+## Let's Examine *sales* and *intelligence* 
+
+```{r}
+sales <- dat1[, 1:3] # Separates the sales variables into their own subset
+intelligence <- dat1[, 4:7] # Separates the intelligence variables into their own subset
+
+ggpairs(sales) # Shows the scatterplot matrix of the sales subset
+ggpairs(intelligence) # Shows the scatterplot matrix of the intelligence subset
+
+# Calculate the Cross-Covariance Structure
+matcor(sales, intelligence) # $Xcor calculates sigma(X), $Ycor calculates sigma(Y), and $XYcor calculates the covariance matrix of Z. Z = (sigma(X), sigma(XY), sigma(YX), sigma(Y))
+```
+
+## Test $H_{0}: \Sigma_{XY}=0$ 
+
+```{r}
+# Tests of Canonical Dimensions
+rho <- cc(sales, intelligence)$cor
+
+## Define Number of Observations, Number of Variables In the First Set, and Number of Variables In the Second Set
+n <- dim(sales)[1]
+p <- length(sales)
+q <- length(intelligence)
+
+## Calculate p-Values Using the F-Approximations of Different Test Statistics
+# library(CCP)
+p.asym(rho, n, p, q, tstat = "Wilks")
+```
+
+## Canonical Correlation Analysis Using *cc* Function from *CCA* Package
+
+```{r}
+# Calculate the Canonical Correlation
+cc1 <- cc(sales, intelligence)
+names(cc1)
+
+cc1$cor # Canonical Correlation
+cc1$xcoef # Sales Matrix
+cc1$ycoef # Intelligence Matrix
+cc1$scores # Matrices
+```
+
+## Check 
+
+Compute the eigenvalues and eigenvectors of
+
+$$\Sigma_{X}^{-1/2}\Sigma_{XY}\Sigma_{Y}^{-1}\Sigma_{YX}\Sigma_{X}^{-1/2}$$
+
+and
+
+$$\Sigma_{Y}^{-1/2}\Sigma_{YX}\Sigma_{X}^{-1}\Sigma_{XY}\Sigma_{Y}^{-1/2}$$
+
+
+```{r, message = FALSE, warning = FALSE}
+library(expm)
+a <- solve(sqrtm(var(dat1[, 1:3]))) %*% var(dat1)[1:3, 4:7] %*% solve(var(dat1[, 4:7])) %*% var(dat1)[4:7, 1:3] %*% solve(sqrtm(var(dat1[, 1:3])))
+
+eigen(a)$values
+cc1$cor^2
+ 
+u_vec <- eigen(a)$vectors
+
+u_vec[, 1] %*% solve(sqrtm(var(dat1[, 1:3])))
+cc1$xcoef[, 1]
+
+b <- solve(sqrtm(var(dat1[, 4:7]))) %*% var(dat1)[4:7, 1:3] %*% solve(var(dat1[, 1:3])) %*% var(dat1)[1:3, 4:7] %*% solve(sqrtm(var(dat1[, 4:7])))
+
+eigen(b)$values
+cc1$cor^2
+
+v_vec <- eigen(b)$vectors
+
+v_vec[, 1] %*% solve(sqrtm(var(dat1[, 4:7])))
+cc1$ycoef[, 1]
+```
+
+## Compute the Correlations Between $\{(U_{i}, V_{i})\}_{i = 1}^{3}$ and $\{X_{i}\}_{i = 1}^{3}$ and $\{Y_{j}\}_{i = 1}^{4}$
+
+```{r}
+# Compute Canonical Loadings
+cc2 <- comput(sales, intelligence, cc1)
+
+# Display Canonical Loadings
+cc2$corr.X.xscores # Correlations Between X’s and U’s
+cc2$corr.Y.xscores # Correlations Between Y ’s and V ’s
+cc2$corr.X.yscores # Correlations Between X’s and V ’s
+cc2$corr.Y.yscores # Correlations Between Y ’s and U’s
+
+# Check
+cc1$xcoef[, 1] %*% var(dat1[, 1:3]) %*% diag(diag(var(dat1[, 1:3]))^(-0.5), 3)
+cc2$corr.X.xscores[, 1]
+
+cc1$ycoef[, 1] %*% var(dat1[, 4:7]) %*% diag(diag(var(dat1[, 4:7]))^(-0.5), 4)
+cc2$corr.Y.yscores[, 1]
+```
+
+## Car Example
+
+```{r}
+vars <- colnames(mtcars)
+design_vars <- which(vars %in% c("cyl", "disp", "carb", "drat", "gear", "vs"))
+design <- mtcars[, design_vars]
+driver_vars <- which(vars %in% c("mpg", "hp", "wt", "qsec", "am"))
+driver <- mtcars[, driver_vars]
+cancor(design, driver)
+
+cc(design, driver) 
+ccs <- cc(design, driver)
+descc1 <- ccs$scores$xscores[, 1]; drivcc1 <- ccs$scores$yscores[, 1]
+sdr <- sort(drivcc1)
+sdr <- sdr[c(1, length(sdr))] # First and Last
+ext <- match(sdr, drivcc1)
+plot(descc1, drivcc1, xlab = "Design Canonical Scores",
+     ylab = "Driver Canonical Scores", las = 1,
+     pch = 16)
+points(descc1[ext], drivcc1[ext], pch = 16, col = c("red", "blue"))
+text(descc1[ext], drivcc1[ext], labels = rownames(mtcars)[ext],
+     pos = c(4, 2), cex = 0.8, col = c("red", "blue"))
+grid()
+
+cancor(design, driver)$cor; cor(descc1, drivcc1)
+```

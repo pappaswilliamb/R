@@ -1,0 +1,419 @@
+---
+title: "Project 2"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  word_document: default
+  pdf_document:
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes: \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+
+In this problem, we are going to use ERA-Interim data product to conduct a PCA analysis. The ERA-Interim is a global atmospheric reanalysis dataset. Reanalysis is an approach to produce spatially and temporally gridded datasets via data assimilation for climate monitoring and analysis. In the R data file `NA_MaxT ERA.RData`, you will find daily values of maximum temperature from 1979 to 2017 with the spatial resolution around 80km. The original global extent has been subsetted to a region covering contiguous United States and extending into Canada and Mexico.
+
+1. First, use the following R script to load the R data object:
+```{r}
+load("NA_MaxT_ERA.RData")
+NA_MaxT <- NA_MaxT - 273.15 # Converts from Kelvin to Celsius
+nlon <- length(NA_lon) # Number of longitude grid points
+nlat <- length(NA_lat) # Number of latitude grid points
+nmon <- 12 # Number of months
+nyr <- 39 # Number of years
+```
+
+2. Second, aggregate the daily data to monthly average:
+```{r}
+avg_by_mon <- array(dim = c(nlon, nlat, nmon, nyr))
+for (i in 1:nlon) {
+  for (j in 1:nlat) {
+dat <- cbind(NA_MaxT[i, j, ], as.factor(mon), as.factor(yr))
+avg_by_mon[i, j, , ] <- tapply(dat[, 1], list(dat[, 2], dat[, 3]), mean)
+  }
+}
+```
+
+3. Third, compute the “anomalies” by subtracting the 39-year monthly average at each location:
+```{r}
+maxT_temp <- apply(avg_by_mon, 1:3, function(x) x - mean(x, na.rm = T))
+
+# Change the Data Into Longitude-Latitude-Month Format
+maxT_anomalies <- array(dim = c(nlon, nlat, nmon * nyr))
+for (i in 1:nlon) {
+  for (j in 1:nlat) {
+    maxT_anomalies[i, j, ] <- c(t(maxT_temp[, i, j, ]))
+  }
+}
+```
+
+4. Fourth, apply singular value decomposition to perform principal component analysis:
+```{r}
+temp <- array(maxT_anomalies, c(nlon * nlat, nmon * nyr))
+
+# Convert the Data Into a Row/Column Format
+temp2 <- svd(temp)
+```
+
+(a) How many principal components are needed in order to explain more than 70% of the variation in anomalies?   
+
+```{r}
+# Screen Plots for EOFs
+
+# Relative Variance Plot
+par(mar = c(4, 4, 1, 1), mfrow = c(1, 2), las = 1)
+dt <- ((temp2$d^2) / sum(temp2$d^2))
+plot(1:50, dt[1:50], xlab = "Index", ylab = "Relative Variance",
+     pch = 16, cex = 0.8)
+grid()
+
+# Variance Explained Plot
+dt <- (cumsum(temp2$d^2) / sum(temp2$d^2))
+plot(1:50, dt[1:50], xlab = "Index", ylab = "Variance Explained", pch = 16, cex = 0.8)
+abline(h = 0.7, col = "red", lwd = 2)
+grid()
+```
+
+**Answer:** 4 principal components are required in order to explain more than 70% of the variation in anomalies. Looking at the screen plots, the fourth principal component puts the variation explained at approximately 74.58%.
+
+
+(b) Based on the answer in (a), plot these principal components in terms of spatial fields and try to interpret these principal components.
+
+```{r, message = FALSE, warning = FALSE}
+library(fields)
+library(maps)
+
+temp <- array(maxT_anomalies, c(nlon * nlat, nmon * nyr))
+ind <- is.na(temp[, 1])
+temp <- temp[!ind, ]
+temp2 <- svd(temp)
+U1 <- matrix(NA, nlon * nlat)
+U1[!ind] <- temp2$u[, 1]; U1 <- matrix(U1, nlon, nlat)
+U2 <- matrix(NA, nlon * nlat)
+U2[!ind] <- temp2$u[, 2]; U2 <- matrix(U2, nlon, nlat)
+U3 <- matrix(NA, nlon * nlat)
+U3[!ind] <- temp2$u[, 3]; U3 <- matrix(U3, nlon, nlat)
+U4 <- matrix(NA, nlon * nlat)
+U4[!ind] <- temp2$u[, 4]; U4 <- matrix(U4, nlon, nlat)
+zr <- range(c(U1, U2, U3, U4), na.rm = TRUE)
+
+set.panel(2, 2)
+par(oma = c(0, 0, 0, 0))
+ct <- tim.colors(256)
+par(mar = c(1, 1, 1, 1))
+image(NA_lon, NA_lat, U1, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world", add = TRUE, lwd = 2)
+box()
+image(NA_lon, NA_lat, U2, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world", add = TRUE, lwd = 2)
+box()
+image(NA_lon, NA_lat, U3, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world", add = TRUE, lwd = 2)
+box()
+image(NA_lon, NA_lat, U4, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world", add = TRUE, lwd = 2)
+box()
+```
+
+Principal component #1 seems to exhibit a land-ocean contrast, as spatial regions closer to the ocean tend to have higher temperatures than spatial regions closer to the interior of the contiguous United States, Canada, and Mexico. This finding makes sense, as water is less resistant to changes in temperature than air. In general, the closer that a spatial region is to a large mass of water, the less responsive that region is to changes in temperature, in comparison to spatial regions that are geographically distant from large masses of water. Principal component #2 appears to exhibit an east-west contrast, as the monthly temperatures in the east are higher than the monthly temperatures in the west. Principal component #3 appears to exhibit a north-south contrast, as the monthly temperatures in the north are lower than the monthly temperatures in the south. Principal component #4 appears to exhibit a southwest-interior-northeast contrast, as the monthly temperatures in the southwest and northeast are higher than the monthly temperatures in the interior.
+
+
+## Problem 2
+
+Split the decathlon data into two different sets:   
+
+* X: Shot.put, Discus, Javeline, Pole.vault   
+* Y : 100m, 400m, 1500m, 110m.hurdle, Long.jump, High.jump   
+
+and perform a canonical correlation analysis.   
+
+
+The data comes from two sporting events in 2004: The Olympics and Decastar. This sample contains the results of 41 decathletes in 10 track and fields events in an attempt to determine which factors influence performance. In the analysis, two collections of variables were measured:
+
+* Field Events: Shot Put, Discus, Javelin, Pole Vault
+* Track Events: 100-Meter Dash, 400-Meter Dash, 1500-Meter Run, 110-Meter Hurdles, Long Jump, High Jump
+
+
+### Load the Data and Import All Appropriate Packages
+```{r, message = FALSE, warning = FALSE, results = 'hide'}
+Packages <- c("ggplot2", "GGally", "ellipse", "RColorBrewer",
+              "CCA", "CCP")
+lapply(Packages, library, character.only = TRUE)
+library(tidyverse)
+library(FactoMineR)
+data(decathlon)
+```
+
+### Summarizing *X (Field Events)* and *Y (Track Events)* 
+```{r}
+# Subset the Data Into Two Sets: X (Field Events) and Y (Track Events)
+X <- decathlon[, c(3, 7, 9, 8)]
+Y <- decathlon[, c(1, 5, 10, 6, 2, 4)]
+
+# Shows the Scatterplot Matrix of the X (Field Events) Subset
+ggpairs(X)
+
+# Shows the Scatterplot Matrix of the Y (Track Events) Subset
+ggpairs(Y)
+
+# Calculate the Cross-Covariance Structure
+matcor(X, Y)
+```
+
+
+### Likelihood Ratio Test
+
+Next, determine if there is any relationship between the two sets of variables.   
+
+```{r}
+# Tests of Canonical Dimensions
+rho <- cc(X, Y)$cor
+
+# Define the Number of Observations
+n <- dim(X)[1]
+
+# Define the Number of Variables in First Set
+p <- length(X)
+
+# Define the Number of Variables in the Second Set
+q <- length(Y)
+
+# Calculate the p-Values Using the F-Approximations of Different Test Statistics
+CCA_Test <- p.asym(rho, n, p, q, tstat = "Wilks")
+```
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\rho$~1~ = $\rho$~2~ = $\rho$~3~ = $\rho$~4~ = 0    
+**$H_A$: ** $\rho$~1~ $\ne$ $\rho$~2~ $\ne$ $\rho$~3~ $\ne$ $\rho$~4~ $\ne$ 0      
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r CCA_Test$approx[1]`     
+**p-value: ** `r CCA_Test$p.value[1]`    
+**Conclusion: ** Fail to Reject $H_0$
+
+**$H_0$: ** $\rho$~2~ = $\rho$~3~ = $\rho$~4~ = 0   
+**$H_A$: ** $\rho$~2~ $\ne$ $\rho$~3~ $\ne$ $\rho$~4~ $\ne$ 0        
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r CCA_Test$approx[2]`     
+**p-value: ** `r CCA_Test$p.value[2]`    
+**Conclusion: ** Fail to Reject $H_0$
+
+**$H_0$: ** $\rho$~3~ = $\rho$~4~ = 0     
+**$H_A$: ** $\rho$~3~ $\ne$ $\rho$~4~ $\ne$ 0          
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r CCA_Test$approx[3]`     
+**p-value: ** `r CCA_Test$p.value[3]`    
+**Conclusion: ** Fail to Reject $H_0$
+
+**$H_0$: ** $\rho$~4~ = 0     
+**$H_A$: ** $\rho$~4~ $\ne$ 0          
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r CCA_Test$approx[4]`     
+**p-value: ** `r CCA_Test$p.value[4]`    
+**Conclusion: ** Fail to Reject $H_0$   
+
+Based on the hypothesis testing, the cross covariance between variables is equal to zero, which means that all four canonical variate pairs are not significantly correlated and dependent on one another. This suggests that we may not summarize all four pairs. Therefore, there is no need to pursue canonical correlation analysis.
+
+However, for the fun of it, let's assume they are significantly correlated and interdependent and conduct the canonical correlation analysis.
+
+### Estimates of Canonical Correlation
+
+```{r}
+# Estimates of Canonical Correlation
+cc1 <- cc(X, Y)
+
+# Canonical Correlation
+cc1$cor
+
+# Coefficient of Determination (R-Squared)
+cc1$cor^2
+```
+37.01% of the variation in $U_1$ is explained by the variation in $V_1$, 34.55% of the variation in $U_2$ is explained by $V_2$, 9.28% of the variation in $U_3$ is explained by $V_3$, and only 3.31% of the variation in $U_4$ is explained by $V_4$.
+
+
+### Obtain the Canonical Coefficients
+```{r}
+colnames(cc1$xcoef) <- c("U1", "U2", "U3", "U4")
+cc1$xcoef
+```
+
+The first canonical variable for X (Field Events) is  
+**$U_1$ = 0.37562679X~Shot.put~ + 0.22026110X~Discus~ - 0.09400791X~Javeline~ + 1.29649330X~Pole.vault~**
+
+```{r}
+colnames(cc1$ycoef) <- c("V1", "V2", "V3", "V4")
+cc1$ycoef
+```
+
+The first canonical variable for Y (Track Events) is  
+**$V_1$ = 0.6428069Y~100m~ - 0.4748815Y~400m~ + 0.0784419Y~1500m~ - 0.6540028Y~110m.hurdle~ - 0.3490155~Long.jump~ + 4.5505653Y~High.jump~**   
+
+
+### Correlations Between Each Variable and the Corresponding Canonical Variate  
+
+**Correlations Between X’s and U’s**  
+```{r}
+colnames(cc1$scores$corr.X.xscores) <- c("U1", "U2", "U3", "U4")
+cc1$scores$corr.X.xscores
+```
+
+**Correlations Between Y’s and V’s**
+```{r}
+colnames(cc1$scores$corr.Y.xscores) <- c("V1", "V2", "V3", "V4")
+cc1$scores$corr.Y.xscores
+```
+
+
+### Correlations Between Each Set of Variables and the Opposite Group of Canonical Variates  
+
+**Correlations Between X’s and V’s**
+```{r}
+colnames(cc1$scores$corr.X.yscores) <- c("V1", "V2", "V3", "V4")
+cc1$scores$corr.X.yscores
+```
+
+**Correlations Between Y’s and U’s**
+```{r}
+colnames(cc1$scores$corr.Y.yscores) <- c("U1", "U2", "U3", "U4")
+cc1$scores$corr.Y.yscores
+```
+
+## Problem 3
+
+Perform a classification analysis using the Swiss bank notes data. Split the data into “training” and “testing” sets to evaluate the performance.
+
+
+### Load the Data
+```{r}
+url <- "https://online.stat.psu.edu/stat505/sites/stat505/files/lesson07/swiss3.txt"
+dat <- read.table(url, header = F)
+```
+
+### Create the Training and Testing Sets
+```{r}
+sample_size <- floor(2 / 3 * nrow(dat))
+
+set.seed(123)
+training_indicator <- sample(seq_len(nrow(dat)), size = sample_size)
+
+training <- dat[training_indicator, ] # 137 observations
+testing <- dat[-training_indicator, ] # 67 observations
+```
+
+I decided to create a training set that was 2/3's (137 observations) of the data and a testing set that was 1/3's of the data (67 observations).
+
+
+**Training Set**
+
+### Principal Component Analysis (PCA)
+```{r, warning = FALSE, message = FALSE}
+# PCA
+library(car)
+training_type <- factor(training$V1)
+pca <- prcomp(training[, 2:7])
+Z <- pca$x
+lambda <- pca$sdev^2 # Eigenvalues
+par(las = 1)
+plot(2:7, lambda / sum(lambda), xaxt = "n", las = 1, xlab = "Rank of Eigenvalues",
+     ylab = "Proportion of Variance", pch = 16, col = "blue", cex = 1, ylim = c(0, 1))
+grid()
+axis(1, at = 2:7)
+
+# Scatterplot Matrix
+scatterplotMatrix(~ Z | training_type, col = c("red", "blue"), diagonal = F, smooth = F,
+                  regLine = F, legend = F, cex = 0.75)
+```
+
+### Linear Discriminant Analysis (LDA)
+
+```{r}
+library(MASS)
+
+# LDA
+fit <- lda(training_type ~ Z[, 1:2]) 
+fit
+
+par(las = 1)
+scatterplot(PC2 ~ PC1 | training_type, Z, smooth = F, regLine = F, legend = F, cex = 0.85,
+            col = c("red", "blue"))
+abline(0, -fit$scaling[1] / fit$scaling[2], pch = 5, lwd = 2)
+```
+
+The Linear Discriminant Analysis training set shows that all the real bank notes (red circles) are correctly classified within the plot. However, the plotting of the fake bank notes (blue triangles) indicates that one was improperly classified. Despite the misclassification, the proper classification rate for the training set remains high and the chance of a type I error remains low. We can conclude that the training set model should be good to apply to the testing set.
+
+**Testing Set**
+
+### Principal Component Analysis (PCA)
+```{r}
+# PCA
+testing_type <- factor(testing$V1)
+pca <- prcomp(testing[, 2:7])
+Z <- pca$x
+lambda <- pca$sdev^2 # Eigenvalues
+par(las = 1)
+plot(2:7, lambda / sum(lambda), xaxt = "n", las = 1, xlab = "Rank of Eigenvalues",
+     ylab = "Proportion of Variance", pch = 16, col = "blue", cex = 1, ylim = c(0, 1))
+grid()
+axis(1, at = 2:7)
+
+# Scatterplot Matrix
+scatterplotMatrix(~ Z | testing_type, col = c("red", "blue"), diagonal = F, smooth = F,
+                  regLine = F, legend = F, cex = 0.75)
+```
+
+### Linear Discriminant Analysis (LDA)
+
+```{r}
+# LDA
+fit <- lda(testing_type ~ Z[, 1:2]) 
+fit
+
+library(MASS)
+par(las = 1)
+scatterplot(PC2 ~ PC1 | testing_type, Z, smooth = F, regLine = F, legend = F, cex = 0.85,
+            col = c("red", "blue"))
+abline(0, -fit$scaling[1] / fit$scaling[2], pch = 5, lwd = 2)
+```
+
+The Linear Discriminant Analysis testing set shows that both all real bank notes (red circles) and all fake bank notes (blue triangles) were correctly classified within the plot. The proper classification rate was 100% and there is little chance for a type I or type II error remains low. The training set's model was indeed good to apply to the testing set.
+
+
+## Problem 4
+
+Perform a multidimensional scaling to the USairpollution data set. Identify some outliers and explain how they are different from others.
+
+### Load the Data
+```{r, warning = FALSE}
+library(HSAUR2)
+data(USairpollution)
+dat <- USairpollution
+```
+
+### Summarize and Plot the Data
+```{r}
+xs <- apply(dat, 2, function(x) (x - min(x)) / (diff(range(x))))
+# summary(xs)
+
+# Compute Distance Matrix
+poldist <- dist(xs)
+
+# Reduce to 2 Dimensions
+pol.mds <- cmdscale(poldist, k = 2, eig = TRUE)
+
+# Reduce to 3 Dimensions
+pol.mds3 <- cmdscale(poldist, k = 3, eig = TRUE)
+
+# Plots
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 0.5))
+x <- pol.mds$points
+plot(x[, 1], x[, 2], type = "n", xlab = "", ylab = "")
+text(x[, 1], x[, 2], labels = rownames(x), cex = 0.8)
+```
+
+Looking at the plot, the top three outliers appear to be Chicago, Phoenix, and Miami. Chicago, by far, deviates most greatly from the main cluster of cities, followed by Phoenix and Miami. One of the reasons for this finding may pertain to city population. Chicago is one of the top three most populous cities in the United States (and the most populous city in the data set), which means it is likely to have higher pollution levels. The same can be said for Phoenix and Miami, as both cities are also top ten in terms of population in the United States.

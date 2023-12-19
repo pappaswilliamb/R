@@ -1,0 +1,242 @@
+---
+title: "Classification"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Iris Data
+
+```{r, message = FALSE, warning = FALSE}
+data(iris)
+head(iris)
+attach(iris) # Eliminates the need to code "iris$" when declaring variable names
+library(car)
+
+# Scatterplot Matrix
+par(las = 1)
+scatterplotMatrix(~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width | Species,
+                  col = c("green", "blue", "red"), diagonal = F,
+                  smooth = F, regLine = F, legend = F)
+```
+
+### Binary Classification
+
+```{r, message = FALSE}
+# Scatterplot Matrix
+irisv = iris[51:150, ]
+irisv$Species <- factor(irisv$Species)
+attach(irisv)
+par(las = 1)
+scatterplotMatrix(~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width | Species,
+                  col = c("red", "blue"), diagonal = F,
+                  smooth = F, regLine = F, legend = F, cex = 0.75)
+```
+
+### Principal Component Analysis (PCA)
+
+```{r}
+# PCA
+pca <- prcomp(irisv[, 1:4])
+Z <- pca$x
+lambda <- pca$sdev^2 # Eigenvalues
+par(las = 1)
+plot(1:4, lambda / sum(lambda), xaxt = "n", las = 1, xlab = "Rank of Eigenvalues",
+     ylab = "Proportion of Variance", pch = 16, col = "blue", cex = 1, ylim = c(0, 1))
+grid(); axis(1, at = 1:4)
+
+# Scatterplot Matrix
+scatterplotMatrix(~ Z | Species, col = c("red", "blue"), diagonal = F, smooth = F,
+                  regLine = F, legend = F, cex = 0.75)
+```
+
+### Linear Discriminant Analysis (LDA)
+
+```{r}
+# LDA
+library(MASS)
+par(las = 1)
+scatterplot(PC2 ~ PC1 | Species , Z, smooth = F, regLine = F, legend = F, cex = 0.85,
+            col = c("red", "blue"))
+fit <- lda(Species ~ Z[, 1:2]) 
+fit # Shows Results
+abline(0, -fit$scaling[1] / fit$scaling[2], pch = 5, lwd = 2)
+points(2, 0.5, pch = "?", cex = 1.5)
+points(1.8, 0.5, pch = "*", cex = 2)
+```
+
+### Logistic Regression
+
+```{r, message = FALSE, warning = FALSE}
+# Logistic Regression Plot
+logfit <- glm(irisv$Species ~ Z[, 1:2], family = binomial) # GLM = Generalized Linear Model
+logpred <- predict(logfit, type = "response")
+library(fields)
+cols <- two.colors(n = 100, "darkblue", "darkred")
+order <- order(logpred)
+predCol <- ifelse(logpred <= 0.5, "blue", "red")
+Col <- rep(c("blue", "red"), each = 50)
+
+plot(Z[order, 1:2], col = cols, pch = 1, las = 1)
+points(Z[order, 1:2], col = Col[order], pch = 16, cex = 0.5)
+grid()
+
+# Logistic Regression Plot
+plot(Z[, 1:2], col = predCol, pch = 1, las = 1)
+points(Z[, 1:2], col = Col, pch = 16, cex = 0.5)
+grid()
+legend("topleft", legend = c("True", "Predicted"), pch = c(16, 1), bty = "n")
+legend("topright", legend = c("versicolor", "virginica"),
+       col = c("blue", "red"), pch = 16, bty = "n")
+
+# Logistic Regression Matrix
+logisticPred <- ifelse(logpred <= 0.5, "versicolor", "virginica")
+table(irisv$Species, logisticPred)
+```
+
+### LDA vs. QDA
+
+```{r, warning = FALSE}
+# Treat Data as a Matrix
+z = as.matrix(Z)
+
+lda <- lda(irisv$Species ~ Z[, 1:2]) # LDA = Linear Discriminant Analysis
+qda <- qda(irisv$Species ~ Z[, 1:2]) # QDA = Quadratic Discriminant Analysis
+
+fit.LDA = predict(lda)$class
+table(irisv$Species, fit.LDA)
+fit.QDA = predict(qda)$class
+table(irisv$Species, fit.QDA)
+
+# Show Results
+library(klaR)
+par(las = 1, mgp = c(2, 1, 0), mar = c(3.5, 3.5, 2, 1))
+partimat(Species ~ Z[, 1:2], method = "lda")
+partimat(Species ~ Z[, 1:2], method = "qda")
+```
+
+### Support Vector Classifier
+
+Here we demonstrate the use of the `svm()` function from the library `e1071` on a two-dimensional toy example so that we can visualize the resulting decision boundary. We begin by generating the observations, which belong to two classes and check whether the classes are linearly separable.
+
+```{r, warning = FALSE}
+set.seed(1)
+x <- matrix(rnorm (100 * 2), ncol = 2)
+y <- c(rep(-1, 50), rep(1, 50))
+x[y == 1, ] <- x[y == 1, ] + 1
+plot(x, col = (3 - y))
+
+dat <- data.frame(x = x, y = as.factor(y))
+library(e1071)
+svmfit <- svm(y ~ ., data = dat, kernel = "linear",
+              cost = 10, scale = FALSE)
+plot(svmfit, dat, col = c(4, 2))
+
+# Support Points
+svmfit$index
+
+# Summary
+summary(svmfit)
+```
+
+### Changing Cost to Allow for a Wider Margin 
+
+```{r}
+svmfit <- svm(y ~ ., data = dat , kernel = "linear",
+cost = 0.1, scale = FALSE)
+plot(svmfit, dat, col = c(4, 2))
+svmfit$index
+```
+
+### Cross-Validation
+
+The `e1071` library includes a built-in function, `tune()`, to perform cross-validation. Here we compare SVMs with a linear kernel, using a range of values of the `cost` parameter.
+
+
+```{r}
+set.seed(1)
+tune.out <- tune(svm, y ~ ., data = dat , kernel = "linear",
+ranges = list(cost = c(0.001 , 0.01, 0.1, 1, 5, 10, 100)))
+
+summary(tune.out)
+
+bestmod <- tune.out$best.model
+summary(bestmod)
+```
+
+### Predcition
+
+The `predict()` function can be used to predict the class label on a set of test observations, at any given value of the cost parameter. 
+
+
+```{r}
+xtest <- matrix(rnorm (20 * 2), ncol = 2)
+ytest <- sample(c(-1, 1), 20, rep = TRUE)
+xtest[ytest == 1, ] <- xtest[ytest == 1, ] + 1
+testdat <- data.frame(x = xtest, y = as.factor(ytest))
+
+ypred <- predict(bestmod, testdat)
+table(predict = ypred, truth = testdat$y)
+```
+
+### Support Vector Machine (SVM)
+
+### Generate Some Data with Non-Linear Class Boundary
+
+```{r}
+set.seed (1)
+x <- matrix(rnorm (200 * 2), ncol = 2)
+x[1:100, ] <- x[1:100, ] + 2
+x[101:150, ] <- x[101:150, ] - 2
+y <- c(rep(1, 150) , rep(2, 50))
+dat <- data.frame(x = x, y = as.factor(y))
+
+plot(x, col = y)
+```
+
+### Training
+
+```{r}
+train <- sample (200, 100)
+svmfit <- svm(y ~ ., data = dat[train, ], kernel = "radial",
+gamma = 1, cost = 1)
+plot(svmfit, dat[train, ], col = 1:2)
+
+summary(svmfit)
+```
+
+### Changing the Cost
+
+```{r}
+svmfit <- svm(y ~ ., data = dat[train, ], kernel = "radial",
+gamma = 1, cost = 1e5)
+plot(svmfit, dat[train, ], col = 1:2)
+```
+
+### Cross-Validation
+
+```{r}
+set.seed(1)
+tune.out <- tune(svm, y ~ ., data = dat[train, ],
+                 kernel = "radial",
+                 ranges = list(cost = c(0.1, 1, 10, 100, 1000),
+                               gamma = c(0.5, 1, 2, 3, 4))
+)
+summary(tune.out)
+
+table(true = dat[-train, "y"],
+      pred = predict(tune.out$best.model, newdata = dat[-train, ])
+)
+```

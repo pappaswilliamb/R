@@ -1,0 +1,170 @@
+---
+title: "Inferences About a Mean Vector"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## CIs: Mineral Content Measurements
+
+```{r}
+xbar <- c(0.8438, 1.7927) # Sample means
+s <- c(0.1140, 0.2835) # Sample standard deviations
+n = 64 # Sample sizes
+p = 2 
+alpha = 0.05 # Confidence levels
+
+
+# One at a Time
+
+## mu1
+(CI1_1 <- xbar[1] + c(-1, 1) * qt(1 - alpha / 2, n - 1) * (s[1] / sqrt(n)))
+
+## mu2
+(CI2_1 <- xbar[2] + c(-1, 1) * qt(1 - alpha / 2, n - 1) * (s[2] / sqrt(n)))
+
+
+## Bonferroni Method
+
+## mu1
+(CI1_2 <- xbar[1] + c(-1, 1) * qt(1 - alpha / (2 * p), n - 1) * (s[1] / sqrt(n)))
+
+## mu2
+(CI2_2 <- xbar[2] + c(-1, 1) * qt(1 - alpha / (2 * p), n - 1) * (s[2] / sqrt(n)))
+
+
+# Simultaneous CIs
+
+## mu1
+multiplier <- sqrt((p * (n - 1) / (n - p)) * qf(1 - alpha, p, n - p))
+(CI1_3 <- xbar[1] + c(-1, 1) * multiplier * (s[1] / sqrt(n)))
+
+## mu2
+(CI2_3 <- xbar[2] + c(-1, 1) * multiplier * (s[2] / sqrt(n)))
+
+
+# Plot the CIs
+par(las = 1, mgp = c(2, 1, 0), mar = c(3.5, 3.5, 0.8, 0.6))
+plot(xbar[1], xbar[2], pch = "+", cex = 1.5,
+     xlim = range(CI1_3),
+     ylim = range(CI2_3) * c(0.995, 1.025),
+     xlab = expression(bar(x)[1]),
+     ylab = expression(bar(x)[2]))
+rect(CI1_1[1], CI2_1[1], CI1_1[2], CI2_1[2], border = "red")
+rect(CI1_2[1], CI2_2[1], CI1_2[2], CI2_2[2], border = "blue")
+rect(CI1_3[1], CI2_3[1], CI1_3[2], CI2_3[2], border = "green")
+legend("topleft", legend = c("One-at-a-Time", "Bonferroni", "Simultaneous"),
+       col = c("red", "blue", "green"), lty = 1, bty = "n")
+```
+
+## Confidence Ellipsoid
+
+```{r, message = FALSE}
+r_corr <- sqrt(((n - 1) * p / (n - p)) * qf(0.95, p, n - p) / qchisq(0.95, p)) 
+rho = 2 / 3
+par(las = 1, mgp = c(2, 1, 0), mar = c(3.5, 3.5, 0.6, 0.6))
+library(ellipse)
+plot(ellipse(rho, scale = r_corr * s / sqrt(n), centre = xbar), type = 'l',
+las = 1, bty = "n", xaxt = "n", yaxt = "n",
+xlim = range(CI1_3),
+ylim = range(CI2_3) * c(0.995, 1.025),
+xlab = expression(bar(x)[1]),
+ylab = expression(bar(x)[2]))
+points(xbar[1], xbar[2], pch = "+")
+xg <- seq(xbar[1] - 3 * (s[1] / sqrt(n)), xbar[1] + 3 * (s[1] / sqrt(n)), s[1] / sqrt(n))
+yg <- seq(xbar[2] - 3 * (s[2] / sqrt(n)), xbar[2] + 3 * (s[2] / sqrt(n)), s[2] / sqrt(n))
+axis(1, at = xg, labels = round(xg, 2))
+axis(2, at = yg, labels = round(yg, 2))
+rect(CI1_1[1], CI2_1[1], CI1_1[2], CI2_1[2], border = "red", lwd = 0.5)
+rect(CI1_2[1], CI2_2[1], CI1_2[2], CI2_2[2], border = "blue", lwd = 0.5)
+rect(CI1_3[1], CI2_3[1], CI1_3[2], CI2_3[2], border = "green", lwd = 0.5)
+```
+
+## Example: Women’s Survey Data
+
+```{r}
+dat <- read.table("nutrient.txt")
+dat <- dat[, -1]
+vars <- c("Calcium", "Iron", "Protein", "Vitamin A", "Vitamin C")
+names(dat) <- vars
+(xbar <- apply(dat, 2, mean))
+(colMeans(dat))
+(S <- cov(dat))
+n <- dim(dat)[1]; p <- dim(dat)[2]
+
+mu0 <- c(1000, 15, 60, 800, 75)
+
+T.squared <- as.numeric(n * t(xbar - mu0) %*% solve(S) %*% (xbar - mu0))
+
+# Test Statistic
+Fobs <- T.squared * ((n - p) / ((n - 1) * p))
+
+# p-Value
+pf(Fobs, p, n - p, lower.tail = F)
+```
+
+## Profile Plots
+
+```{r}
+dat_normalized <- array(dim = dim(dat))
+for (i in 1:p) {
+  dat_normalized[, i] <- dat[, i] / mu0[i]
+}
+
+(xbar <- colMeans(dat_normalized))
+(sd <- apply(dat_normalized, 2, sd))
+
+# Simultaneous CIs
+CIs <- array(dim = c(p, 2))
+multiplier <- sqrt((p * (n - 1) / (n - p)) * qf(1 - alpha, p, n - p))
+for (j in 1:p) {
+  CIs[j, ] <- xbar[j] + c(-1, 1) * multiplier * (sd[j] / sqrt(n))
+}
+
+# Profile Plot
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 2.4, 0.6, 0.8))
+plot(1:p, xbar, ylim = range(CIs), xaxt = "n", pch = "*",
+     xlab = "", ylab = "", cex = 1.5)
+abline(h = 1, lty = 2)
+for (j in 1:p) segments(x0 = j, y0 = CIs[j, 1], y1 = CIs[j, 2], col = "green", lwd = 2)
+axis(1, at = 1:p, labels = vars)
+```
+
+## Spouse Survey Data Example
+
+```{r}
+dat <- read.table("spouse.txt")
+d <- array(dim = c(dim(dat)[1], dim(dat)[2] / 2))
+
+# Calculate the Differences
+for (i in 1:(dim(dat)[2] / 2)) {
+  d[, i] <- dat[, i] - dat[, i + dim(dat)[2] / 2]
+}
+
+(xbar <- apply(d, 2, mean))
+(S <- cov(d))
+n <- dim(d)[1]; p <- dim(d)[2]
+
+mu0 <- rep(0, 4)
+
+T.squared <- as.numeric(n * t(xbar - mu0) %*% solve(S) %*% (xbar - mu0))
+
+# Test Statistic
+Fobs <- T.squared * ((n - p) / ((n - 1) * p))
+
+# p-Value
+pf(Fobs, p, n - p, lower.tail = F)
+```

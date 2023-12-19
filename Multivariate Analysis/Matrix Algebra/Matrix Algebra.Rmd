@@ -1,0 +1,138 @@
+---
+title: "Matrix Algebra"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Motor Trend Car Road Tests Data
+
+```{r}
+data(mtcars)
+vars <- which(names(mtcars) %in% c("mpg", "disp", "hp", "drat", "wt"))
+cars <- mtcars[, vars]
+```
+
+## Mean Vector and Covariance Matrix
+
+```{r}
+(mean <- apply(cars, 2, mean)) #2 designates that the mean calculation will be by the column. A 1 would be for by the row
+n <- dim(cars)[1]; p <- dim(cars)[2] # Pulls the size of the sample (n) and the number of variables (p)
+X <- as.matrix(cars) # Converts the dataset cars to a matrix
+ones <- rep(1, n) # Creates a vector of 1's with a length of n
+(meanCal <- (1 / n) * t(X) %*% ones) # Calculates the mean using the matrix math formula from the lecture
+(S <- cov(cars)) # Calculates the covariance
+(Scal <- (1 / (n - 1)) * t(X) %*% (diag(n) - (1 / n) * ones %*% t(ones)) %*% X) #Also calculates the covariance, using the formula from the lecture
+```
+
+## Inverse Matrix
+
+```{r}
+S_inv <- solve(S)
+(S_inv %*% S)
+# Values Are Not Exactly 1 or 0 In Actuality. However, They Are Approximately Equal to 1 or 0
+```
+
+
+## Orthogonal Matrix Example
+
+```{r}
+Q <- matrix(c(2, 1, 2, -2, 2, 1, 1, 2, -2), ncol = 3) / 3
+
+# Check
+(Q %*% t(Q))
+```
+
+## Eigenvalues and Eigenvectors
+
+```{r}
+eigen <- eigen(S)
+
+(S %*% eigen$vectors[, 1] / eigen$vectors[, 1])
+
+eigen$values[1]
+
+t(eigen$vectors[, 1]) %*% eigen$vectors[, 1]
+```
+
+## Spectral Decomposition
+
+```{r}
+temp <- array(dim = c(5, 5, 5)) # Creates a placeholder for a 5x5 matrix
+
+for (i in 1:5) {
+  temp[i, , ] <- eigen$values[i] * eigen$vectors[, i] %*% t(eigen$vectors[, i])
+}
+
+# Check the Spectral Decomposition
+(out <- apply(temp, 2:3, sum))
+S
+```
+
+
+## Determinant and Trace
+
+```{r}
+# Trace: Equal to the Sum of the Diagonal Elements
+(trace <- sum(diag(S)))
+sum(eigen$values)
+
+# Determinant: Equal to the Product of the Eigenvalues
+det(S)
+prod(eigen$values)
+```
+
+## Square-Root Matrices
+
+```{r}
+temp1 <- array(dim = c(5, 5, 5)) # Creates a placeholder for a 5x5 matrix
+
+for (i in 1:5) {
+  temp1[i, , ] <- (1 / eigen$values[i]) * eigen$vectors[, i] %*% t(eigen$vectors[, i])
+}
+
+# Check the Spectral Decomposition
+(out1 <- apply(temp1, 2:3, sum))
+S_inv
+
+temp2 <- array(dim = c(5, 5, 5))
+
+for (i in 1:5) {
+  temp2[i, , ] <- sqrt(eigen$values[i]) * eigen$vectors[, i] %*% t(eigen$vectors[, i])
+}
+
+out2 <- apply(temp2, 2:3, sum)
+
+(out2 %*% out2)
+S
+```
+
+## Partitioning Random Vectors
+
+Let's partitioning the variables into two groups:
+
+1. *disp*, *hp*, *wt*
+2. *mpg*, *drat*
+
+```{r}
+vars1 <- which(names(mtcars) %in% c("disp", "hp", "wt"))
+vars2 <- which(names(mtcars) %in% c("mpg", "drat"))
+
+carPar <- mtcars[, c(vars1, vars2)]
+
+(Sigma11 <- cov(carPar[1:3, 1:3]))
+(Sigma22 <- cov(carPar[4:5, 4:5]))
+(Sigma12 <- cov(carPar)[1:3, 4:5])
+```

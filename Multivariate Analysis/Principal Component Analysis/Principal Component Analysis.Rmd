@@ -1,0 +1,293 @@
+---
+title: "Principal Component Analysis"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Toy Examples
+
+### Example 1
+
+```{r}
+library(MASS)
+sim1 <- mvrnorm(n = 1000, mu = c(0, 0), Sigma = matrix(c(4, 0, 0, 1), 2, 2))
+plot(sim1, pch = 16, cex = 0.5, las = 1,
+xlab = expression(X[1]),
+ylab = expression(X[2]))
+
+# Population PCs
+abline(h = 0, col = "red", lwd = 1.5)
+abline(v = 0, col = "red", lwd = 0.75)
+
+# Sample PCs
+pca.sim1 <- prcomp(sim1)
+abline(0, pca.sim1$rotation[2, 1] / pca.sim1$rotation[1, 1],
+       col = "red", lwd = 1.5, lty = 2)
+abline(0, pca.sim1$rotation[2, 2] / pca.sim1$rotation[1, 2],
+       col = "red", lwd = 0.75, lty = 2)
+grid()
+```
+
+### Example 2
+
+```{r}
+sim2 <- mvrnorm(n = 1000, mu = c(0, 0), Sigma = matrix(c(4, 1.6, 1.6, 1), 2, 2))
+plot(sim2, pch = 16, cex = 0.5, las = 1,
+xlab = expression(X[1]),
+ylab = expression(X[2]))
+
+# Sample PCs
+pca.sim2 <- prcomp(sim2)
+abline(0, pca.sim2$rotation[2, 1] / pca.sim2$rotation[1, 1],
+       col = "red", lwd = 1.5, lty = 2)
+abline(0, pca.sim2$rotation[2, 2] / pca.sim2$rotation[1, 2],
+       col = "red", lwd = 0.75, lty = 2)
+grid()
+```
+
+
+## Men's 100k Road Race Example
+
+### Read the Data
+
+```{r}
+URL <- "http://homepage.divms.uiowa.edu/~dzimmer/applied-multivariate/race100k.dt"
+race <- read.table(URL)
+head(race)
+
+# Remove the Subject ID
+race <- race[, -1]
+names(race)[1:10] <- paste(seq(0, 90, by = 10), "-", seq(10, 100, by = 10), "time", sep = "")
+names(race)[11] <- "Age"
+str(race)
+```
+
+### Pair Plots
+
+```{r}
+par(pch = 16, las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 0.6))
+choose <- c(1, 2, 6, 10)
+pairs(race[, choose], panel = function(x, y){panel.smooth(x, y)
+  abline(lsfit(x, y), lty = 2, col = "blue")})
+```
+
+### Covariance PCA
+
+```{r}
+# Use prcomp
+race.pc <- prcomp(race[, -11]) # Conducts a PCA excluding the last variable in race
+race.pc$sdev # Standard deviation
+race.pc$rotation # Rotation
+
+Sigma <- var(race.pc$x)
+Eigenvalue <- diag(Sigma)
+(Proportion <- round(Eigenvalue / sum(Eigenvalue), 3)) # Calculates the Proportion of the variation explained by each eigenvalue
+(Cumulative <- round(cumsum(Eigenvalue) / sum(Eigenvalue), 3)) # Calculates the cumulative proportion of the variation explained by each eigenvalue
+
+# Use princomp
+pcaCOV <- princomp(race[, -11])
+str(pcaCOV)
+```
+
+### Plot the First 2 PCs and the Loadings
+
+```{r}
+par(las = 1, mgp = c(2.4, 1, 0), mar = c(3.5, 3.5, 1, 0.6))
+plot(pcaCOV$loadings[, 1:2], xlab = "PC1 Loadings",
+     ylab = "PC2 Loadings", type = "n", main = "")
+mtext("PCA of Covariance Matrix")
+text(pcaCOV$loadings[, 1:2], labels = colnames(race[, -11]),
+     cex = 0.75)
+abline(h = 0, col = "gray")
+grid()
+```
+
+### Screen Plot
+
+```{r}
+p <- 10
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 3))
+plot(1:p, Proportion, xlab = "Number of PCs", ylim = c(0, 1),
+ylab = "Proportion", pch = 16, cex = 0.8, xaxt = "n", col = "blue")
+axis(1, at = 1:p)
+mtext("Cumulative", 4, las = 0, line = 2)
+axis(4, col = "green"); axis(2, col = "blue")
+grid()
+points(1:p, Cumulative, cex = 1, col = "green")
+```
+
+### Component Scores by Type 
+
+```{r}
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 3))
+race.type <- ifelse(race[, 11] >= 40, "S", "M")
+col <- ifelse(race.type == "M", "blue", "green")
+plot(race.pc$x[, 1], race.pc$x[, 2], type = "n",
+xlab = "PC1: Overall Speed", ylab = "PC2: Change in Speed")
+text(race.pc$x[, 1], race.pc$x[, 2], labels = race.type, cex = 0.8,
+     col = col)
+abline(h = 0, col = "gray"); abline(v = 0, col = "gray") 
+```
+
+### Profile Plot
+
+```{r, warning = FALSE}
+library(scales)
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 3))
+plot(1:10, race[1, 1:10], type = "l", col = alpha(col[1], 0.75), lwd = 0.5,
+     ylim = range(race[, 1:10]), xaxt = "n",
+     xlab = "Distance (km)", ylab = "Time (in Minutes)")
+for (i in 2:80) lines(1:10, race[i, 1:10], col = alpha(col[i], 0.75),
+                      lwd = 0.5)
+axis(1, 1:10, paste(seq(0, 90, by = 10), "-", seq(10, 100, by = 10), sep = ""))
+legend("topleft", legend = c(">=40", "<40"),
+       title = "Age", lty = 1, col = c("green", "blue"),
+       bty = "n")
+```
+
+### Correlation PCA
+
+```{r}
+race.std <- scale(race, center = T, scale = T)
+races.pc <- prcomp(race.std[, -11])
+Sigma.std <- var(races.pc$x)
+Eigenvalue.std <- diag(Sigma.std)
+(Proportion.std <- round(Eigenvalue.std / sum(Eigenvalue.std), 3))
+(Cumulative.std <- round(cumsum(Eigenvalue.std) / sum(Eigenvalue.std), 3))
+
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1.2, 3), mfrow = c(1, 2))
+plot(1:p, Proportion, xlab = "Number of PCs", ylim = c(0, 1),
+ylab = "Proportion", pch = 16, cex = 0.8, xaxt = "n", col = "blue", main = "Covariance PCA")
+axis(1, at = 1:p)
+mtext("Cumulative", 4, las = 0, line = 2)
+axis(4, col = "green"); axis(2, col = "blue")
+grid()
+points(1:p, Cumulative, cex = 1, col = "green")
+
+plot(1:p, Proportion.std, xlab = "Number of PCs", ylim = c(0, 1),
+ylab = "Proportion", pch = 16, cex = 0.8, xaxt = "n", col = "blue", main = "Correlation PCA")
+axis(1, at = 1:p)
+mtext("Cumulative", 4, las = 0, line = 2)
+axis(4, col = "green"); axis(2, col = "blue")
+grid()
+points(1:p, Cumulative.std, cex = 1, col = "green")
+```
+
+## PCA: SST Example
+
+### Load and Visualize the Data
+
+```{r, message = FALSE, warning = FALSE}
+load("SST1.rda")
+library(fields)
+library(maps)
+
+par(las = 1, mar = c(3, 3, 1, 1))
+image.plot(lon1, lat1, SST1[, , 1], xaxt = "n", xlab = "", ylab = "")
+lon <- ifelse(lon1 <= 180, lon1, lon1 - 360)
+axis(1, at = lon1[seq(4, 84, 10)], lon[seq(4, 84, 10)])
+map("world2", add = TRUE, lwd = 2)
+```
+
+### Compute the SST Anomalies by Subtracting Means
+
+```{r}
+t <- array(SST1, dim = c(84, 30, 12, 46))
+SST_temp <- apply(t, 1:3, function(x) x - mean(x, na.rm = T))
+
+# Change the Data Into Longitude-Latitude-Month Format 
+SST_anomalies <- array(dim = c(84, 30, 552))
+for (i in 1:84) {
+  for (j in 1:30) {
+    SST_anomalies[i, j, ] <- c(t(SST_temp[, i, j, ]))
+  }
+}
+```
+
+### Empirical Orthogonal Functions (EOFs)
+
+```{r, message = FALSE}
+# Extracting First Three EOFs Via Singular Value Decomposition
+temp <- array(SST_anomalies, c(84 * 30, 552))
+ind <- is.na(temp[, 1])
+temp <- temp[!ind, ]
+temp2 <- svd(temp)
+U1 <- matrix(NA, 84 * 30)
+U1[!ind] <- temp2$u[, 1]; U1 <- matrix(U1, 84, 30)
+U2 <- matrix(NA, 84 * 30)
+U2[!ind] <- temp2$u[, 2]; U2 <- matrix(U2, 84, 30)
+U3 <- matrix(NA, 84 * 30)
+U3[!ind] <- temp2$u[, 3]; U3 <- matrix(U3, 84, 30)
+zr <- range(c(U1, U2, U3), na.rm = TRUE)
+
+set.panel(3, 1)
+par(oma = c(0, 0, 0, 0))
+ct <- tim.colors(256)
+par(mar = c(1, 1, 1, 1))
+image(lon1, lat1, U1, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world2", add = TRUE, lwd = 2)
+box()
+image(lon1, lat1, U2, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world2", add = TRUE, lwd = 2)
+box()
+image(lon1, lat1, U3, axes = FALSE, xlab = "", ylab = "", zlim = zr, col = ct)
+map("world2", add = TRUE, lwd = 2)
+box()
+```
+
+### Screen plot
+
+```{r}
+par(mar = c(4, 4, 1, 1), mfrow = c(1, 2), las = 1)
+dt <- ((temp2$d^2) / sum(temp2$d^2))
+plot(1:50, dt[1:50], xlab = "Index", ylab = "Relative Variance",
+     pch = 16, cex = 0.8)
+grid()
+dt <- (cumsum(temp2$d^2) / sum(temp2$d^2))
+plot(1:50, dt[1:50], xlab = "Index", ylab = "Variance Explained", pch = 16, cex = 0.8)
+yline(0.5, col = "red", lwd = 2)
+grid()
+```
+
+### 1998 Jan El Ni\~no Event
+
+```{r, message = FALSE}
+V <- temp2$v %*% diag(temp2$d)
+J <- 337 # The index for January 1998
+zr <- range(SST_anomalies, na.rm = TRUE)
+set.panel(2, 2)
+par(mar = c(1, 1, 1, 1), oma = c(0, 0, 0, 6))
+image(lon1, lat1, SST_anomalies[, , J], axes = FALSE, xlab = "", ylab = "", 
+      col = tim.colors(256), zlim = zr)
+map("world2", add = TRUE)
+title("Data", adj = 0)
+image(lon1, lat1, V[J, 1] * U1, axes = FALSE, xlab = "", ylab = "", 
+      col = tim.colors(256), zlim = zr)
+map("world2", add = TRUE)
+title("EOF 1", adj = 0)
+image(lon1, lat1, V[J, 1] * U1 + V[J, 2] * U2, axes = FALSE, 
+      xlab = "", ylab = "", col = tim.colors(256), zlim = zr)
+map("world2", add = TRUE)
+title("EOF 1 and 2", adj = 0)
+image(lon1, lat1, V[J, 1] * U1 + V[J, 2] * U2 + V[J, 3] * U3, 
+      axes = FALSE, xlab = "", ylab = "", col = tim.colors(256), 
+      zlim = zr)
+map("world2", add = TRUE)
+title("EOF 1, 2 and 3", adj = 0)
+set.panel()
+par(oma = c(0, 0, 0, 0))
+image.plot(legend.only = TRUE, zlim = zr, horizontal = FALSE, legend.shrink = 0.6)
+```

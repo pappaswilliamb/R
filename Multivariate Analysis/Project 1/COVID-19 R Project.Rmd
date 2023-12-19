@@ -1,0 +1,659 @@
+---
+title: 'COVID-19 R Project'
+author: "Blake Pappas"
+date: 'October 27, 2022'
+output:
+  html_document:
+    df_print: paged
+    theme: cosmo
+    code_download: true
+runtime: shiny
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **COVID-19 Data**
+
+### **Load the state level data using the *COVID19* R package:**
+
+```{r, message = FALSE, warning = FALSE}
+library(COVID19)
+
+# State-Level Data
+raw_level2 <- covid19(c("US"), level = 2, start = "2020-03-01", verbose = FALSE)
+```
+
+### **Extract data from two different states:**
+
+```{r}
+SC <- which(raw_level2$administrative_area_level_2 == "South Carolina")
+NJ <- which(raw_level2$administrative_area_level_2 == "New Jersey")
+```
+
+### **Let's focus on *vaccines*, *tests*, *confirmed*, *deaths*:**
+
+```{r}
+vars <- names(raw_level2)
+id <- which(vars %in% c("vaccines", "tests", "confirmed", "deaths"))
+
+SC_data <- data.frame(raw_level2[SC, id])
+NJ_data <- data.frame(raw_level2[NJ, id])
+```
+
+### **Calculate the daily count:**
+
+```{r}
+SC_data_daily <- apply(SC_data, 2, diff)
+NJ_data_daily <- apply(NJ_data, 2, diff)
+```
+
+### **Calculate the weekly count:**
+
+```{r}
+n <- dim(SC_data_daily)[1] # Sample Size 
+p <- dim(SC_data_daily)[2] # Number of Variables
+n_weeks <- floor(n / 7)
+ 
+SC_data_temp <- NJ_data_temp <- array(dim = c(7, n_weeks, p))
+for (i in 1:p) {
+  SC_data_temp[, , i] <- array(SC_data_daily[1:(7 * n_weeks), i], dim = c(7, n_weeks))
+  NJ_data_temp[, , i] <- array(NJ_data_daily[1:(7 * n_weeks), i], dim = c(7, n_weeks))
+  }
+ 
+SC_weekly_count <- apply(SC_data_temp, 2:3, sum, na.rm = T)
+NJ_weekly_count <- apply(NJ_data_temp, 2:3, sum, na.rm = T)
+```
+
+<br>
+</br>
+
+## **Problem 0**
+
+Perform an exploratory analysis and summarize your findings.
+
+<br>
+</br>
+
+**SC Data Set**  
+
+{.tabset .tabset-fade}
+-------------------------------
+
+```{r echo = FALSE}
+# Variable Descriptions
+data_dictionary <- c(confirmed = "The number of confirmed COVID-19 cases per week", 
+           deaths = "The number of COVID-19 deaths per week", 
+           tests = "The number of COVID-19 tests per week",
+           vaccines = "The number of COVID-19 vaccinations administered per week"
+           )
+```
+
+### `confirmed`
+
+**Description: ** `r data_dictionary["confirmed"]`  
+**Data Type: ** `r typeof(SC_weekly_count[, 1])`  
+**Minimum: ** `r format(min(SC_weekly_count[, 1]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(SC_weekly_count[, 1], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(SC_weekly_count[, 1]), scientific = FALSE)`  
+**Mean: ** `r format(mean(SC_weekly_count[, 1]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(SC_weekly_count[, 1], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(SC_weekly_count[, 1]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(SC_weekly_count[, 1]), scientific = FALSE)`  
+**Variance: ** `r format(sd(SC_weekly_count[, 1])^2, scientific = FALSE)`  
+**Outliers: ** 13  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(SC_weekly_count[, 1], horizontal = TRUE, main = "Distribution of South Carolina Weekly Confirmed Cases", xlab = "Confirmed Cases")
+
+# Histogram
+hist(SC_weekly_count[, 1], main = "Distribution of South Carolina Weekly Confirmed Cases", xlab = "Confirmed Cases", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `confirmed` variable represents the  number of confirmed COVID-19 cases per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(SC_weekly_count[, 1]), scientific = FALSE)` being significantly greater than the median of `r format(median(SC_weekly_count[, 1]), scientific = FALSE)`. The skew can also be explained by the 13 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(SC_weekly_count[, 1], 0.75), scientific = FALSE)`.
+
+### `deaths`
+
+**Description: ** `r data_dictionary["deaths"]`  
+**Data Type: ** `r typeof(SC_weekly_count[, 2])`  
+**Minimum: ** `r format(min(SC_weekly_count[, 2]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(SC_weekly_count[, 2], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(SC_weekly_count[, 2]), scientific = FALSE)`  
+**Mean: ** `r format(mean(SC_weekly_count[, 2]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(SC_weekly_count[, 2], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(SC_weekly_count[, 2]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(SC_weekly_count[, 2]), scientific = FALSE)`  
+**Variance: ** `r format(sd(SC_weekly_count[, 2])^2, scientific = FALSE)`  
+**Outliers: ** 6  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(SC_weekly_count[, 2], horizontal = TRUE, main = "Distribution of South Carolina Weekly COVID Deaths", xlab = "Deaths")
+
+# Histogram
+hist(SC_weekly_count[, 2], main = "Distribution of South Carolina Weekly COVID Deaths", xlab = "Deaths", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `deaths` variable represents the number of COVID-19 deaths per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(SC_weekly_count[, 2]), scientific = FALSE)` being significantly greater than the median of `r format(median(SC_weekly_count[, 2]), scientific = FALSE)`. The skew can also be explained by the 6 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(SC_weekly_count[, 2], 0.75), scientific = FALSE)`.
+
+### `tests`
+
+**Description: ** `r data_dictionary["tests"]`  
+**Data Type: ** `r typeof(SC_weekly_count[, 3])`  
+**Minimum: ** `r format(min(SC_weekly_count[, 3]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(SC_weekly_count[, 3], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(SC_weekly_count[, 3]), scientific = FALSE)`  
+**Mean: ** `r format(mean(SC_weekly_count[, 3]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(SC_weekly_count[, 3], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(SC_weekly_count[, 3]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(SC_weekly_count[, 3]), scientific = FALSE)`  
+**Variance: ** `r format(sd(SC_weekly_count[, 3])^2, scientific = FALSE)`  
+**Outliers: ** 3  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(SC_weekly_count[, 3], horizontal = TRUE, main = "Distribution of South Carolina Weekly COVID Tests", xlab = "Tests")
+
+# Histogram
+hist(SC_weekly_count[, 3], main = "Distribution of South Carolina Weekly COVID Tests", xlab = "Tests", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `tests` variable represents the number of COVID-19 tests per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(SC_weekly_count[, 3]), scientific = FALSE)` being significantly greater than the median of `r format(median(SC_weekly_count[, 3]), scientific = FALSE)`. The skew can also be explained by the 3 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(SC_weekly_count[, 3], 0.75), scientific = FALSE)`.
+
+### `vaccines`
+
+**Description: ** `r data_dictionary["vaccines"]`  
+**Data Type: ** `r typeof(SC_weekly_count[, 4])`  
+**Minimum: ** `r format(min(SC_weekly_count[, 4]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(SC_weekly_count[, 4], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(SC_weekly_count[, 4]), scientific = FALSE)`  
+**Mean: ** `r format(mean(SC_weekly_count[, 4]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(SC_weekly_count[, 4], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(SC_weekly_count[, 4]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(SC_weekly_count[, 4]), scientific = FALSE)`  
+**Variance: ** `r format(sd(SC_weekly_count[, 4])^2, scientific = FALSE)`  
+**Outliers: ** 6  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(SC_weekly_count[, 4], horizontal = TRUE, main = "Distribution of South Carolina Weekly COVID Vaccinations", xlab = "Vaccinations")
+
+# Histogram
+hist(SC_weekly_count[, 4], main = "Distribution of South Carolina Weekly COVID Vaccinations", xlab = "Vaccinations", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `vaccines` variable represents the number of COVID-19 vaccinations administered per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(SC_weekly_count[, 4]), scientific = FALSE)` being significantly greater than the median of `r format(median(SC_weekly_count[, 4]), scientific = FALSE)`. The skew can also be explained by the 6 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(SC_weekly_count[, 4], 0.75), scientific = FALSE)`. There were 41 instances of values of zero which correspond to the first 41 weeks of the pandemic where the vaccine was not available. One would expect these values to pull overall the mean for this variable closer to zero.  
+
+<br>
+</br>
+
+##  
+**NJ Data Set**  
+
+{.tabset .tabset-fade}
+-------------------------------
+
+### `confirmed`
+
+**Description: ** `r data_dictionary["confirmed"]`  
+**Data Type: ** `r typeof(NJ_weekly_count[, 1])`  
+**Minimum: ** `r format(min(NJ_weekly_count[, 1]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(NJ_weekly_count[, 1], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(NJ_weekly_count[, 1]), scientific = FALSE)`  
+**Mean: ** `r format(mean(NJ_weekly_count[, 1]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(NJ_weekly_count[, 1], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(NJ_weekly_count[, 1]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(NJ_weekly_count[, 1]), scientific = FALSE)`  
+**Variance: ** `r format(sd(NJ_weekly_count[, 1])^2, scientific = FALSE)`  
+**Outliers: ** 6  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(NJ_weekly_count[, 1], horizontal = TRUE, main = "Distribution of New Jersey Weekly Confirmed Cases", xlab = "Confirmed Cases")
+
+# Histogram
+hist(NJ_weekly_count[, 1], main = "Distribution of New Jersey Weekly Confirmed Cases", xlab = "Confirmed Cases", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `confirmed` variable represents the  number of confirmed COVID-19 cases per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(NJ_weekly_count[, 1]), scientific = FALSE)` being significantly greater than the median of `r format(median(NJ_weekly_count[, 1]), scientific = FALSE)`. The skew can also be explained by the 6 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(NJ_weekly_count[, 1], 0.75), scientific = FALSE)`.
+
+### `deaths`
+
+**Description: ** `r data_dictionary["deaths"]`  
+**Data Type: ** `r typeof(NJ_weekly_count[, 2])`  
+**Minimum: ** `r format(min(NJ_weekly_count[, 2]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(NJ_weekly_count[, 2], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(NJ_weekly_count[, 2]), scientific = FALSE)`  
+**Mean: ** `r format(mean(NJ_weekly_count[, 2]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(NJ_weekly_count[, 2], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(NJ_weekly_count[, 2]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(NJ_weekly_count[, 2]), scientific = FALSE)`  
+**Variance: ** `r format(sd(NJ_weekly_count[, 2])^2, scientific = FALSE)`  
+**Outliers: ** 9  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(NJ_weekly_count[, 2], horizontal = TRUE, main = "Distribution of New Jersey Weekly COVID Deaths", xlab = "Deaths")
+
+# Histogram
+hist(NJ_weekly_count[, 2], main = "Distribution of New Jersey Weekly COVID Deaths", xlab = "Deaths", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `deaths` variable represents the number of COVID-19 deaths per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(NJ_weekly_count[, 2]), scientific = FALSE)` being significantly greater than the median of `r format(median(NJ_weekly_count[, 2]), scientific = FALSE)`. The skew can also be explained by the 9 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(NJ_weekly_count[, 2], 0.75), scientific = FALSE)`. There was an irregular value of -9 which made up the minimum value for this variable. This may be attributed to an adjustment from a previous week, or perhaps even a data quality error.
+
+### `tests`
+
+**Description: ** `r data_dictionary["tests"]`  
+**Data Type: ** `r typeof(NJ_weekly_count[, 3])`  
+**Minimum: ** `r format(min(NJ_weekly_count[, 3]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(NJ_weekly_count[, 3], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(NJ_weekly_count[, 3]), scientific = FALSE)`  
+**Mean: ** `r format(mean(NJ_weekly_count[, 3]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(NJ_weekly_count[, 3], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(NJ_weekly_count[, 3]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(NJ_weekly_count[, 3]), scientific = FALSE)`  
+**Variance: ** `r format(sd(NJ_weekly_count[, 3])^2, scientific = FALSE)`  
+**Outliers: ** 2  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(NJ_weekly_count[, 3], horizontal = TRUE, main = "Distribution of New Jersey Weekly COVID Tests", xlab = "Tests")
+
+# Histogram
+hist(NJ_weekly_count[, 3], main = "Distribution of New Jersey Weekly COVID Tests", xlab = "Tests", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `tests` variable represents the number of COVID-19 tests per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(NJ_weekly_count[, 3]), scientific = FALSE)` being significantly greater than the median of `r format(median(NJ_weekly_count[, 3]), scientific = FALSE)`. The skew can also be explained by the 2 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(NJ_weekly_count[, 3], 0.75), scientific = FALSE)`.
+
+### `vaccines`
+
+**Description: ** `r data_dictionary["vaccines"]`  
+**Data Type: ** `r typeof(NJ_weekly_count[, 4])`  
+**Minimum: ** `r format(min(NJ_weekly_count[, 4]), scientific = FALSE)`  
+**1st Quartile: ** `r format(quantile(NJ_weekly_count[, 4], 0.25), scientific = FALSE)`  
+**Median: ** `r format(median(NJ_weekly_count[, 4]), scientific = FALSE)`  
+**Mean: ** `r format(mean(NJ_weekly_count[, 4]), scientific = FALSE)`  
+**3rd Quartile: ** `r format(quantile(NJ_weekly_count[, 4], 0.75), scientific = FALSE)`  
+**Maximum: ** `r format(max(NJ_weekly_count[, 4]), scientific = FALSE)`  
+**Standard Deviation: ** `r format(sd(NJ_weekly_count[, 4]), scientific = FALSE)`  
+**Variance: ** `r format(sd(NJ_weekly_count[, 4])^2, scientific = FALSE)`  
+**Outliers: ** 8  
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(NJ_weekly_count[, 4], horizontal = TRUE, main = "Distribution of New Jersey Weekly COVID Vaccinations", xlab = "Vaccinations")
+
+# Histogram
+hist(NJ_weekly_count[, 4], main = "Distribution of New Jersey Weekly COVID Vaccinations", xlab = "Vaccinations", col = "blue", label = TRUE, plot = TRUE, freq = T)
+```
+
+The `vaccines` variable represents the number of COVID-19 vaccinations administered per week. Looking at the boxplot and histogram, this variable is unimodal, asymmetric, and positively skewed. The positive skew is the result of the mean of `r format(mean(NJ_weekly_count[, 4]), scientific = FALSE)` being significantly greater than the median of `r format(median(NJ_weekly_count[, 4]), scientific = FALSE)`. The skew can also be explained by the 8 outliers which lay more than 1.5 times above the third quartile of `r format(quantile(NJ_weekly_count[, 4], 0.75), scientific = FALSE)`. There were 41 instances of values of zero which correspond to the first 41 weeks of the pandemic where the vaccine was not available. One would expect these values to pull overall the mean for this variable closer to zero.  
+
+<br>
+</br>
+
+## **Problem 1**
+
+Vaccine eligibility in South Carolina was open to everyone aged 16 and older starting March 31. Perform a Hotelling's T-Square to test if the vector of the weekly average *confirmed cases* and *deaths* is different before/after this policy. Discuss any limitations or complications of the analysis. For example, an assessment of whether the modeling assumptions are reasonable, and/or any unusual features of the data.
+
+```{r}
+# V1 = Before/After, V2 = Confirmed, V3 = Deaths
+
+dat <- read.table("vaccine_eligibility.txt")
+
+# Calculate Summary Statistics
+Before <- which(dat$V1 == "Before") # Creates a sample for Before
+After <- which(dat$V1 == "After") # Creates a sample for After
+xbar1 <- colMeans(dat[Before, -1]) # Computes the mean for Before
+xbar2 <- colMeans(dat[After, -1]) # Computes the mean for After
+Sigma1 <- cov(dat[Before, -1]) # Calculates the covariance matrix for Before
+Sigma2 <- cov(dat[After, -1]) # Calculates the covariance matrix for After
+n1 <- length(Before) # Calculates the size of Before sample
+n2 <- length(After) # Calculates the size of After sample
+p <- dim(dat[, -1])[2] # Calculates the number of variables
+Sp <- ((n1 - 1) * Sigma1 + (n2 - 1) * Sigma2) / (n1 + n2 - 2) # Calculates the pooled version of the covariance matrix between the two samples
+
+# Test Statistic
+T.squared <- as.numeric(t(xbar1 - xbar2) %*% solve(Sp * (1 / n1 + 1 / n2)) %*% (xbar1 - xbar2))
+Fobs <- T.squared * ((n1 + n2 - p - 1) / ((n1 + n2 - 2) * p))
+
+# p-Value
+p_value <- format(pf(Fobs, p, n1 + n2 - p - 1, lower.tail = F), scientific = FALSE)
+```
+
+```{r}
+# Simultaneous Confidence Intervals
+
+s1 <- diag(Sigma1)
+s2 <- diag(Sigma2)
+
+xbar_diff <- xbar1 - xbar2
+sp_diff <- ((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2)
+
+multipler <- sqrt((p * (n1 + n2 - 2) / (n1 + n2 - p - 1)) * qf(0.95, p, n1 + n2 - p - 1))
+
+sp <- sqrt((1 / n1 + 1 / n2) * sp_diff)
+
+CIs <- cbind(xbar_diff + -1 * multipler * sp, xbar_diff + 1 * multipler * sp)
+CIs
+```
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\mu$*~1k~ = $\mu$~2k~    
+**$H_A$: ** $\mu$~1k~ $\ne$ $\mu$~2k~       
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r Fobs`     
+**p-value: ** `r p_value`    
+**Conclusion: ** Reject $H_0$
+
+There were two distinct South Carolina populations from which the weekly COVID-19 data for this test was recorded:     
+1. The first population was the population before the COVID-19 vaccine      
+2. The second population was the population after the COVID-19 vaccine        
+
+For both populations, the following measurements were taken:  
+1. The number of COVID-19 cases per week      
+2. The number of COVID-19 deaths per week  
+
+We wanted to determine if the average number of weekly confirmed COVID-19 cases and deaths was different before and after the vaccine became available. This Two-Sample Hotelling's T-Square Test was conducted at a 95% confidence level. The null hypothesis was that the two population mean vectors were the same. The alternative hypothesis was that at least one of the two mean vector components (`confirmed` or `deaths`) was different between the two populations. The number of degrees of freedom was 135, the F-statistic was `r Fobs`, and the p-value was `r p_value`. Based on the results of the Two-Sample Hotelling’s T-Square Test, we reject the null hypothesis because the p-value of `r p_value` is less than the alpha of 0.05. There is statistically significant evidence that suggests the average number of weekly confirmed COVID-19 cases and deaths in South Carolina was different before and after vaccine eligibility. Based on the simultaneous confidence intervals, both the average number of confirmed weekly COVID-19 cases and the average number of weekly COVID-19 deaths were the vector component that were different before and after the COVID-19 vaccine. The variables' confidence intervals of (-12,015.836061, 2,834.0887) and (-8.853011, 103.8733) crossed the zero threshold.
+
+During this analysis, the assumption of homoskedasticity was valid, as the covariance matrix for before and after the COVID-19 vaccine was the same. The assumption of independence was also reasonable, as the sample of the first population (before the COVID-19 vaccine) had nothing to do with the sample of the second population (after the COVID-19 vaccine). The assumption of normality was reasonable, as the underlying population for each sample indeed came from a multivariate normal distribution. Something worth noting is that this third and final assumption was not as critical because the sample sizes in both populations were already relatively large, at 56 and 81, for before and after the COVID-19 vaccine, respectively.  
+
+<br>
+</br>
+
+## **Problem 2**
+
+Compare the average weekly *confirmed cases* and *deaths* (normalized by population) between two states (or two counties) using two sample Hotelling's test and paired Hotelling's test, respectively. Discuss any limitations or complications of the analysis.
+
+**Two-Sample Hotelling's Test**
+```{r}
+# V1 = State, V2 = Confirmed, V3 = Deaths
+
+dat <- read.table("two_sample.txt")
+
+# Calculate Summary Statistics
+SC <- which(dat$V1 == "SC") # Creates a sample for SC
+NJ <- which(dat$V1 == "NJ") # Creates a sample for NJ
+xbar1 <- colMeans(dat[SC, -1]) # Computes the mean for SC
+xbar2 <- colMeans(dat[NJ, -1]) # Computes the mean for NJ
+Sigma1 <- cov(dat[SC, -1]) # Calculates the covariance matrix for SC
+Sigma2 <- cov(dat[NJ, -1]) # Calculates the covariance matrix for NJ
+n1 <- length(SC) # Calculates the size of SC sample
+n2 <- length(NJ) # Calculates the size of NJ sample
+p <- dim(dat[, -1])[2] # Calculates the number of variables
+Sp <- ((n1 - 1) * Sigma1 + (n2 - 1) * Sigma2) / (n1 + n2 - 2) # Calculates the pooled version of the covariance matrix between the two samples
+
+# Test Statistic
+T.squared <- as.numeric(t(xbar1 - xbar2) %*% solve(Sp * (1 / n1 + 1 / n2)) %*% (xbar1 - xbar2))
+Fobs <- T.squared * ((n1 + n2 - p - 1) / ((n1 + n2 - 2) * p))
+
+# p-Value
+p_value <- format(pf(Fobs, p, n1 + n2 - p - 1, lower.tail = F), scientific = FALSE)
+```
+
+```{r}
+# Simultaneous Confidence Intervals
+
+s1 <- diag(Sigma1)
+s2 <- diag(Sigma2)
+
+xbar_diff <- xbar1 - xbar2
+sp_diff <- ((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2)
+
+multipler <- sqrt((p * (n1 + n2 - 2) / (n1 + n2 - p - 1)) * qf(0.95, p, n1 + n2 - p - 1))
+
+sp <- sqrt((1 / n1 + 1 / n2) * sp_diff)
+
+CIs <- cbind(xbar_diff + -1 * multipler * sp, xbar_diff + 1 * multipler * sp)
+CIs
+```
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\mu$~1k~ = $\mu$~2k~    
+**$H_A$: ** $\mu$~1k~ $\ne$ $\mu$~2k~       
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r Fobs`     
+**p-value: ** `r p_value`    
+**Conclusion: ** Reject $H_0$
+
+There were two distinct state populations from which the weekly COVID-19 data for this test was recorded:   
+1. The first population was the population of the state of South Carolina    
+2. The second population was the population of the the state of New Jersey    
+
+For both populations, the following measurements were taken:    
+1. The number of COVID-19 cases per week    
+2. The number of COVID-19 deaths per week 
+
+We wanted to determine if the average number of weekly confirmed COVID-19 cases and deaths was different between South Carolina and New Jersey. This Two-Sample Hotelling's T-Square Test was conducted at a 95% confidence level. The null hypothesis was that the two population mean vectors were the same. The alternative hypothesis was that at least one of the two mean vector components (`confirmed` or `deaths`) was different between the two populations. The number of degrees of freedom was 272, the F-statistic was `r Fobs`, and the p-value was `r p_value`. Based on the results of the Two-Sample Hotelling’s T-Square Test, we reject the null hypothesis because the p-value of `r p_value` is less than the alpha of 0.05. There is statistically significant evidence that suggests the average number of weekly confirmed COVID-19 cases and deaths was different between South Carolina and New Jersey. Based on the simultaneous confidence intervals, we are unable to conclude which vector component was different between the South Carolina and New Jersey populations, as the upper and lower bounds for both confidence intervals failed to cross the zero threshold.
+
+During this analysis, the assumption of homoskedasticity was valid, as the covariance matrix between the South Carolina population and New Jersey population was the same. The assumption of independence was also reasonable, as the sample of the first population (South Carolina) had nothing to do with the sample of the second population (New Jersey). Finally, the assumption of normality was reasonable, as the underlying population for each sample indeed came from a multivariate normal distribution. Something worth noting is that this third and final assumption was not as critical because the sample sizes in both populations were already relatively large, with each having 137 observations. There was an irregularity present in `deaths` for the New Jersey data set. This variable had a value of -9 which made up the minimum value for this variable. This may be attributed to an adjustment from a previous week, or perhaps even a data quality error.
+
+<br>
+</br>
+
+**Paired Hotelling's Test**
+```{r}
+# V1 = SC Confirmed, V2 = SC Deaths, V3 = NJ Confirmed, V4 = NJ Deaths
+
+dat <- read.table("paired.txt")
+d <- array(dim = c(dim(dat)[1], dim(dat)[2] / 2))
+
+# Calculate the Differences
+for (i in 1:(dim(dat)[2] / 2)) {
+  d[, i] <- dat[, i] - dat[, i + dim(dat)[2] / 2]
+}
+
+xbar <- apply(d, 2, mean)
+S <- cov(d)
+n <- dim(d)[1]
+p <- dim(d)[2]
+
+mu0 <- rep(0, 2)
+
+T.squared <- as.numeric(n * t(xbar - mu0) %*% solve(S) %*% (xbar - mu0))
+
+# Test Statistic
+Fobs <- T.squared * ((n - p) / ((n - 1) * p))
+
+# p-Value
+p_value <- format(pf(Fobs, p, n - p, lower.tail = F), scientific = FALSE)
+```
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\mu$~D~ = 0    
+**$H_A$: ** $\mu$~D~ $\ne$ 0       
+**Confidence Level: ** $\alpha$ = 0.05    
+**Test Statistic : ** F = `r Fobs`     
+**p-value: ** `r p_value`    
+**Conclusion: ** Reject $H_0$
+
+There were two distinct state populations from which the weekly COVID-19 data for this test was recorded:   
+1. The first population was the population of the state of South Carolina    
+2. The second population was the population of the the state of New Jersey    
+
+For both populations, the following measurements were taken:    
+1. The number of COVID-19 cases per week    
+2. The number of COVID-19 deaths per week
+
+We wanted to determine if the state of South Carolina suffered from COVID-19 in the same way as the state of New Jersey. In order to determine this, the differences between the weekly numbers of confirmed COVID-19 cases and COVID-19 deaths in both states were taken. From there, the differences in both confirmed COVID-19 cases and COVID-19 deaths were averaged to calculate the mean vectors. This Paired Hotelling's T-Square Test was conducted at a 95% confidence level. The null hypothesis was that the mean vectors of the paired differences were the same between the two populations. The alternative hypothesis was that the mean vectors of the paired differences were different between the two populations. The number of degrees of freedom was 135, the F-statistic was `r Fobs`, and the p-value was `r p_value`. Based on the results of the Paired Hotelling’s T-Square Test, we reject the null hypothesis because the p-value of `r p_value` is less than the alpha of 0.05. There is statistically significant evidence that suggests the state of South Carolina did not suffer from COVID-19 in the same way as the state of New Jersey.
+
+During this analysis, the assumption of homoskedasticity was valid, as the covariance matrix between the South Carolina population and New Jersey population was the same. Because this was a paired test, the assumption of independence was not reasonable. The assumption of normality was reasonable, as the underlying population for each sample indeed came from a multivariate normal distribution. Something worth noting is that this third and final assumption was not as critical because the sample sizes in both populations were already relatively large, with each having 137 observations. There was an irregularity present in `deaths` for the New Jersey data set. This variable had a value of -9 which made up the minimum value for this variable. This may be attributed to an adjustment from a previous week, or perhaps even a data quality error.
+
+<br>
+</br>
+
+## **Problem 3**
+
+Draw a 95% confidence ellipsoid of the mean vector of weekly *confirmed cases* and *deaths* for South Carolina (or any other state).
+
+```{r}
+# Confidence Intervals
+
+# 1 = Confirmed, 2 = Deaths, 3 = Tests, 4 = Vaccines
+xbar <- c(mean(SC_weekly_count[, 1]), mean(SC_weekly_count[, 2])) # Sample Means
+s <- c(sd(SC_weekly_count[, 1]), sd(SC_weekly_count[, 2])) # Sample Standard Deviations
+n <- dim(SC_data_daily)[1] # Sample Sizes
+p <- dim(SC_data_daily)[2] # Number of Variables
+alpha = 0.05 # Confidence Level
+
+
+# One at a Time
+
+## mu1
+CI1_1 <- xbar[1] + c(-1, 1) * qt(1 - alpha / 2, n - 1) * (s[1] / sqrt(n))
+
+## mu2
+CI2_1 <- xbar[2] + c(-1, 1) * qt(1 - alpha / 2, n - 1) * (s[2] / sqrt(n))
+
+
+## Bonferroni Method
+
+## mu1
+CI1_2 <- xbar[1] + c(-1, 1) * qt(1 - alpha / (2 * p), n - 1) * (s[1] / sqrt(n))
+
+## mu2
+CI2_2 <- xbar[2] + c(-1, 1) * qt(1 - alpha / (2 * p), n - 1) * (s[2] / sqrt(n))
+
+
+# Simultaneous CIs
+
+## mu1
+multiplier <- sqrt((p * (n - 1) / (n - p)) * qf(1 - alpha, p, n - p))
+CI1_3 <- xbar[1] + c(-1, 1) * multiplier * (s[1] / sqrt(n))
+
+## mu2
+CI2_3 <- xbar[2] + c(-1, 1) * multiplier * (s[2] / sqrt(n))
+
+
+# Plot the CIs
+par(las = 1, mgp = c(2, 1, 0), mar = c(3.5, 3.5, 0.8, 0.6))
+plot(xbar[1], xbar[2], pch = "+", cex = 1.5,
+     xlim = range(CI1_3),
+     ylim = range(CI2_3) * c(0.995, 1.025),
+     xlab = expression(bar(x)[1]),
+     ylab = expression(bar(x)[2]))
+rect(CI1_1[1], CI2_1[1], CI1_1[2], CI2_1[2], border = "red")
+rect(CI1_2[1], CI2_2[1], CI1_2[2], CI2_2[2], border = "blue")
+rect(CI1_3[1], CI2_3[1], CI1_3[2], CI2_3[2], border = "green")
+legend("topleft", legend = c("One-at-a-Time", "Bonferroni", "Simultaneous"),
+       col = c("red", "blue", "green"), lty = 1, bty = "n")
+```
+
+```{r, message = FALSE, warning = FALSE}
+# Confidence Ellipsoid
+
+r_corr <- sqrt(((n - 1) * p / (n - p)) * qf(0.95, p, n - p) / qchisq(0.95, p)) 
+rho = 2 / 3
+par(las = 1, mgp = c(2, 1, 0), mar = c(3.5, 3.5, 0.6, 0.6))
+library(ellipse)
+plot(ellipse(rho, scale = r_corr * s / sqrt(n), centre = xbar), type = 'l',
+las = 1, bty = "n", xaxt = "n", yaxt = "n",
+xlim = range(CI1_3),
+ylim = range(CI2_3) * c(0.995, 1.025),
+xlab = expression(bar(x)[1]),
+ylab = expression(bar(x)[2]))
+points(xbar[1], xbar[2], pch = "+")
+xg <- seq(xbar[1] - 3 * (s[1] / sqrt(n)), xbar[1] + 3 * (s[1] / sqrt(n)), s[1] / sqrt(n))
+yg <- seq(xbar[2] - 3 * (s[2] / sqrt(n)), xbar[2] + 3 * (s[2] / sqrt(n)), s[2] / sqrt(n))
+axis(1, at = xg, labels = round(xg, 2))
+axis(2, at = yg, labels = round(yg, 2))
+rect(CI1_1[1], CI2_1[1], CI1_1[2], CI2_1[2], border = "red", lwd = 0.5)
+rect(CI1_2[1], CI2_2[1], CI1_2[2], CI2_2[2], border = "blue", lwd = 0.5)
+rect(CI1_3[1], CI2_3[1], CI1_3[2], CI2_3[2], border = "green", lwd = 0.5)
+```
+
+<br>
+</br>
+
+## **Problem 4**
+
+Explain what variables might be used to predict the weekly confirmed cases.
+
+```{r, message = FALSE, warning = FALSE}
+SOUTH_CAROLINA <- data.frame(SC_weekly_count)
+colnames(SOUTH_CAROLINA) <- c("confirmed", "deaths", "tests", "vaccines")
+
+library(tidyverse)
+library(caret)
+library(leaps)
+
+models <- regsubsets(confirmed ~ ., data = SOUTH_CAROLINA)
+summary(models) # Gives best model based on the number of predictors
+```
+
+In order to determine which variables best predict the number of weekly confirmed COVID-19 cases, I used the *regsubsets()* function to create a best model selection. This model selection was performed on the SC data set. Looking at the best model selection, we are presented with three options for predicting weekly confirmed cases. Each option provides the best model based on the number of predictors. For a model using only one predictor, `tests` was determined to be the best model (Option 1). For a model using two predictors, `tests` and `vaccines` were determined to be the best options (Option 2). The third and final option was be to use all three predictors: `deaths`, `tests`, and `vaccines` (Option 3). For these models’ inferential analyses, I decided to conduct both confidence intervals and hypothesis tests. Both the confidence intervals and hypothesis tests use a confidence level of 95% ($\alpha$ = 0.05). 
+
+```{r, warning = FALSE}
+# Option 1
+
+# Simple Linear Regression
+lmod <- lm(confirmed ~ tests, data = SOUTH_CAROLINA)
+summary(lmod)
+
+# Confidence Intervals
+X <- model.matrix(lmod)
+x0 <- apply(X, 2, median)
+y0 <- sum(x0 * coef(lmod))
+
+predict(lmod, new = data.frame(t(x0)), interval = "confidence")
+```
+
+For Option 1, I created a simple linear regression which yielded a regression equation of `confirmed` = -4612 + 0.1714 x `tests`. The confidence interval for this regression was (6239.922, 10050.87). This means there is a 95% chance that the median weekly number of confirmed COVID-19 cases is between 6239.922 and 10050.87. The null hypothesis was H~0~ : $\beta$~tests~ = 0, the alternative hypothesis was H~A~ : $\beta$~tests~ $\ne$ 0, the F-statistic was 214.4, and the p-value was 2.2 x 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 x 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~tests~ is different from 0. When `tests` takes its median value of `r format(median(SC_weekly_count[,1]), scientific = FALSE)`, `confirmed` has a value of 8145.394, which deviates significantly from the sample median. Remember that `tests` was considered to be the best option for a model using only one predictor. This indicates that none of the predictors alone are useful in predicting the response. In order to get a better prediction, additional predictors may need to be added. 
+
+```{r, warning = FALSE}
+# Option 2
+
+# Multiple Linear Regression
+lmod <- lm(confirmed ~ tests + vaccines, data = SOUTH_CAROLINA)
+summary(lmod)
+
+# Confidence Intervals
+X <- model.matrix(lmod)
+x0 <- apply(X, 2, median)
+y0 <- sum(x0 * coef(lmod))
+
+predict(lmod, new = data.frame(t(x0)), interval = "confidence")
+```
+
+For Option 2, I created a multiple linear regression which yielded a regression equation of `confirmed` = -3299 + 0.1940 x `tests` - 0.05999 x `vaccines`. The confidence interval for this regression was (7407.192, 11108.4). This means there is a 95% chance that the median weekly number of confirmed COVID-19 cases is between 7407.192 and 11108.4. The null hypothesis was H~0~ : $\beta$~tests~ = $\beta$~vaccines~ = 0, the alternative hypothesis was H~A~ : at least one of the regression coefficients $\ne$ 0, the F-statistic was 132.3, and the p-value was 2.2 x 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 x 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests at least one of $\beta$~tests~, $\beta$~vaccines~ is different from 0. When `tests` and `vaccines` take their median values, `confirmed` has a value of 9257.796, which (compared to Option 1) deviates more from the sample median of `r format(median(SC_weekly_count[,1]), scientific = FALSE)`. Adding a second predictor into the model did not prove to make the prediction any more accurate.
+
+```{r, warning = FALSE}
+# Option 3
+
+# Multiple Linear Regression
+lmod <- lm(confirmed ~ ., data = SOUTH_CAROLINA)
+summary(lmod)
+
+# Confidence Intervals
+X <- model.matrix(lmod)
+x0 <- apply(X, 2, median)
+y0 <- sum(x0 * coef(lmod))
+
+predict(lmod, new = data.frame(t(x0)), interval = "confidence")
+```
+
+For Option 3, I created a multiple linear regression which yielded a regression equation of `confirmed` = -2574 - 22.34 x `deaths` + 0.2177 x `tests` - 0.06160 x `vaccines`. The confidence interval for this regression was (7877.866, 11552.93). This means there is a 95% chance that the median weekly number of confirmed COVID-19 cases is between 7877.866 and 11552.93. The null hypothesis was H~0~ : $\beta$~deaths~ = $\beta$~tests~ = $\beta$~vaccines~ = 0, the alternative hypothesis was H~A~ : at least one of the regression coefficient $\ne$ 0, the F-statistic was 94.95, and the p-value was 2.2 x 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 x 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests at least one of $\beta$~deaths~, $\beta$~tests~, $\beta$~vaccines~ is different from 0. When `deaths`, `tests`, and `vaccines` take their median values, `confirmed` has a value of 9715.4, which (compared to Options 1 and 2) deviates more from the sample median of `r format(median(SC_weekly_count[,1]), scientific = FALSE)`. Adding a third predictor into the model did not prove to make the prediction any more accurate.
+
+
+Therefore, `tests` appears to be the variable which bests predicts the number of weekly confirmed COVID-19 cases. Although a simple linear regression did not initially seem to be an appropriate model, it's margin of error proved to be much smaller than that of the two multivariate linear regressions. Given their much higher margins of error, the use of 2 and 3 predictors in a model were less useful in predicting the response. Many people think that adding more variables to a model makes the model more accurate. However, the results from Options 2 and 3 do not support this notion. Something else worth noting is that Option 1 had an R-squared of 0.6090. In general, an R-squared of this size is considered to be moderate. However, it’s really impressive when you think about it because the model only used one predictor. Approximately 60.90% of the variation in weekly confirmed COVID-19 cases can be explained by changes in the weekly number of COVID-19 tests. This makes sense when you think about it. Most people tested for COVID-19 do so because they feel symptoms of the virus. In general, when someone shows symptoms for a virus, there's a high chance that they do indeed have the virus.

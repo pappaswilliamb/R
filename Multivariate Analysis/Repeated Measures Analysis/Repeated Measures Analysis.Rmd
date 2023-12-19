@@ -1,0 +1,67 @@
+---
+title: "Repeated Measures Analysis"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read the Data
+
+```{r}
+dat <- read.table("dog1.txt")
+temp <- array(dim = c(144, 4))
+temp[, 1] <- rep(dat$V1, 4)
+temp[, 2] <- rep(dat$V2, 4)
+temp[, 3] <- rep(c(1, 5, 9, 13), each = 36)
+temp[, 4] <- c(dat$V3, dat$V4, dat$V5, dat$V6)
+dat2 <- data.frame(temp)
+names(dat2) <- c("Treatment", "Dog_id", "Time", "Response")
+dat2$Treatment <- as.factor(dat2$Treatment)
+dat2$Dog_id <- as.factor(dat2$Dog_id)
+dat2$Time <- as.factor(dat2$Time)
+```
+
+## Split-Plot ANOVA
+
+```{r, warning = FALSE}
+# Computing the Cell Means (by Treatment and Time Combinations)
+tapply(dat2$Response, list(dat2$Treatment, dat2$Time), mean)
+
+par(las = 1, mgp = c(2.2, 1, 0), mar = c(3.6, 3.6, 0.8, 0.6))
+with(dat2, interaction.plot(x.factor = Time, trace.factor = Treatment,
+                           response = Response, col = 1:4, lwd = 1.5))
+
+library(lmerTest)
+fit <- lmer(Response ~ Treatment * Time + (1 | Dog_id), data = dat2)
+anova(fit)
+```
+
+## MANOVA
+
+```{r}
+out <- manova(cbind(V3, V4, V5, V6) ~ as.factor(V1), data = dat)
+summary(out, test = "Wilks")
+```
+
+## Mixed Model with AR(1) Temporal Correlation Structure 
+
+```{r, warning = FALSE}
+library(nlme)
+fit1 = gls(Response ~ Treatment * Time, 
+           correlation = corCompSymm(form = ~ 1 | Dog_id), data = dat2)
+fit2 = gls(Response ~ Treatment * Time, 
+           correlation = corAR1(form = ~ 1 | Dog_id), data = dat2)
+anova(fit1, fit2)
+```

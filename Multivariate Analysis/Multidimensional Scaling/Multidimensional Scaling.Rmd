@@ -1,0 +1,111 @@
+---
+title: "Multidimensional Scaling"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Classical Multidimensional Scaling
+
+### Check $B = -\frac{1}{2}CD^{2}C$
+
+```{r, warning = FALSE}
+n <- 100
+library(MASS)
+sigma <- c(1, 0.8, 0.64, 0.8, 1, 0.8, 0.64, 0.8, 1)
+Sigma <- matrix(sigma, 3, 3) 
+set.seed(123)
+X <- mvrnorm(n, rep(0, 3), Sigma)
+X <- scale(X, center = T, scale = F)
+B <- X %*% t(X)
+C <- diag(n) - (outer(rep(1, n), rep(1, n))) / n
+library(fields)
+D <- rdist(X)
+tmp <- (-1 / 2) * C %*% D^(2) %*% C
+```
+
+
+### Distances Between US Cities
+
+```{r}
+loc <- cmdscale(UScitiesD)
+x <- loc[, 1]; y <- loc[, 2]
+plot(x, y, type = "n", xlab = "", ylab = "", asp = 1,
+     axes = FALSE, main = "cmdscale(UScitiesD)")
+text(x, y, rownames(loc), cex = 0.8)
+
+# Flip Axes
+x1 <- -loc[, 1]; y1 <- -loc[, 2]
+plot(x1, y1, type = "n", xlab = "", ylab = "", asp = 1,
+     axes = FALSE, main = "cmdscale(UScitiesD)")
+text(x1, y1, rownames(loc), cex = 0.8)
+```
+
+### Air Pollution in US Cities
+
+```{r, warning = FALSE}
+library(HSAUR3)
+data(USairpollution)
+dat <- USairpollution
+head(dat)
+summary(dat)
+
+xs <- apply(dat, 2, function(x) (x - min(x)) / (diff(range(x))))
+summary(xs)
+
+# Compute Distance Matrix
+poldist <- dist(xs)
+
+# Reduce to 2 Dimensions
+(pol.mds <- cmdscale(poldist, k = 2, eig = TRUE))
+
+# Reduce to 3 Dimensions
+(pol.mds3 <- cmdscale(poldist, k = 3, eig = TRUE))
+
+# Plot
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 0.5))
+x <- pol.mds$points
+plot(x[, 1], x[, 2], type = "n", xlab = "", ylab = "")
+text(x[, 1], x[, 2], labels = rownames(x), cex = 0.8)
+library(scatterplot3d)
+par(las = 1)
+scatterplot3d(pol.mds3$points, pch = 16, angle = 75,
+              box = F, xlab = "", ylab = "",
+              zlab = "")
+```
+
+## Non-Metric Multidimensional Scaling
+
+### House of Representatives Voting Data
+
+```{r}
+# Matrix
+data("voting", package = "HSAUR2")
+voting
+
+names <- rownames(voting)
+party <- gsub("[\\(\\)]", "", regmatches(names, gregexpr("\\(.*?\\)", names)))
+col <- ifelse(party == "R", "red", "blue")
+
+library(MASS)
+voting_mds <- isoMDS(voting, k = 2)
+str(voting_mds)
+
+par(las = 1, mar = c(2, 2, 0.5, 0.5))
+plot(voting_mds$points, type = "n", xlim = c(-12, 8),
+     xlab = "", ylab = "")
+text(voting_mds$points, labels = rownames(voting_mds$points),
+     cex = 0.7, col = col)
+```

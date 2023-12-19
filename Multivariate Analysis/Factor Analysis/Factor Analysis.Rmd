@@ -1,0 +1,99 @@
+---
+title: "Factor Analysis"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load the Stock Price Data
+
+```{r}
+url <- "http://users.stat.umn.edu/~sandy/courses/8053/Data/Wichern_data/T8-4.DAT"
+stock <- read.table(url, sep = "\t", header = F)
+colnames(stock) <- c("JP Morgan", "City Bank", "Wells Fargo", "Royal Dutch", "Exxon")
+```
+
+## Summary Statistics
+
+```{r}
+(Xbar <- colMeans(stock)) # Calculates the mean vector
+(S <- cov(stock)) # Calculates the covariance matrix
+```
+
+## Scatterplot Matrix
+
+```{r}
+stock_std <- scale(stock, center = T, scale = T)
+stock_std <- as.data.frame(stock_std)
+par(las = 1, mgp = c(2.4, 1, 0), mar = c(3.5, 3.5, 1, 0.6))
+pairs(stock_std, labels = names(stock),
+      panel = function(x, y){panel.smooth(x, y)
+abline(lsfit(x, y), lty = 2, col = "blue")})
+```
+
+## Compute PCs from the Correlation Matrix
+
+```{r}
+(s.cor <- var(stock_std)) # Calculates the correlation matrix
+s.pca <- prcomp(stock, scale = T, center = T) # Principal Component Analysis
+
+s.pca$rotation
+s <- var(s.pca$x) 
+(Proportion.std <- round(diag(s) / sum(diag(s)), 3)) # Proportion of variability explained by each component
+(Cumulative.std <- round(cumsum(diag(s)) / sum(diag(s)), 3)) # Cumulative variability explained by the components
+
+# Screen Plot
+p <- 5
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 3))
+plot(1:p, Proportion.std, xlab = "Number of PCs", ylim = c(0, 1),
+ylab = "Proportion", pch = 16, cex = 0.8, xaxt = "n", col = "blue")
+axis(1, at = 1:p)
+mtext("Cumulative", 4, las = 0, line = 2)
+axis(4, col = "green"); axis(2, col = "blue")
+grid()
+points(1:p, Cumulative.std, cex = 1, col = "green")
+```
+
+## Factor Loadings and Specific Variances
+
+```{r}
+# m = 2, Factor Loadings
+lambda <- s.pca$sdev^2 # Lambda is essentially the eigenvalues
+e <- s.pca$rotation
+sqrt(lambda[1]) * e[, 1]
+sqrt(lambda[2]) * e[, 2]
+
+# Specific Variances
+sVar <- diag(s.cor - (lambda[1] * e[, 1] %*% t(e[, 1]) + lambda[2] * e[, 2] %*% t(e[, 2]))) # Using PC method
+
+# Residual Matrix
+round(s.cor - (lambda[1] * e[, 1] %*% t(e[, 1]) + lambda[2] * e[, 2] %*% t(e[, 2]) + diag(sVar)), 2) # Calculates the residual matrix
+```
+
+## MLE
+
+```{r}
+(stock.fac <- factanal(stock, factors = 2,
+method = "mle", scale = T, center = T))
+
+par(las = 1, mgp = c(2, 1, 0), mar = c(3, 3, 1, 3))
+plot(stock.fac$loadings, xlab = "F1 Loadings", ylab = "F2 Loadings",
+     type = "n", xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.1))
+text(stock.fac$loadings, labels = colnames(stock))
+
+# Residual Matrix
+pred <- (stock.fac$loadings %*% t(stock.fac$loadings)) + diag(stock.fac$uniqueness)
+(resid <- s.cor - pred)
+```
