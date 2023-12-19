@@ -1,0 +1,210 @@
+---
+title: "Analysis of Covariance and Non-Linear Regression - Lab"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: no
+    fig_width: 8.5
+    fig_height: 6
+    toc_depth: 3
+  word_document:
+    toc: no
+    toc_depth: '3'
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Analysis of Covariance: Salaries for Professors
+
+The 2008-09 nine-month academic salary for Assistant Professors, Associate Professors and Professors in a college in the U.S. The data were collected as part of the on-going effort of the college's administration to monitor salary differences between male and female faculty members.
+
+### Load the Dataset
+
+**Code:**
+
+```{r, Warning = FALSE}
+library(carData)
+data(Salaries)
+head(Salaries)
+```
+
+**Description of the Variables**
+
+* \texttt{rank}: a factor with levels Assistant Professor ("AsstProf"); Associate Professor ("AssocProf"); Full Professor ("Prof")
+
+* \texttt{discipline}: a factor with levels A ("theoretical" departments) or B ("applied" departments)
+
+* \texttt{yrs.since.phd}: years since her/his PhD
+
+* \texttt{sex}: a factor with levels "Female" and "Male"
+
+* \texttt{salary}: nine-month salary, in dollars
+
+### Exploratory Data Analysis
+
+1. Identify the numerical variables and categorical variabes in this data set.
+
+**Answer: Numerical variables: \texttt{yrs.since.phd}, \texttt{yrs.service}, \texttt{salary}. Categorical variabes: \texttt{rank}, \texttt{discipline}, \texttt{sex}**
+
+2. Summarize each variable numerically and graphically. Briefly describe the findings.
+
+**Code:**
+
+```{r}
+summary(Salaries)
+catVars <- which(colnames(Salaries) %in% c("rank", "discipline", "sex"))
+numVars <- which(colnames(Salaries) %in% c("yrs.since.phd", "yrs.service", "salary"))
+
+
+for (i in catVars) barplot(sort(table(Salaries[, i]), decreasing = T), las = 1,
+                           main = colnames(Salaries)[i])
+for (i in numVars) {
+  hist(Salaries[, i], 30, main = colnames(Salaries)[i], las = 1)
+  abline(v = mean(Salaries[, i]), col = "blue")
+  abline(v = median(Salaries[, i]), col = "red")
+  legend("topright", legend = c("Mean", "Median"), lty = 1, col = c("blue", "red"))
+}
+```
+
+**Answer:**
+The years of service and years since PhD are both skewed right. Salary distribution is skewed right but a bit closer to symmetric. There are more professors (~2/3) than associate and assistant professors combined (~1/3). The disciplines are relatively close to equal. There are way more male than female professors.
+
+3. Create a scatterplot matrix and briefly describe the findings.
+
+**Code:**
+
+```{r}
+pairs(Salaries[, numVars], cex = 0.5, col = "chocolate1")
+cor(Salaries[, numVars])
+```
+
+**Answer:**
+There is, as expected, a storng postive linear relationship with \texttt{yrs.service} and \texttt{yrs.since.phd}. There is a moderate postive linear relationship between \texttt{salary} and \texttt{yrs.since.phd} and a even weaker postive linear relationship between \texttt{salary} and \texttt{yrs.service}.
+
+### Model Fitting
+
+4. Fit a MLR with \texttt{yrs.since.phd}, \texttt{discipline}, \texttt{rank}, and \texttt{sex} as the predictors. Write down the fitted regression equations for each category (e.g., Female, Assistant Professor, theoretical departments). There are 12 categories in total.
+
+**Code:**
+
+```{r}
+model1 <- lm(salary ~ yrs.since.phd + discipline + rank + sex, data = Salaries)
+summary(model1)
+```
+
+**Answer:**
+
+* Female, Assistant Professor, theoretical departments: $\hat{\texttt{salary}} = 67884.32 + 61.01 \times \texttt{yrs.since.phd}$
+
+* Female, Assistant Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Female, Associate Professor, theoretical departments: $\hat{\texttt{salary}} = (67884.32 + 13104.15) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Female, Associate Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47 + 13104.15) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Female, Professor, theoretical departments: $\hat{\texttt{salary}} = (67884.32 + 46032.55) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Female, Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47 + 46032.55) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Assistant Professor, theoretical departments: $\hat{\texttt{salary}} = (67884.32 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Assistant Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Associate Professor, theoretical departments: $\hat{\texttt{salary}} = (67884.32 + 13104.15 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Associate Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47 + 13104.15 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Professor, theoretical departments: $\hat{\texttt{salary}} = (67884.32 + 46032.55 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+* Male, Professor, applied departments: $\hat{\texttt{salary}} = (67884.32 + 13937.47  +46032.55 + 4349.37) + 61.01 \times \texttt{yrs.since.phd}$
+
+
+5. State the model assumptions in the previous regression model.
+
+**Answer:**
+There is a linear relationship between \texttt{salary} and \texttt{yrs.since.phd} and the regression is the same across all 12 categories. Also the random error term follows a normal distribution with constant variance and all these random errors are independent to each other.
+
+6. Now fit another MLR with \texttt{yrs.since.phd}, \texttt{discipline}, \texttt{sex} and their interactions. Write down the fitted regression equations for each category
+
+**Code:**
+
+```{r}
+model2 <- lm(salary ~ yrs.since.phd * discipline +  yrs.since.phd * sex, data = Salaries)
+summary(model2)
+```
+
+**Answer:**
+
+* Female, theoretical departments: $\hat{\texttt{salary}} = 68155.8 + 1574.6 \times \texttt{yrs.since.phd}$
+
+* Female, applied departments: $\hat{\texttt{salary}} = (68155.8 + 6386.7) + (1574.6 + 403.9) \times \texttt{yrs.since.phd}$
+
+* Male, theoretical departments: $\hat{\texttt{salary}} = (68155.8 + 19608.8) + (1574.6 - 728.9) \times \texttt{yrs.since.phd}$
+
+* Male, applied departments: $\hat{\texttt{salary}} = (68155.8 + 19608.8 + 6386.7) + (1574.6 + 403.9 - 728.9) \times \texttt{yrs.since.phd}$
+
+
+
+## Non-Linear Regression: A Simulated Example
+
+Suppose the response $y$ depends on the predictor $t$ in the following form:
+$$y = \alpha \exp(-\beta t) + \epsilon,$$
+where $\epsilon \sim \mathrm{N}(0, \sigma^2)$, and the true $\alpha$, $\beta$, and $\sigma^2$
+are 15, 2 and 0.09, respectively. First, let's simulate some data points from this nonlinear model:
+
+**Code:**
+
+```{r}
+alpha = 15; beta = 2; sigma.sq = 0.09
+n <- 50
+t <- seq(0, 2, len = 50)
+set.seed(123)
+y <- alpha * exp(-beta * t) + rnorm(n, sd = sqrt(sigma.sq))
+data <- data.frame(y = y, t = t)
+
+plot(t, y, las = 1, pch = 16)
+lines(t, alpha * exp(-beta * t), type = "l", col = "blue")
+legend("topright", legend = c("Data", "True"), pch = c(16, NA), lty = c(NA, 1),
+       col = c("black", "blue"), bty = "n")
+```
+
+7. Use \texttt{nls} function to obtain nonlinear least-squares estimates $\hat{\alpha}$, $\hat{\beta}$, and $\hat{\sigma}^2$. In order to use \texttt{nls}, you would need to provide formula = y $\sim$ alpha * exp(-beta * t), start = list(alpha = alpha_0, beta = beta_0), where alpha_0 and beta_0 are initial guesses of the parameters $\alpha$ and $\beta$.
+
+
+**Code:**
+
+```{r}
+NLFit <- nls(y ~ alpha * exp(-beta * t), start = list(alpha = 8, beta = 2))
+summary(NLFit)
+```
+
+**Answer:** 
+$\hat{\alpha} = $ `r summary(NLFit)$coefficients[1, 1]`,
+$\hat{\beta} = $ `r summary(NLFit)$coefficients[2, 1]`,
+and $\hat{\sigma} = $ `r summary(NLFit)$sigma`
+
+
+8. Write down the fitted equation.
+
+**Answer:**
+$y = 15.0962 \times \exp(-2.0113\times t)$
+
+9. Apply the natural log transformation to the simulated response and fit a simple linear regression. Back transform to get the fit on the original scale. 
+
+Note that $\mathbb{E}(y) = \alpha\exp(-\beta t) \Rightarrow \log(\mathbb{E}(y)) = \log(\alpha) - \beta t$.
+
+**Code:**
+
+```{r}
+logTrlmFit <- lm(log(y) ~ t)
+summary(logTrlmFit)
+```
+
+**Answer:** 
+
+
+We have $\hat{\beta} = 2.1332$ $(SE(\hat{\beta}) = 0.1062)$ and $\hat{\alpha} = \exp(2.7798) = 16.1158$.

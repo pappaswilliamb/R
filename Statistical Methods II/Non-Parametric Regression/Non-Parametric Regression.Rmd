@@ -1,0 +1,314 @@
+---
+title: "Non-Parametric Regression and Shrinkage Methods"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5.5
+    fig_caption: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Non-Parametric Regression: Motorcycle Accident Simulation Data
+
+A data frame giving a series of measurements of head acceleration in a simulated motorcycle accident, used to test crash helmets.
+
+* \texttt{times}: time (in milliseconds) after impact
+
+* \texttt{accel}: head acceleration in $g$
+
+
+*Data Source:* Silverman, B. W. (1985) Some aspects of the spline smoothing approach to non-parametric curve fitting. *Journal of the Royal Statistical Society series B* 47, 1–52.
+
+### Load and Plot the Data 
+
+```{r, message = FALSE}
+library(MASS) # Load the library
+data(mcycle) # Load the data set
+attach(mcycle)
+plot(accel ~ times, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+```
+
+### Linear and Polynomial Regression Fits
+
+```{r, message = FALSE}
+# This Will Show How Bad a Linear Model Is for This Data Set
+rg <- range(times)
+xg = seq(rg[1], rg[2], 0.1) # Prediction grids
+
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lmFit <- lm(accel ~ times, data = mcycle)
+abline(lmFit, col = "red")
+Cub.polyFit <- lm(accel ~ poly(times, 3), data = mcycle) # Polynomial Regression
+Cub.polyPred <- predict(Cub.polyFit, data.frame(times = xg))
+lines(xg, Cub.polyPred, col = "blue")
+```
+
+### Kernel Regression
+
+$\hat{f}(x) = \hat{\mathbb{E}}(Y | X = x) = \frac{\sum_{i = 1}^{n}K_{h}(x-x_{i})y_{i}}{\sum_{i = 1}^{n}K_{h}(x-x_{i})},$
+where $K_{h}$ is a kernel with a bandwidth $h$.
+
+```{r, message = FALSE}
+KernFit <- with(mcycle, ksmooth(times, accel, kernel = "normal", bandwidth = 0.5))
+KernFit2 <- with(mcycle, ksmooth(times, accel, kernel = "normal", bandwidth = 5))
+
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lines(KernFit$x, KernFit$y, col = "darkgreen")
+lines(KernFit2$x, KernFit2$y, col = "blue")
+# Green line --> smaller bandwidths
+# Blue line --> larger bandwidths
+# Blue line is better and smoother predictor
+```
+
+### Local Polynomial Regression Fitting (*loess*)
+
+```{r, message = FALSE, warning = FALSE}
+library(ggplot2)
+plot <- ggplot(aes(x = times, y = accel), data = mcycle)
+plot <- plot + geom_point()
+(plot <- plot + geom_smooth(method = "loess", degree = 2, span = 0.4, se = TRUE)) # Span is synonymous with bandwidth. # degree = df
+```
+
+### Regression Splines
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("splines")
+library(splines)
+RegSplineFit <- lm(accel ~ bs(times, df = 10), data = mcycle)
+summary(RegSplineFit)
+RegSplinePred <- predict(RegSplineFit, data.frame(times = xg))
+
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lines(xg, RegSplinePred, col = "darkgreen")
+```
+
+### Generalized Additive Models
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("mgcv")
+library(mgcv)
+GAMFit <- gam(accel ~ s(times), data = mcycle)
+summary(GAMFit)
+GAMpred <- predict(GAMFit, data.frame(times = xg))
+
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lines(xg, GAMpred, col = "red")
+```
+
+### Smoothing Splines
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("fields")
+library(fields)
+SpFit <- sreg(times, accel)
+summary(SpFit)
+plot(SpFit, which = 3, col = "blue", pch = 16, las = 1)
+SpPred <- predict(SpFit, xg)
+
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lines(xg, SpPred , col = "blue")
+```
+
+### Comparing Regression Spline/GAM/Smoothing Spline Fits
+
+```{r, message = FALSE, warning = FALSE}
+plot(times, accel, pch = "*", cex = 1, las = 1,
+     xlab = "Time (ms)", ylab = "Acceleration (g)")
+lines(xg, RegSplinePred, col = "darkgreen")
+lines(xg, GAMpred, col = "red")
+lines(xg, SpPred, col = "blue")
+legend("topleft", legend = c("Reg Spline", "GAM", "Smoothing Spline"),
+       col = c("darkgreen", "red", "blue"), lty = 1, bty = "n")
+```
+
+
+## Shrinkage Methods
+
+The rest of this R session is largely based on the R lab: Ridge Regression and the Lasso of the book "Introduction to Statistical Learning with Applications in R" by *Gareth James*, *Daniela Witten*, *Trevor Hastie* and *Robert Tibshirani*.
+
+The `glmnet` package will be used to perform ridge regression and the Lasso package will be used to predict `Salary` on the `Hitters` data.
+
+### Ridge Regression
+
+1. Data Setup
+
+```{r, message = FALSE, warning = FALSE}
+# Predict the Salary of MLB Baseball Players
+
+# install.packages("ISLR")
+library(ISLR)
+data(Hitters)
+Hitters = na.omit(Hitters) # Omits missing values
+head(Hitters)
+summary(Hitters)
+
+# install.packages("glmnet")
+library(glmnet)
+X <- model.matrix(Salary ~ ., data = Hitters)[, -1] # Creates a predictor variables 
+y <- Hitters$Salary # Creates a response variable
+```
+
+The `glmnet()` function has an alpha argument that determines what type of model is fit. If `alpha = 0`, then a ridge regression model is fit, and if `alpha = 1`, then a Lasso model is fit. We first fit a ridge regression model, which minimizes $$\sum_{i = 1}^{n}(y_{i} - \beta_{0} - \sum_{j = 1}^{p} \ beta_{j}x_{ij})^2 +\color{blue}{\lambda\sum_{j = 1}^{p} \ beta_{j}^2},$$ where $\lambda \geq 0$ is a *tuning parameter* to be determined.
+
+2. Fit a ridge regression over a grid of $\lambda$ values.
+
+```{r, message = FALSE, warning = FALSE}
+grid <- 10^seq(10, -2, length = 100)
+ridge.mod <- glmnet(X, y, alpha = 0, lambda = grid)
+```
+
+3. Ridge Regression Coefficients
+
+```{r, message = FALSE, warning = FALSE}
+dim(coef(ridge.mod))
+```
+
+We expect the coefficient estimates to be much smaller, in terms of $\ell_2$ norm, when a large value of $\lambda$ is used. 
+
+```{r, message = FALSE, warning = FALSE}
+ridge.mod$lambda[50] # Displays 50th lambda value
+coef(ridge.mod)[, 50] # Displays coefficients associated with 50th lambda value
+sqrt(sum(coef(ridge.mod)[-1, 50]^2)) # Calculates l2 norm
+```
+
+In contrast, here are the coefficients when $\lambda = 705$, along with their $\ell_2$ norm. Note the much larger $l_2$ norm of the coefficients associated with this smaller value of $\lambda$.
+
+
+```{r, message = FALSE, warning = FALSE}
+ridge.mod$lambda[60] # Displays 60th lambda value
+coef(ridge.mod)[, 60] # Displays coefficients associated with 60th lambda value
+sqrt(sum(coef(ridge.mod)[-1, 60]^2)) # Calculate l2 norm
+```
+
+We can use the `predict()` function for a number of purposes. For instance, we can obtain the ridge regression coefficients for a new value of $\lambda$, say 50:
+
+```{r, message = FALSE, warning = FALSE}
+predict(ridge.mod, s = 50, type = "coefficients")[1:20, ]
+```
+
+4. Training/Testing
+
+We now split the samples into a training set and a test set in order to estimate the test error of ridge regression and later on the Lasso.
+
+```{r, message = FALSE, warning = FALSE}
+set.seed(1)
+train <- sample(1:nrow(X), nrow(X) / 2)
+test <- (-train)
+y.test <- y[test]
+
+# Fit Ridge Regression to the Training Data
+ridge.mod <- glmnet(X[train,], y[train], alpha = 0, lambda = grid, thresh = 1e-12)
+
+# Predict the Salary to the Testing Data with Lambda = 4
+ridge.pred <- predict(ridge.mod, s = 4, newx = X[test, ])
+
+# Calculate the Root Mean Square Error (RMSE)
+sqrt(mean((ridge.pred - y.test)^2))
+
+# Compute the RMSE for the Intercept-Only Model
+sqrt(mean((mean(y[train]) - y.test)^2))
+
+# Change to a Much Larger Lambda
+ridge.pred <- predict(ridge.mod, s = 1e10, newx = X[test, ])
+sqrt(mean((ridge.pred - y.test)^2))
+
+# Change Lambda to 0
+ridge.pred <- predict(ridge.mod, s = 0, newx = X[test, ])
+sqrt(mean((ridge.pred - y.test)^2))
+
+lm(y ~ X, subset = train)
+predict(ridge.mod, s = 0, type = "coefficients")[1:20, ]
+```
+
+
+Instead of arbitrarily choosing $\lambda = 4$, it would be better to use cross-validation (CV) to choose the tuning parameter $\lambda$. We can do this using the built-in cross-validation function, `cv.glmnet()`. By default, the function performs 10-fold cross-validation, though this can be changed using the argument `folds`.
+
+5. Cross-Validation (CV)
+
+```{r, message = FALSE, warning = FALSE}
+set.seed(1)
+
+# Fit Ridge Regression Model on Training Data
+cv.out <- cv.glmnet(X[train, ], y[train], alpha = 0)
+
+# Select Lambda That Minimizes Training MSE
+(bestLambda = cv.out$lambda.min) 
+
+ridge.pred <- predict(ridge.mod, s = bestLambda, newx = X[test, ])
+sqrt(mean((ridge.pred - y.test)^2))
+
+plot(cv.out) # Draw plot of training MSE as a function of lambda
+```
+
+Finally, we refit our ridge regression model on the full data set, using the value of $\lambda$ chosen by cross-validation, and examine the coefficient estimates.
+
+```{r, message = FALSE, warning = FALSE}
+# Fit Ridge Regression Model on Full Dataset
+out <- glmnet(X, y, alpha = 0)
+
+# Display Coefficients Using Lambda Chosen by CV
+predict(out, type = "coefficients", s = bestLambda)[1:20, ] 
+```
+
+### The Lasso 
+
+We see that the ridge regression with a wise choice of $\lambda$ can outperform least squares as well as the null model on the Hitters data set. We now ask whether the Lasso, which minimizes $$\sum_{i = 1}^{n}(y_{i} - \beta_{0} - \sum_{j = 1}^{p} \ beta_{j}x_{ij})^2 + \color{blue}{\lambda\sum_{j = 1}^{p}|\beta_{j}|}$$ can yield either a more accurate or a more interpretable model than the ridge regression. In order to fit a Lasso model, we once again use the `glmnet()` function. However, this time we use the argument `alpha = 1`.
+
+
+```{r, message = FALSE, warning = FALSE}
+# Fit Lasso Model on Training Data
+lasso.mod <- glmnet(X[train, ], y[train], alpha = 1, lambda = grid)
+
+# Draw Plot of Coefficients
+plot(lasso.mod, las = 1)    
+```
+
+Notice that in the coefficient plot that, depending on the choice of tuning parameter, some of the coefficients are exactly equal to zero. We now perform cross-validation and compute the associated test error:
+
+
+```{r, message = FALSE, warning = FALSE}
+set.seed(1)
+
+# Fit Lasso Model on Training Data
+cv.out <- cv.glmnet(X[train, ], y[train], alpha = 1) 
+
+# Draw Plot of Training MSE as a Function of Lambda
+plot(cv.out) 
+
+# Select Lambda That Minimizes Training MSE
+bestLambda <- cv.out$lambda.min 
+
+# Use Best Lambda to Predict Test Data
+lasso.pred <- predict(lasso.mod, s = bestLambda, newx = X[test, ])
+
+# Calculate Test RMSE
+sqrt(mean((lasso.pred - y[test])^2)) 
+```
+
+This is substantially lower than the test set RMSE of the null model and of least squares, and very similar to the test RMSE of the ridge regression with $\lambda$ chosen by cross-validation.
+
+However, the Lasso has a substantial advantage over the ridge regression in that the resulting coefficient estimates are sparse. Here we see that 8 of the 19 coefficient estimates are exactly zero:
+
+
+```{r, message = FALSE, warning = FALSE}
+# Fit Lasso Model on Full Dataset
+out <- glmnet(X, y, alpha = 1, lambda = grid) 
+
+# Display Coefficients Using Lambda Chosen by CV
+(lasso.coef <- predict(out, type = "coefficients", s = bestLambda)[1:20, ]) 
+lasso.coef[lasso.coef != 0] # Display only non-zero coefficients
+```

@@ -1,0 +1,145 @@
+---
+title: "Random and Mixed Effects Models and Computer Experiments"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 8.5
+    fig_height: 7
+    fig_caption: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Random Effects Example
+
+Suppose that an agronomist is studying a large number of varieties of soybeans for yield. The agronomist randomly selects three varieties, and then randomly assigns each of those varieties to 10 of 30 available plots. 
+
+
+Model:
+$y_{ij} = \mu + \alpha_{i} + \epsilon_{ij},$
+$\alpha_{i}s \stackrel{i.i.d.}{\sim} \mathrm{N}(0, \sigma^{2}_{\alpha})$, $\epsilon_{ij}s \stackrel{i.i.d.}{\sim} \mathrm{N}(0, \sigma^{2})$. $\alpha_{i}s$ and $\epsilon_{ij}s$ are independent to each other.
+
+### Read the Data Into R
+
+```{r}
+v1 <- c(6.6, 6.4, 5.9, 6.6, 6.2, 6.7, 6.3, 6.5, 6.5, 6.8)
+v2 <- c(5.6, 5.2, 5.3, 5.1, 5.7, 5.6, 5.6, 6.3, 5.0, 5.4)
+v3 <- c(6.9, 7.1, 6.4, 6.7, 6.5, 6.6, 6.6, 6.6, 6.8, 6.8)
+yield <- c(v1, v2, v3) # Response
+var <- factor(c(rep(1, 10), rep(2, 10), rep(3, 10))) # Predictor
+plot(yield ~ var, las = 1) # Creates boxplot of the three varieties
+```
+
+### Fitting a Fixed Effects Model
+
+```{r}
+fixef <- lm(yield ~ var)
+anova(fixef)
+coefficients(fixef)
+```
+
+### Fitting a Random Effects Model
+
+
+```{r, warning = FALSE}
+# install.packages("lme4")
+library(lme4)
+randef <- lmer(yield ~ 1 + (1 | var), REML = TRUE) #lmer() fits the linear mixed effect models
+summary(randef) # 0.6379 = sigma alpha; 0.2894 = sigma
+```
+
+Let's construct CIs for $\sigma^{2}_{\alpha}$, $\sigma^2$, and $\mu$.
+
+```{r}
+## Compute the Confidence Intervals (CIs) Using Profile Likelihood
+CIs <- confint(randef, oldNames = FALSE)
+CIs
+```
+
+## RCBD: Fixed vs. Random Block
+
+### Load R Libraries
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("lsmeans", "lmerTest")
+library(lsmeans)
+library(lmerTest)
+```
+
+### Read the Data
+```{r}
+### Create the Data Set
+x <- c(52, 47, 44, 51, 42, 60, 55, 49, 52, 43, 56, 48, 45, 44, 38)
+trt <- rep(c("A", "B", "C"), each = 5)
+blk <- rep(1:5, 3)
+dat <- data.frame(x = x, trt = trt, blk = as.factor(blk))
+```
+
+### Fixed Block 
+
+```{r}
+fixef <- lm(x ~ trt + blk, data = dat)
+anova(fixef)
+```
+
+### Random Block
+
+```{r}
+randef <- lmer(x ~ trt + (1 | blk), REML = TRUE, data = dat)
+summary(randef)
+lsmeans(randef, list(pairwise ~ trt), adjust = "none")
+```
+
+## Computer Experiments
+
+### Design: Latin Hypercube
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("lhs") # Latin Hypercube Sample Package
+library(lhs)
+
+# Generate a Good n x k LHD
+LHD = maximinLHS(n = 30, k = 2, dup = 5)
+# "dup" is an integer tuning parameter that determines the number of candidate points considered. Larger values should improve results but requires more computational resources.
+
+# Display the LHD
+LHD
+pairs(LHD, col = "blue", cex = 0.8, pch = 16, las = 1)
+```
+
+### Analysis: Gaussian Process
+
+```{r, message = FALSE, warning = FALSE}
+# Load the Data
+neuron <- read.table("http://deanvossdraguljic.ietsandbox.net/DeanVossDraguljic/R-data/neuron.txt", header = T)
+head(neuron, 10)
+
+# Fit a GP
+# install.packages("mlegp")
+library(mlegp)
+GPFit <- mlegp(neuron[, 1:2], neuron[, 3]) # neuron[, 1:2] = x-variable; neuron[, 3] = y-variable
+summary(GPFit)
+
+# Make Prediction
+predictedX = expand.grid(g_NaF = seq(0, 1, 0.02), g_KDR = seq(0, 1, 0.02))
+yhats = predict(GPFit, predictedX, se.fit = T)
+
+# Visualize Predictions and Their Uncertainty 
+# install.packages("fields")
+library(fields)
+par(mfrow = c(1, 2))
+image.plot(seq(0, 1, 0.02), seq(0, 1, 0.02), matrix(yhats$fit, 51, 51),
+           xlab = "g NaF (mS/cm^2)", ylab = "g KDR (mS/cm^2)", las = 1,
+           main = "Prediction")
+points(neuron[, 1:2], pch = 16, cex = 0.75)
+image.plot(seq(0, 1, 0.02), seq(0, 1, 0.02), matrix(yhats$se.fit, 51, 51),
+           xlab = "g NaF (mS/cm^2)", ylab = "g KDR (mS/cm^2)", las = 1,
+           main = "Prediction Uncertinaty")
+points(neuron[, 1:2], pch = 16, cex = 0.75)
+```

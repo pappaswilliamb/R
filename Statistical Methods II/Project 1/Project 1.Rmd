@@ -1,0 +1,374 @@
+#### Problem 1: Linear Regression Analysis of Boston Data Set
+
+# Load the Data
+library(MASS)
+data(Boston)
+
+vars <- c("medv", "lstat", "rm", "crim")
+data <- Boston[, vars]
+
+### Descriptive Summary
+
+## Graphical Summary
+# Boxplots
+par(mfrow = c(1, 4))
+boxplot(data$medv, main = 'medv', ylab = 'Median Home Value ($)')
+boxplot(data$lstat, main = 'lstat', ylab = 'Lower Status of Population (%)')
+boxplot(data$rm, main = 'rm', ylab = 'Average Rooms per Dwelling')
+boxplot(data$crim, main = 'crim', ylab = 'Per Capita Crime Rate by Town')
+
+# Histograms
+par(mfrow = c(1, 4))
+hist(data$medv, main = 'medv', xlab = '', ylab = 'Median Home Value ($)')
+hist(data$lstat, main = 'lstat', xlab = '', ylab = 'Lower Status of Population (%)')
+hist(data$rm, main = 'rm', xlab = '', ylab = 'Average Rooms per Dwelling')
+hist(data$crim, main = 'crim', xlab = '', ylab = 'Per Capita Crime Rate by Town')
+
+# Scatterplot Matrices
+pairs(data, cex = 0.95, col = "blue", las = 1)
+library(ggplot2)
+
+library(GGally)
+ggpairs(data)
+
+# Question 1: Is At Least One of the Predictors Useful in Predicting the Response?
+# Option 1: lstat as Predictor
+lmfit1 <- lm(medv ~ crim, data = data)
+summary(lmfit1)
+# Regression Equation: medv = 34.55384 - 0.95005 x lstat
+
+X <- model.matrix(lmfit1)
+(x0 <- apply(X, 2, median))
+(y0 <- sum(x0 * coef(lmfit1)))
+
+# Confidence Interval
+predict(lmfit1, new = data.frame(t(x0)), interval = "prediction", alpha = 0.05)
+
+alpha = 0.05
+beta1_hat <- summary(lmfit1)[["coefficients"]][, 1][2]
+se_beta1 <- summary(lmfit1)[["coefficients"]][, 2][2]
+CI_beta1 <- c(beta1_hat - qt(1 - alpha / 2, 11) * se_beta1,
+beta1_hat + qt(1 - alpha / 2, 11) * se_beta1)
+CI_beta1
+
+beta1_null <- 0
+t_star <- (beta1_hat - beta1_null) / se_beta1
+p_value <- 2 * pt(t_star, 11, lower.tail = F)
+p_value
+
+crim_new = data.frame(crim = 3.61352)
+hat_Y <- lmfit1$coefficients[1] + lmfit1$coefficients[2] * 3.61352
+hat_Y
+
+predict(lmfit1, crim_new, interval = "confidence", level = 0.95)
+
+crim_grid = data.frame(crim = 0:89)
+CI_band <- predict(lmfit1, crim_grid, interval = "confidence", level = 0.95)
+PI_band <- predict(lmfit1, crim_grid, interval = "predict", level = 0.95)
+plot(medv ~ crim, data = data, pch = 16, cex = 0.75,
+xlab = "Per Capita Crime Rate (crim)", ylab = "Median Home Value (medv)", main = "CIs and PIs", las = 1)
+abline(lmfit1, col = "blue")
+abline(h = 21.20, lty = 2, col = "gray")
+lines(0:89, CI_band[, 2], lty = 2, col = "blue")
+lines(0:89, CI_band[, 3], lty = 2, col = "blue")
+lines(0:89, PI_band[, 2], lty = 2, col = "darkgreen")
+lines(0:89, PI_band[, 3], lty = 2, col = "darkgreen")
+legend("bottomright", legend = c("CI", "PI"), col = c("blue", "darkgreen"), lty = 2, bty = "n")
+
+
+# Prediction Interval
+predict(lmfit1, new = data.frame(t(x0)), interval = "prediction")
+
+
+
+
+# Plots
+plot(lmfit1)
+
+
+
+# Option 2: lstat & rm as Predictors
+lmfit2 <- lm(medv ~ lstat + rm, data = data)
+summary(lmfit2)
+# Regression Equation: medv = -1.35827 - 0.64236 x lstat + 5.09479 x rm
+
+X <- model.matrix(lmfit2)
+(x0 <- apply(X, 2, median))
+(y0 <- sum(x0 * coef(lmfit2)))
+
+# Confidence Interval
+predict(lmfit2, new = data.frame(t(x0)), interval = "confidence", alpha = 0.05)
+
+# Prediction Interval
+predict(lmfit2, new = data.frame(t(x0)), interval = "prediction")
+
+alpha = 0.05
+beta1_hat <- summary(lmfit2)[["coefficients"]][, 1][2]
+se_beta1 <- summary(lmfit2)[["coefficients"]][, 2][2]
+CI_beta1 <- c(beta1_hat - qt(1 - alpha / 2, 11) * se_beta1,
+beta1_hat + qt(1 - alpha / 2, 11) * se_beta1)
+CI_beta1
+
+beta1_null <- 0
+t_star <- (beta1_hat - beta1_null) / se_beta1
+p_value <- 2 * pt(t_star, 11, lower.tail = F)
+p_value
+
+lstat_new = data.frame(lstat = 11.36)
+hat_Y <- lmfit2$coefficients[1] + lmfit2$coefficients[2] * 11.36
+hat_Y
+
+predict(lmfit2, lstat_new, interval = "confidence", level = 0.95)
+
+
+
+lstat_new = data.frame(lstat = 11.36)
+hat_Y <- lmfit2$coefficients[1] + lmfit2$coefficients[2] * 11.36
+hat_Y
+
+predict(lmfit1, lstat_new, interval = "confidence", level = 0.9)
+
+
+lstat_grid2 = data.frame(lstat = 0:40)
+CI_band <- predict(lmfit2, lstat_grid2, interval = "confidence", level = 0.95)
+PI_band <- predict(lmfit2, lstat_grid2, interval = "predict", level = 0.95)
+plot(medv ~ lstat, data=data, pch = 16, cex = 0.75,
+xlab = "Lower Status of Population (lstat)", ylab = "Median Home Value (mdev)", main = "CIs and PIs for Option 1", las = 1)
+abline(lmfit1, col = "blue")
+abline(h = 21.20, lty = 2, col = "gray")
+lines(0:40, CI_band[, 2], lty = 2, col = "blue")
+lines(0:40, CI_band[, 3], lty = 2, col = "blue")
+lines(0:40, PI_band[, 2], lty = 2, col = "darkgreen")
+lines(0:40, PI_band[, 3], lty = 2, col = "darkgreen")
+legend("topright", legend = c("CI", "PI"), col = c("blue", "darkgreen"), lty = 2, bty = "n")
+
+# Plots
+plot(lmfit2)
+
+# Option 3: lstat, rm, crim as Predictors
+lmfit3 <- lm(medv ~ ., data = data)
+summary(lmfit3)
+# Regression Equation: medv = -2.56225 - 0.57849 x lstat + 5.21695 x rm - 0.10294 x crim
+
+X <- model.matrix(lmfit3)
+(x0 <- apply(X, 2, median))
+(y0 <- sum(x0 * coef(lmfit3)))
+
+# Confidence Interval
+predict(lmfit3, new = data.frame(t(x0)), interval = "prediction", alpha = 0.05)
+
+#Prediction Interval
+predict(lmfit3, new = data.frame(t(x0)), interval = "prediction")
+
+# Plots
+plot(lmfit3)
+
+
+# Question 2: Do All the Predictors Help to Explain the Response, or Is Only a Subset of the Predictors Useful?
+
+# Question 3: How Well Does the Mode Fit the Data?
+
+# Question 4: Predict the Response Value When All the Chosen Predictors Take Their Median Value. Quantify the Prediction Uncertainty.
+
+
+### Inferential Analysis
+# Best Model Selection
+library(tidyverse)
+library(caret)
+library(leaps)
+models <- regsubsets(medv ~ ., data = data) # regsubsets = the function for model selection
+summary(models) # Gives best model based on the number of predictors
+
+
+res.sum <- summary(models)
+
+criteria <- data.frame(
+  Adj.R2 = res.sum$adjr2,
+  Cp = res.sum$cp,
+  BIC = res.sum$bic)
+
+criteria
+
+
+plot(2:4, criteria$Adj.R2, las = 1, xlab = "p", ylab = "", pch = 16, col = "gray",
+     main = expression(R['adj']^2))
+points(4, criteria$Adj.R2[3], col = "blue", pch = 16)
+
+
+# SLR
+slr <- lm(medv ~ rm, data = data) # Reduced Model
+summary(slr)
+
+# MLR
+mlr <- lm(medv ~ lstat + rm, data = data) # Full Model
+summary(mlr)
+
+# ANOVA
+anova(slr, mlr)
+
+
+### Conclusion
+
+lmod <- lm(medv ~ lstat + rm, data = data)
+plot(lmod)
+
+# Residual Plot
+plot(mlr$fitted.values, mlr$residuals, pch = 16, col = "blue", xlab = "Fitted Values", ylab = "Residuals", main = "Residuals vs. Fitted")
+abline(h = 0, col = "red")
+
+# Histogram of Residuals
+(sd <- sd(mlr$residuals))
+
+par(las = 1)
+hist(mlr$residuals, 5, prob = T, col = "lightblue", border = "gray", main = "Histogram of Residuals", xlab = "Residuals")
+xg <- seq(-200, 200, 1)
+yg <- dnorm(xg, 0, sd)
+lines(xg, yg)
+
+# Normal QQ Plot
+qqnorm(mlr$residuals, pch = 16, las = 1, col = "gray", xlab = "Normal Quantiles", ylab = "Residuals")
+qqline(mlr$residuals)
+
+# Multicollinearity
+library(faraway)
+vif(mlr)
+
+# Leverage
+step_Boston <- step(mlr, trace = F)
+X <- model.matrix(step_Boston)
+H <- X %*% solve((t(X) %*% X)) %*% t(X)
+lev <- hat(X)
+high_lev <- which(lev >= 2 * 3 / 30)
+attach(Boston)
+par(las = 1)
+plot(lstat, crim, cex = sqrt(5 * lev), col = "blue", ylim = c(0, 5000))
+points(lstat[high_lev], crim[high_lev], col = "red", pch = 16,
+cex = sqrt(5 *lev[high_lev]))
+
+
+
+#### Problem 2: Analysis of Salaries Data Set
+
+# Load the Data
+library(carData)
+data(Salaries)
+head(Salaries)
+
+salary <- Salaries
+write.csv(salary, file = "salary.csv")
+
+### Descriptive Summary
+## Summary Statistics
+summary(Salaries)
+
+## Graphical Summary
+# Boxplots
+par(mfrow = c(1, 2))
+boxplot(salary ~ sex, data = Salaries, las = 1)
+boxplot(salary ~ discipline + sex, data = Salaries, las = 1)
+
+# Cross tabulation
+xtabs(~ sex + rank + discipline, data = Salaries)
+
+
+
+### Inferential Analysis
+
+# Model Fitting
+m1 <- lm(salary ~ discipline + rank + sex + yrs.since.phd, data = Salaries)
+X <- model.matrix(m1)
+head(X)
+summary(m1)
+
+# Plot the Model Fit
+attach(Salaries)
+yr.range <- tapply(yrs.since.phd, list(discipline, sex, rank), range)
+sex.col <- ifelse(sex == "Male", "blue", "red")
+dis.col <- ifelse(discipline == "A", 16, 1)
+
+beta0 <- m1$coefficients[1]
+betaDisp <- m1$coefficients[2]
+betaAssoc <- m1$coefficients[3]
+betaProf <- m1$coefficients[4]
+betaMale <- m1$coefficients[5]
+beta1 <- m1$coefficients[6]
+
+library(scales)
+
+# Plot the Model Fits by Rank
+## Assistant Professor
+assistant <- which(rank == "AsstProf")
+plot(yrs.since.phd[assistant], salary[assistant], pch = dis.col[assistant], cex = 0.8,
+     col = alpha(sex.col[assistant], 0.5), yaxt = "n", xlab = "Years Since PhD",
+     main = "9-Month Salary", ylab = "")
+axis(2, at = seq(63000, 99000, len = 6), labels = paste(seq(63000, 99000, len = 6) / 1000, "k"),
+     las = 1)
+legend('bottomright', legend = c("Male", 
+                               "Female"),
+       col = c("blue", "red"),
+       pch = 16, cex = 0.6)
+
+segments(yr.range[[1]][1], beta0 + yr.range[[1]][1] * beta1,
+         yr.range[[1]][2], beta0 + yr.range[[1]][2] * beta1, col = "red", lwd = 1.8)
+segments(yr.range[[2]][1], beta0 + betaDisp + yr.range[[2]][1] * beta1,
+         yr.range[[2]][2], beta0 + betaDisp + yr.range[[2]][2] * beta1,
+         col = "red", lty = 2, lwd = 1.8)
+segments(yr.range[[3]][1], beta0 + betaMale + yr.range[[3]][1] * beta1,
+         yr.range[[3]][2], beta0 + betaMale + yr.range[[3]][2] * beta1,
+         col = "blue", lwd = 1.8)
+segments(yr.range[[4]][1], beta0 + betaDisp + betaMale + yr.range[[4]][1] * beta1,
+         yr.range[[4]][2], beta0 + betaDisp + betaMale + yr.range[[4]][2] * beta1,
+         col = "blue", lty = 2, lwd = 1.8)
+         
+## Associate Professor
+assoc <- which(rank == "AssocProf")
+plot(yrs.since.phd[assoc], salary[assoc], pch = dis.col[assoc], cex = 0.8,
+     col = alpha(sex.col[assoc], 0.5), yaxt = "n", xlab = "Years Since PhD",
+     main = "9-Month Salary", ylab = "")
+axis(2, at = seq(62000, 127000, len = 6), labels = paste(seq(62000, 127000, len = 6) / 1000, "k"),
+     las = 1)
+legend('bottomright', legend = c("Male", 
+                               "Female"),
+       col = c("blue", "red"),
+       pch = 16, cex = 0.6)
+
+segments(yr.range[[5]][1], beta0 + betaAssoc + yr.range[[5]][1] * beta1,
+         yr.range[[5]][2], beta0 + betaAssoc + yr.range[[5]][2] * beta1,
+         col = "red", lwd = 1.8)
+segments(yr.range[[6]][1], beta0 + betaDisp + betaAssoc + yr.range[[6]][1] * beta1,
+         yr.range[[6]][2], beta0 + betaDisp + betaAssoc + yr.range[[6]][2] * beta1,
+         col = "red", lty = 2, lwd = 1.8)
+segments(yr.range[[7]][1], beta0 + betaAssoc + betaMale + yr.range[[7]][1] * beta1,
+         yr.range[[7]][2], beta0 + betaAssoc + betaMale + yr.range[[7]][2] * beta1,
+         col = "blue", lwd = 1.8)
+segments(yr.range[[8]][1], beta0 + betaDisp + betaAssoc + betaMale + yr.range[[8]][1] * beta1,
+         yr.range[[8]][2], beta0 + betaDisp + betaAssoc + betaMale + yr.range[[8]][2] * beta1,
+         col = "blue", lty = 2, lwd = 1.8)
+         
+## Full Professor
+prof <- which(rank == "Prof")
+plot(yrs.since.phd[prof], salary[prof],
+     pch = dis.col[prof], cex = 0.8,
+     col = alpha(sex.col[prof], 0.5),
+     yaxt = "n", xlab = "Years Since PhD",
+     main = "9-Month Salary", ylab = "")
+axis(2, at = seq(57000, 232000, len = 6),
+     labels = paste(seq(57000, 232000, len = 6) / 1000, "k"),
+     las = 1)
+legend('bottomright', legend = c("Male", 
+                               "Female"),
+       col = c("blue", "red"),
+       pch = 16, cex = 0.6)
+
+segments(yr.range[[9]][1], beta0 + betaProf + yr.range[[9]][1] * beta1,
+         yr.range[[9]][2], beta0 + betaProf + yr.range[[9]][2] * beta1,
+         col = "red", lwd = 1.8)
+segments(yr.range[[10]][1], beta0 + betaDisp + betaProf + yr.range[[10]][1] * beta1,
+         yr.range[[10]][2], beta0 + betaDisp + betaProf + yr.range[[10]][2] * beta1,
+         col = "red", lty = 2, lwd = 1.8)
+segments(yr.range[[11]][1], beta0 + betaProf + betaMale + yr.range[[11]][1] * beta1,
+         yr.range[[11]][2], beta0 + betaProf + betaMale + yr.range[[11]][2] * beta1,
+         col = "blue", lwd = 1.8)
+segments(yr.range[[12]][1], beta0 + betaDisp + betaProf + betaMale + yr.range[[12]][1] * beta1,
+         yr.range[[12]][2], beta0 + betaDisp + betaProf + betaMale + yr.range[[12]][2] * beta1,
+         col = "blue", lty = 2, lwd = 1.8)

@@ -1,0 +1,241 @@
+---
+title: "Time Series Analysis 1"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: no
+    toc_depth: '3'
+  html_document:
+    toc: no
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 4
+    fig_caption: yes
+header-includes: \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Time Series Data
+
+### Lake Huron Time Series
+
+Annual measurements of the level of Lake Huron in feet.
+
+```{r}
+par(mar = c(3.2, 3.2, 0.5, 0.5), mgp = c(2, 0.5, 0), bty = "L")
+data(LakeHuron)
+plot(LakeHuron, ylab = "Depth (in Feet)", xlab = "Year", las = 1)
+grid()
+```
+
+### $\mathrm{CO}_{2}$ Concentration
+
+Atmospheric concentrations of $\mathrm{CO}2$ are expressed in parts per million (ppm) and reported in the preliminary 1997 SIO manometric mole fraction scale.
+
+```{r}
+data(co2)
+par(mar = c(3.8, 4, 0.8, 0.6))
+plot(co2, las = 1, xlab = "", ylab = "")
+mtext("Time (in Years)", side = 1, line = 2)
+mtext(expression(paste("CO"[2], " Concentration (ppm)")), side = 2, line = 2.5)
+
+# Seasonal and Trend Decomposition Using Loess (STL)
+par(mar = c(4, 3.6, 0.8, 0.6))
+stl <- stl(co2, s.window = "periodic")
+plot(stl, las = 1)
+```
+
+### U.S. Monthly Unemployment Rates
+
+```{r, message = FALSE, warning = FALSE}
+# install.packages("quantmod")
+library(quantmod)
+getSymbols("UNRATE", src = "FRED")
+head(UNRATE); tail(UNRATE)
+chartSeries(UNRATE) 
+```
+
+
+## ARMA: ACF and PACF
+
+```{r}
+set.seed(123)
+n = 200
+WN <- rnorm(n)
+par(mfrow = c(4, 2), mar = c(3.6, 3.6, 1.2, 0.6))
+plot(1:n, WN, type = "l", las = 1, xlab = "", ylab = "")
+mtext("WN")
+acf(WN, xlab = "", ylab = "", main = "", las = 1)
+mtext("ACF")
+
+# AR(1) phi = 0.8
+set.seed(123)
+AR <- arima.sim(n = n, model = list(ar = 0.8))
+plot(1:n, AR, type = "l", las = 1, xlab = "", ylab = "")
+mtext("AR(1)")
+acf(AR, xlab = "", ylab = "", main = "", las = 1)
+
+# MA(1) theta = 0.5
+set.seed(123)
+MA <- arima.sim(n = n, model = list(ma = 0.5))
+plot(1:n, MA, type = "l", las = 1, xlab = "", ylab = "")
+mtext("MA(1)")
+acf(MA, xlab = "", ylab = "", main = "", las = 1)
+
+# ARMA(1, 1) phi = 0.8, theta = 0.5
+set.seed(123)
+ARMA <- arima.sim(n = n, model = list(ar = 0.8, ma = 0.5))
+plot(1:n, ARMA, type = "l", las = 1, xlab = "", ylab = "")
+mtext("ARMA(1,1)")
+mtext("Time", side = 1, line = 2)
+acf(ARMA, xlab = "", ylab = "", main = "", las = 1)
+mtext("Lag", side = 1, line = 2)
+
+par(mfrow = c(4, 2), mar = c(3.6, 3.6, 1.2, 0.6))
+plot(1:n, WN, type = "l", las = 1, xlab = "", ylab = "")
+mtext("WN")
+pacf(WN, xlab = "", ylab = "", main = "", las = 1)
+mtext("PACF")
+
+# AR(1) phi = 0.8
+set.seed(123)
+AR <- arima.sim(n = n, model = list(ar = 0.8))
+plot(1:n, AR, type = "l", las = 1, xlab = "", ylab = "")
+mtext("AR(1)")
+pacf(AR, xlab = "", ylab = "", main = "", las = 1)
+
+# MA(1) theta = 0.5
+set.seed(123)
+MA <- arima.sim(n = n, model = list(ma = 0.5))
+plot(1:n, MA, type = "l", las = 1, xlab = "", ylab = "")
+mtext("MA(1)")
+pacf(MA, xlab = "", ylab = "", main = "", las = 1)
+
+# ARMA(1, 1) phi = 0.8, theta = 0.5
+set.seed(123)
+ARMA <- arima.sim(n = n, model = list(ar = 0.8, ma = 0.5))
+plot(1:n, ARMA, type = "l", las = 1, xlab = "", ylab = "")
+mtext("ARMA(1,1)")
+mtext("Time", side = 1, line = 2)
+pacf(ARMA, xlab = "", ylab = "", main = "", las = 1)
+mtext("Lag", side = 1, line = 2)
+```
+
+## Lake Huron Case Study
+
+### De-Trend 
+
+```{r}
+## Let Us Create a 'years' Variable
+years <- time(LakeHuron)
+
+## Plot Time Series
+plot(LakeHuron, ylab = "Depth (in Feet)", xlab = "Year", las = 1)
+grid()
+
+## ACF and PACF
+par(mfrow = c(2, 1), mar = c(4, 4, 1, 1))
+acf(LakeHuron, xlab = "Lag (in Years)", ylab = "Sample ACF", main = "")
+pacf(LakeHuron, xlab = "Lag (in Years)", ylab = "Sample PACF", main = "")
+
+# Estimate the Linear Trend
+lm <- lm(LakeHuron ~ years)
+par(mfrow = c(2, 1), mar = c(3.5, 3.5, 1, 0.6))
+plot(LakeHuron, ylab = "", xlab = "", las = 1); grid()
+abline(lm, col = "blue", lty = 2)
+mtext("Depth (in Feet)", 2, line = 2.4)
+deTrend <- resid(lm)
+plot(1875:1972, deTrend, type = "l", ylab = "", xlab = "", las = 1); grid()
+abline(h = 0, col = "blue", lty = 2)
+mtext("Year", 1, line = 2)
+mtext("Depth (in Feet)", 2, line = 2.4)
+
+## ACF and PACF
+par(mfrow = c(1, 2), mar = c(4, 4, 1, 1))
+acf(deTrend, xlab = "Lag (in Years)", ylab = "Sample ACF", main = "")
+pacf(deTrend, xlab = "Lag (in Years)", ylab = "Sample PACF", main = "")
+
+# Histogram and QQ Plot
+hist(deTrend, main = "", xlab = "", las = 1)
+qqnorm(deTrend, main = "", pch = 16, cex = 0.8); qqline(deTrend, col = "blue")
+```
+
+### Model Selection and Fitting
+
+```{r}
+## AR(1)
+(ar1.model <- arima(deTrend, order = c(1, 0, 0)))
+ar1.resids <- resid(ar1.model)
+plot(1875:1972, ar1.resids, type = "l", xlab = "Year", ylab = "AR1 Residuals")
+
+## Sample ACF and PACF of the Residuals
+par(mfrow = c(1, 2))
+acf(ar1.resids, ylab = "Sample ACF", xlab = "Lag (in Years)")
+pacf(ar1.resids, ylab = "Sample PACF", xlab = "Lag (in Years)")
+
+## Normal Q-Q Plot for the Residuals
+qqnorm(ar1.resids, main = ""); qqline(ar1.resids, col = "blue")
+
+## Test for Time Dependence for the Residuals 
+Box.test(ar1.resids, type = "Ljung-Box")
+
+## AR(2)
+(ar2.model <- arima(deTrend, order = c(2, 0, 0)))
+
+## Calculate the Residuals
+ar2.resids <- resid(ar2.model)
+
+## Sample ACF and PACF of the Residuals
+par(mfrow = c(1, 2))
+acf(ar2.resids,  ylab = "Sample ACF", xlab = "Lag (in Years)")
+pacf(ar2.resids,  ylab = "Sample PACF", xlab = "Lag (in Years)")
+
+## Test for Time Dependence for the Residuals 
+Box.test(ar2.resids, type = "Ljung-Box")
+
+## Normal Q-Q Plot for the Residuals
+qqnorm(ar2.resids, main = ""); qqline(ar2.resids, col = "blue")
+
+## Fit the ARMA(2, 1) Model
+(arma21.model <- arima(deTrend, order = c(2, 0, 1)))
+
+## Calculate the Residuals
+arma21.resids <- resid(arma21.model)
+
+## Sample ACF and PACF of the Residuals
+par(mfrow=c(1,2))
+acf(arma21.resids,  ylab = "Sample ACF", xlab = "Lag (in Years)")
+pacf(arma21.resids,  ylab = "Sample PACF", xlab = "Lag (in Years)")
+
+## Normal Q-Q Plot for the Residuals
+qqnorm(arma21.resids, main = ""); qqline(arma21.resids, col = "blue")
+
+## Test
+Box.test(arma21.resids, type = "Ljung-Box")
+
+# Model Selection Using AIC
+AIC(ar1.model); AIC(ar2.model); AIC(arma21.model)
+```
+
+### AR(2) Fitting and Forecasting
+
+```{r, warning = FALSE}
+# install.packages("forecast")
+library(forecast)
+(fit <- Arima(LakeHuron, order = c(2, 0, 0), include.drift = T))
+
+par(mfrow = c(2, 2), mar = c(4.1, 4, 1, 0.8), las = 1)
+res <- fit$residuals
+plot(res, type = "l", xlab = "Year", ylab = "AR(2) Residuals", las = 1)
+abline(h = 0, col = "blue")
+qqnorm(res, main = ""); qqline(res, col = "blue")
+acf(res,  ylab = "Sample ACF", xlab = "Lag (in Years)")
+pacf(res,  ylab = "Sample PACF", xlab = "Lag (in Years)")
+
+# 10-Year Forecasts
+autoplot(forecast(fit, h = 10, level = c(50, 95)))
+```

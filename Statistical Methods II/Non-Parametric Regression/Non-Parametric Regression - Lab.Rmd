@@ -1,0 +1,206 @@
+---
+title: 'Non-Parametric Regression and Shrinkage Methods - Lab'
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Non-Parametric Regression
+
+The dataset \texttt{teengamb} concerns a study of teenage gambling in Britain.
+Type `r ?teengamb' to get more details about the the dataset.
+In this lab we will take the variables \texttt{gamble} as the response and \texttt{income} as the predictor.
+
+
+*Data Source:* 
+
+
+1. Make a scatterplot to examine the relationship between the predictor \texttt{income} and the response \texttt{gamble}.
+
+**Code:**
+
+```{r, warning = FALSE}
+library(faraway)
+data(teengamb)
+with(teengamb, plot(gamble ~ income, pch = 16, cex = 0.8, las = 1))
+```
+
+2. Fit a curve to the data using regression spline with \texttt{df = 8}. Produce a plot for the fit and a 95% confidence band (using *RegSplinePred <- predict(RegSplineFit, data.frame(income = xg), interval = "confidence")*) for the fit. Is a linear fit plausible? 
+
+**Code:**
+
+
+```{r}
+library(splines)
+RegSplineFit <- lm(gamble ~ bs(income, df = 8), data = teengamb)
+summary(RegSplineFit)
+(rg <- range(teengamb$income))
+xg <- seq(0.6, 15, 0.01)
+RegSplinePred <- predict(RegSplineFit, data.frame(income = xg), interval = "confidence")
+
+with(teengamb, plot(gamble ~ income, pch = 16, cex = 0.8, las = 1, ylim = range(RegSplinePred)))
+lines(xg, RegSplinePred[, 1], col = "darkgreen")
+lines(xg, RegSplinePred[, 2], lty = 2)
+lines(xg, RegSplinePred[, 3], lty = 2)
+```
+
+**Answer:**
+
+
+3. Fit a curve using either generalized additive models or smoothing splines.
+
+**Code:**
+
+### GAM Fit
+
+```{r, warning = FALSE}
+library(mgcv)
+GAMFit <- gam(gamble ~ s(income), data = teengamb)
+summary(GAMFit)
+plot(GAMFit)
+```
+
+### Smoothing Spline Fit
+
+```{r, warning = FALSE}
+library(fields)
+SpFit <- with(teengamb, sreg(income, gamble))
+SpPred <- predict(SpFit, xg)
+
+with(teengamb, plot(gamble ~ income, pch = "*", cex = 1, las = 1))
+lines(xg, SpPred, col = "blue")
+```
+
+## Ridge Regression and LASSO: Meat Spectrometry to Determine Fat Content
+
+A Tecator Infratec Food and Feed Analyzer working in the wavelength range 850 - 1050 nm by the Near Infrared Transmission (NIT) principle was used to collect data on samples of finely chopped pure meat. 215 samples were measured. For each sample, the fat content was measured along with a 100 channel spectrum of absorbances. Since determining the fat content via analytical chemistry is time-consuming, we would like to build a model to predict the fat content of new samples using the 100 absorbances which can be measured more easily.
+
+
+*Data Source:* H. H. Thodberg (1993) "Ace of Bayes: Application of Neural Networks With Pruning", report no. 1132E, Maglegaardvej 2, DK-4000 Roskilde, Danmark
+
+Load the data and partition the data into *training set* (the first 150 observations) and *testing set* (the remaining 65 observations).
+
+**Code:**
+
+```{r}
+data(meatspec, package = "faraway")
+train <- 1:150; test <- 151:215
+trainmeat <- meatspec[train, ]
+testmeat <- meatspec[test, ]
+```
+
+4. Fit a linear regression with all the 100 predictors to the training set. Compute the root mean square error (RMSE) for the testing set.
+
+**Code:**
+
+```{r}
+lmFit <- lm(fat ~ ., data = trainmeat)
+
+# Define a Function to Calculate RMSE
+rmse <- function(pred, obs) sqrt(mean((pred - obs)^2))
+
+# Computing RMSE for the Training Set
+rmse(predict(lmFit), trainmeat$fat)
+
+# Computing RMSE for the Testing Set
+rmse(predict(lmFit, testmeat), testmeat$fat)
+```
+
+**Answer:**
+
+The RMSE for the testing set is `r rmse(predict(lmFit, testmeat), testmeat$fat)`.
+
+
+5. Fit a ridge regression (using cross-validation to select the "best" $\lambda$) and compute the RMSE for the training set.
+
+**Code:**
+
+```{r, warning = FALSE}
+library(glmnet)
+X <- model.matrix(fat ~ ., data = meatspec)[, -1]
+y <- meatspec$fat
+
+grid <- 10^seq(10, -2, length = 100)
+ridgeFit <- glmnet(X[train, ], y[train], alpha = 0, lambda = grid)
+
+set.seed(1)
+
+# Fit Ridge Regression Model on Training Data
+cv.out <- cv.glmnet(X[train,], y[train], alpha = 0, thresh = 1e-12)
+
+# Select Lambda That Minimizes Training MSE
+(bestLambda = cv.out$lambda.min)
+
+ridge.pred <- predict(ridgeFit, s = bestLambda, newx = X[test, ])
+rmse(ridge.pred, y[test])
+```
+
+
+**Answer:**
+
+The RMSE for the testing set is `r rmse(ridge.pred, y[test])`.
+
+
+6. Fit a LASSO (again using cross-validation to select the "best" $\lambda$) and compute the RMSE for the training set.
+
+**Code:**
+
+```{r}
+LASSOFit <- glmnet(X[train, ], y[train], alpha = 1, lambda = grid)
+
+# Fit Ridge Regression Model on Training Data
+cv.out <- cv.glmnet(X[train, ], y[train], alpha = 1)
+
+# Select Lambda That Minimizes Training MSE
+(bestLambda = cv.out$lambda.min)
+
+LASSO.pred <- predict(LASSOFit, s = bestLambda, newx = X[test, ])
+rmse(LASSO.pred, y[test])
+```
+
+**Answer:**
+
+The RMSE for the testing set is `r rmse(LASSO.pred, y[test])`.
+
+
+7. Fit a LASSO with all the data points (using the best $\lambda$) and report the number of non-zero regression coefficients.
+
+**Code:**
+
+```{r}
+out <- glmnet(X, y, alpha = 1, lambda = grid)
+
+# Display Coefficients Using Lambda Chosen by CV
+(lasso.coef <- predict(out, type = "coefficients", s = bestLambda))
+
+lasso.coef[lasso.coef != 0]
+```
+
+**Answer:**
+
+The number of non-zero regression coefficients is 26.
+
+```{r}
+plot(1:65, y[test], type = "l", las = 1, xlab = "", ylab = "", lwd = 1.5)
+lines(1:65, predict(lmFit, testmeat), col = "red")
+lines(1:65, ridge.pred, col = "blue")
+lines(1:65, LASSO.pred, col = "green")
+
+plot(y[test], predict(lmFit, testmeat) - y[test], pch = 16, cex = 0.5, col = "red",
+     las = 1, xlab = "y", ylab = "Residuals")
+points(y[test], ridge.pred - y[test], pch = 16, cex = 0.5, col = "blue")
+points(y[test], LASSO.pred - y[test], pch = 16, cex = 0.5, col = "green")
+abline(h = 0, lty = 2)
+grid()
+legend("bottomleft", legend = c("LM", "Ridge", "LASSO"),
+       pch = 16, col = c("red", "blue", "green"),
+       bty = "n")
+```

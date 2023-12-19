@@ -1,0 +1,124 @@
+---
+title: 'Completely Randomized Designs - Lab'
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document: default
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The dataset \texttt{PlantGrowth} contains results from an experiment to compare yields (as measured by dried weight of plants) obtained under a control and two different treatment conditions.
+
+*Data Source:* Dobson, A. J. (1983) *An Introduction to Statistical Modelling*. London: Chapman and Hall.
+
+Let's load the data first:
+
+**Code:**
+
+```{r}
+data(PlantGrowth)
+str(PlantGrowth)
+```
+
+1. Compute the treatment means and standard deviations.
+
+**Code:**
+
+```{r}
+(means <- tapply(PlantGrowth$weight, PlantGrowth$group, mean))
+(vars <- tapply(PlantGrowth$weight, PlantGrowth$group, sd))
+```
+
+2. Make side-by-side boxplots by treatment.
+
+**Code:**
+
+```{r}
+boxplot(weight ~ group, data = PlantGrowth, las = 1)
+boxplot(weight ~ group, data = PlantGrowth, las = 1, horizontal = T)
+```
+
+3. Write down the effects model and explain each term in the model (including the model assumptions regarding the random error).
+
+**Answer: $Y_{ij}: \mu + \alpha_{i} + \epsilon_{ij}$, i = 1,...,g,   j = 1,..., $n_{i}$,   $\epsilon_{ij}$ ~ N(0,$\sigma$ ^2). $Y_{ij}$ is the random variable that represents the response for the jth experimental unit to treatment i. $\mu_{i}$ is the mean response time for the ith treatment. $\epsilon_{ij}$ is the random error, which is assumed to be normal.**
+
+
+4. Perform an overall F-test using ANOVA. State the hypotheses, p-value, decision, and conclusion.
+
+**Code:**
+
+```{r}
+AOV <- aov(weight ~ group, data = PlantGrowth)
+summary(AOV)
+```
+
+**Answer: The null hypothesis is $H_{0}: \alpha_{\texttt{i}}= 0$, the alternative hypothesis is $H_{a}: \alpha_{\texttt{i}}\neq 0$, the $\alpha$ is 0.05, the F-statistic is 4.846, the p-value is 0.0159, and the decision is to reject the null hypothesis. The data shows evidence of differences the three treatment groups.**
+
+
+5. Conduct pairwise comparisons using Tukey's HSD  procedure.
+
+**Code:**
+
+```{r}
+# HSD
+HSD <- TukeyHSD(AOV, conf.level = 0.95)
+HSD$group
+```
+
+**Answer: The trt2-trt1 groups have statistically significant differences.**
+
+6. Use qqplot to examine the normality assumption on error.
+
+**Code:**
+
+```{r}
+mod1 <- lm(weight ~ group, data = PlantGrowth)
+
+qqnorm(mod1$resid, cex = 0.8)
+qqline(mod1$resid, col = "red", lwd = 1.5)
+```
+
+**Answer: Based on the plot, the modeling assumption of normality appears to be reasonable. The pattern of the plot runs very close to the trend line.**
+
+7. Make a residual plot to assess equal variance assumption.
+
+**Code:**
+
+```{r}
+plot(mod1$fitted, mod1$resid, las = 1, xlab = "Fitted Value", ylab = "Residual", cex = 0.75, col = "blue")
+abline(h = 0)
+
+plot(mod1$resid, col = "blue", las = 1, cex = 0.75, pch = 16, ylab = "Residual")
+abline(h = 0, lty = 2, lwd = 1.5)
+
+# By Treatment
+attach(PlantGrowth)
+colorf <- as.factor(PlantGrowth$group)
+colors <- c("green",
+"orange", "blue")
+
+plot(mod1$resid, col = colors[colorf], las = 1, cex = 0.75,
+     pch = 16, ylab = "Residual")
+abline(h = 0, lty = 2, lwd = 1.5)
+```
+
+**Answer: Based on the residual plots, the assumption of equal variances seems to be reasonable.**
+
+8. Perform a Levene’s test for equal variance.
+
+**Code:**
+
+```{r, warning = FALSE}
+# Levene’s Test for Equal Variance
+# install.packages("lawstat")
+library("lawstat")
+levene.test(PlantGrowth$weight, PlantGrowth$group, location = "mean")
+
+# Brown-Forsythe Test
+levene.test(PlantGrowth$weight, PlantGrowth$group, location = "median")
+```

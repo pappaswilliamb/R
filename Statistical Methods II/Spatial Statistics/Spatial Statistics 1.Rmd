@@ -1,0 +1,230 @@
+---
+title: "Spatial Statistics 1"
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Toy Examples 
+
+```{r, message = FALSE, warning = FALSE}
+N = 30
+xg <- yg <- seq(0, 1, length = N)
+locs <- expand.grid(xg, yg)
+
+par(mfrow = c(1, 2), mar = c(2, 2, 1, 0.6),
+    mgp = c(2.4, 1, 0), las = 1)
+
+## Case 1: No Spatial Pattern 
+set.seed(123)
+y1 <- array(rnorm(n = N^2), dim = c(N, N))
+y1[N / 2, N / 2] <- NA
+which(is.na(y1) == 1)
+library(fields)
+image.plot(xg, yg, y1, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+text(xg[N / 2], yg[N / 2], "?")
+
+## Case 2: A Smooth Spatial Image
+library(MASS)
+cov.Matern <- function(h, pars) Matern(h, phi = pars[1], range = pars[2], smoothness = pars[3])
+dist <- rdist(locs)
+Sigma_Matern <- cov.Matern(dist, c(1, 0.1, 1.5))
+set.seed(123)
+y2 <- array(mvrnorm(n = 1, rep(0, N^2), Sigma_Matern), dim = c(N, N))
+y2[N / 2,  N / 2] <- NA
+which(is.na(y2) == 1)
+image.plot(xg, yg, y2, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+text(xg[N / 2], yg[N / 2], "?")
+```
+
+## Using Variogram Cloud and (Binned) Variogram to Examine the Spatial Dependency 
+
+```{r}
+gamma1 <- array(dim = c(N^2, N^2))
+system.time(for (i in 1:N^2) {
+  for (j in 1:N^2) {
+    gamma1[i, j] <- (c(y1)[i] - c(y1)[j])^2
+  }
+})
+system.time(gamma1 <- outer(c(y1), c(y1), FUN = "-")^2)
+gamma2 <- outer(c(y2), c(y2), FUN = "-")^2
+
+par(mfrow = c(2, 2), mar = c(3.6, 3.6, 1, 0.6),
+    mgp = c(2.4, 1, 0), las = 1)
+plot(dist, gamma1, cex = 0.2, xlab = "Distance", ylab = expression(gamma))
+abline(h = 2 * 1, col = "blue")
+mtext("Variogram Cloud")
+
+plot(dist, gamma2, cex = 0.2, xlab = "Distance", ylab = expression(gamma))
+dgrid <- seq(0, sqrt(2), 0.001)
+lines(dgrid, 2 * (1 - cov.Matern(dgrid, c(1, 0.1, 1.5))),
+      col = "blue")
+mtext("Variogram Cloud")
+
+vargram1 <- vgram(locs, c(y1), N = 30)
+plot(vargram1, ylim = c(0, 1.3), main = "Binned Variogram")
+abline(h = 1, col = "blue")
+
+vargram2 <- vgram(locs, c(y2), N = 30)
+plot(vargram2, ylim = c(0, 1.1), main = "Binned Variogram")
+lines(dgrid, 1 - cov.Matern(dgrid, c(1, 0.1, 1.5)), col = "blue")
+```
+
+## Covariance Functions and Their Realizations
+
+```{r, message = FALSE}
+# Commonly Used Covariance Functions 
+cov.exp <- function(h, pars) pars[1] * exp(-h / pars[2])
+cov.doubleExp <- function(h, pars) pars[1] * exp(-(h / pars[2])^2)
+
+xg <- seq(0, 5, 0.01)
+c_exp <- cov.exp(xg, c(1, 0.75))
+c_doubleExp <- cov.doubleExp(xg, c(1, 1))
+c_Matern <- cov.Matern(xg, c(1, 0.4, 1.5))
+
+plot(xg, c_exp, type = "l", ylab = "Covariance", xlab = "Distance", las = 1)
+lines(xg, c_doubleExp, col = "red")
+lines(xg, c_Matern, col = "blue")
+legend("topright", legend = c("Exp", "Gau", "Matern 3/2"),
+       col = c("black", "red", "blue"), lty = 1, bty = "n")
+
+Sigma_exp <- cov.exp(rdist(xg), c(1, 0.75))
+Sigma_doubleExp <- cov.doubleExp(rdist(xg), c(1, 1))
+Sigma_Matern <- cov.Matern(rdist(xg), c(1, 0.4, 1.5))
+library(MASS)
+set.seed(123)
+sim_exp_1d <- mvrnorm(n = 1, rep(0, 501), Sigma_exp)
+set.seed(123)
+sim_doubleExp_1d <- mvrnorm(n = 1, rep(0, 501), Sigma_doubleExp)
+set.seed(123)
+sim_Matern_1d <- mvrnorm(n = 1, rep(0, 501), Sigma_Matern)
+
+plot(xg, sim_exp_1d, type = "l", ylim = range(sim_exp_1d, sim_doubleExp_1d,
+                                              sim_Matern_1d), 
+     ylab = "y", las = 1)
+lines(xg, sim_doubleExp_1d, col = "red") 
+lines(xg, sim_Matern_1d, col = "blue") 
+legend("topleft", legend = c("Exp", "Gau", "Matern 3/2"),
+       col = c("black", "red", "blue"), lty = 1, bty = "n")
+```
+
+## Simulate 2D Realizations
+
+```{r}
+grid <- list(x = seq(0, 20, len = 200), y = seq(0, 20, len = 200))
+nu <- c(0.5, 1, 2.5, 5)
+obj <- list()
+for (i in 1:4) obj[[i]] <- matern.image.cov(grid = grid, theta = 0.5,
+                                            smoothness = nu[i], setup = TRUE)
+set.seed(2021)
+sim <- lapply(obj, sim.rf)
+set.panel(2, 2)
+par(mar = c(2.6, 3.1, 3.1, 0.6), las = 1)
+for (i in 1:4) {
+  image.plot(grid$x, grid$y, sim[[i]], zlim = c(-4.25, 4.25), xlab = "", ylab = "")
+}
+```
+
+## Spatial Interpolation
+
+Here we assume $m(s) = 0 \quad \forall s \in \mathcal{S}$ 
+
+### Predicting One Location
+
+$$\hat{y}_{0} = k^{T}\Sigma^{-1}\boldsymbol{y}$$
+$$\mathrm{Var}(\hat{y}_{0}) = \sigma^{2}-k^{T}\Sigma^{-1}k$$
+
+```{r}
+Sigma_Matern <- cov.Matern(dist, c(1, 0.1, 1.5))
+set.seed(123)
+y2 <- array(mvrnorm(n = 1, rep(0, N^2), Sigma_Matern), dim = c(N, N))
+y2[N / 2,  N / 2] <- NA
+
+# k Vector
+k <- Sigma_Matern[435, -435]
+
+# Sigma Matrix
+Sigma <- Sigma_Matern[-435, -435]
+
+# y Vector
+y <- y2[-435]
+
+## Prediction
+system.time(y0_hat <- t(k) %*% solve(Sigma) %*% y)
+system.time(y0_hat_faster <-  t(k) %*% solve(Sigma, y))
+
+## Prediction Uncertainty
+system.time(var_y0_hat <- Sigma_Matern[435, 435] - t(k) %*% solve(Sigma) %*% k)
+system.time(Sigma_Matern[435, 435] - t(k) %*% solve(Sigma, k))
+
+w <- t(k) %*% solve(Sigma)
+weight_map <- array(c(w[1, 1:434], NA, w[1, 435:899]),
+                    dim = c(30, 30))
+xg <- yg <- seq(0, 1, length = N)
+image.plot(xg, yg, weight_map)
+```
+
+### Predicting Multiple Locations
+
+```{r}
+N = 30
+xg <- yg <- seq(0, 1, length = N)
+locs <- expand.grid(xg, yg); dist <- rdist(locs)
+Sigma_Matern <- cov.Matern(dist, c(1, 0.1, 1.5))
+set.seed(123)
+y2 <- array(mvrnorm(n = 1, rep(0, N^2), Sigma_Matern), dim = c(N, N))
+y2_vec <- c(y2)
+set.seed(123)
+rm <- sample(1:(N^2), 0.5 * N^2)
+y2_vec[rm] <- NA
+y2_rm <- array(y2_vec, dim = c(N, N))
+
+# k Matrix
+k <- Sigma_Matern[-rm, rm]
+
+# Sigma Matrix
+Sigma <- Sigma_Matern[-rm, -rm]
+
+# y Vector
+y <- y2_rm[-rm]
+
+## Prediction
+system.time(y0_hat <- t(k) %*% solve(Sigma) %*% y)
+system.time(y0_hat_faster <-  t(k) %*% solve(Sigma, y))
+
+## Prediction Uncertainty
+system.time(var_y0_hat <- Sigma_Matern[rm, rm] - t(k) %*% solve(Sigma) %*% k)
+system.time(Sigma_Matern[rm, rm] - t(k) %*% solve(Sigma, k))
+
+par(mfrow = c(1, 3), mar = c(0, 1.6, 1.2, 0),
+    mgp = c(2.4, 1, 0), las = 1)
+image.plot(xg, yg, y2_rm, xlab = "", ylab = "", xaxt = "n", yaxt = "n", horizontal = T, legend.width = 0.8,
+           legend.line = 1)
+mtext("Observed")
+
+y2_pred <- y2_rm
+y2_pred[rm] <- y0_hat[, 1]
+image.plot(xg, yg, y2_pred, xlab = "", ylab = "", xaxt = "n", yaxt = "n", horizontal = T, legend.width = 0.8,
+           legend.line = 1)
+mtext("Predicted")
+
+con_sd <- sqrt(diag(var_y0_hat))
+condSD <- array(0, dim = c(N, N))
+temp <- c(condSD); temp[rm] <- con_sd
+condSD <- array(temp, dim = c(N, N))
+
+image.plot(xg, yg, matrix(condSD, N, N), xlab = "", ylab = "", xaxt = "n", yaxt = "n", horizontal = T, legend.width = 0.8, legend.line = 1)
+mtext("Predicted SD")
+```

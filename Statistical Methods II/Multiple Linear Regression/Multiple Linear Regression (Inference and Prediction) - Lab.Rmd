@@ -1,0 +1,165 @@
+---
+title: 'Multiple Linear Regression (Inference and Prediction) - Lab'
+author: "Blake Pappas"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Housing Values in Suburbs of Boston
+
+The Boston housing data was collected in 1978. Each of the 506 entries represent aggregated data about 14 features for homes from various suburbs in Boston, MA. 
+
+*Data Source:* Harrison, D. and Rubinfeld, D.L. (1978) Hedonic prices and the demand for clean air. **J. Environ. Economics and Management** 5, 81–102.
+
+
+## Load the Dataset
+
+**Code:**
+
+```{r}
+library(MASS)
+data(Boston)
+```
+
+We will use only the following variables for conducting data analysis:
+
+1. \texttt{medv}: median value of owner-occupied homes in $\$1000s$; 
+
+2. \texttt{lstat}: lower status of the population (percent);
+
+3. \texttt{rm}: average number of rooms per dwelling;
+
+4. \texttt{crim}: per capita crime rate by town
+
+**Code:**
+
+The code below can be used to extract these variables.
+
+```{r}
+vars <- c("medv", "lstat", "rm", "crim")
+data <- Boston[, vars]
+```
+
+ 
+## Exploratory Data Analysis
+
+### Numerical Summary
+
+1. Use `summary` command to produce various numerical summaries of each of the 4 variables under consideration. 
+
+**Code:**
+
+```{r}
+summary(data)
+```
+
+### Graphical Summary
+
+2. Make a boxplot for each variable.
+
+**Code:**
+
+```{r}
+par(mfrow = c(1, 4))
+boxplot(data$medv, main = 'medv', ylab = 'Median Home Value ($)')
+boxplot(data$lstat, main = 'lstat', ylab = 'Lower Status of Population (%)')
+boxplot(data$rm, main = 'rm', ylab = 'Average Rooms per Dwelling')
+boxplot(data$crim, main = 'crim', ylab = 'Per Capita Crime Rate by Town')
+```
+
+3. Briefly discuss the shape of the distribution of each variable.
+
+**Code:**
+
+```{r}
+par(mfrow = c(1, 4))
+hist(data$medv, main = 'medv', xlab = '', ylab = 'Median Home Value ($)')
+hist(data$lstat, main = 'lstat', xlab = '', ylab = 'Lower Status of Population (%)')
+hist(data$rm, main = 'rm', xlab = '', ylab = 'Average Rooms per Dwelling')
+hist(data$crim, main = 'crim', xlab = '', ylab = 'Per Capita Crime Rate by Town')
+```
+
+**Answer: The variable `mdev` is positively skewed, asymmetric, and unimodal. The variable `lstat` is positively skewed, asymmetric, and unimodal. Although it may appear normally distributed, the variable `rm` is slightly positively skewed, asymmmetric, and unimodal. The variable `crim` is positively skewed, asymmetric and unimodal.**
+
+
+4. Create a scatterplot matrix to explore the interdependence between these variables.
+
+**Code:**
+
+```{r, warning = FALSE}
+pairs(data, cex = 0.95, col = "blue", las = 1)
+library(ggplot2)
+library(GGally)
+ggpairs(data)
+```
+
+## Model Fitting 
+
+Here we will use `medv` as the response and `lstat`, `rm`, `crim` as the predictors.  
+
+### Simple Linear Regression
+
+5. Fit a simple linear regression.
+
+**Code:**
+
+```{r}
+# Simple Linear Regression Using mdev as the Response and rm as the Predictor
+slr <- lm(medv ~ rm, data = data) # This will be the reduce model for the F-test
+summary(slr)
+```
+
+```{r}
+y <- data$medv; x <- data$rm
+y_diff <- y - mean(y)
+x_diff <- x - mean(x)
+beta_1 <- sum(y_diff * x_diff) / sum((x_diff)^2)
+beta_1
+
+beta_0 <- mean(y) - mean(x) * beta_1
+beta_0
+
+par(las = 1, mar = c(4.1, 4.1, 1.1, 1.1))
+plot(x, y, pch = 16, xlab = "Average Rooms per Dwelling (rm)", ylab = "Median Home Value ($) (medv)")
+grid()
+abline(a = beta_0, b = beta_1, col = "red")
+```
+
+6. Write down the fitted linear regression equation.
+
+**Answer: `medv` = -34.671 + 9.102 x `rm` + $\epsilon$, where Y = `medv`, X = `rm`, $\hat{\beta_0}$ = -34.671, $\hat{\beta_1}$ = 9.102, and $\epsilon$ = stochastic error.**
+
+
+
+### Multiple Linear Regression
+
+7. Fit a multiple linear regression using all predictors.
+
+**Code:**
+
+```{r}
+mlr <- lm(medv ~ ., data = data) # This will be the full model for the F-test
+summary(mlr)
+```
+8. Write down the fitted linear regression equation.
+
+**Answer: `medv` = -2.56225 - 0.57849 x `lstat` + 5.21695 x `rm` - 0.10294 x `crim` + $\epsilon$**
+
+
+
+9. Perform an overall F-test and state the hypotheses, test statistic, p-value, decision, and conclusion.
+
+**Code:**
+
+```{r}
+anova(slr, mlr)
+```
+
+**Answer: The null hypothesis was H0 : ${\beta}$lstat = ${\beta}$rm = ${\beta}$crim = 0. The alternative hypothesis was HA : at least one of the three coefficients $\neq$ 0. The test statistic was 115.05, the p-value was 2.2e-16, and conclusion was to reject the null hypothesis.**
