@@ -1,0 +1,223 @@
+---
+title: "Collecting Data"
+author: "Blake Pappas"
+date: "8/24/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting started with R Markdown
+
+## R documentation
+
+One of the reasons R is so popular among statisticians is that its libraries contain functions for so many statistical procedures. Every R function (if it is from a library hosted on CRAN) has documentation that tells you how to use it.  
+
+The **Useage** section of R documentation shows the syntax to use when calling the function. The **Arguments** section tells you what items should be put inside the parenthesis, separated by commas. **Value** describes the output of the function.
+
+To view the documentation for a function, type "?" followed by the name of the function into the console. Try this out for the "quantile" function by typing ?quantile into the console now.
+
+quantile?
+
+## Logical Operators and Subsetting
+First, create some objects in the workspace.
+```{r}
+# Create Some Data Vectors 
+x <- c(12.3, 32.4, 8.6, 9, 11.5)
+y <- c("red", "red", "green", "red", "green")
+car_no <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 17, 18, 19, 20, 21, 22, 23, 24, 34, 41, 42, 48)
+ACC_Schools <- c('Clemson', 'Wake Forest', 'Duke', 'North Carolina', 'NC State', 'Syracuse')
+
+# View the 4th Element of x
+x[4]
+
+# View the 5th Element of ACC_Schools
+ACC_Schools[5]
+
+# View the 19th Element of car_no
+car_no[19]
+
+# View the 2nd and 4th Elements of y
+y[c(2, 4)]
+
+# View Elements 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15 of car_no
+car_no[c(1:5, 10:15)]
+
+# View the 1st, 3rd, and 5th Elements of ACC_Schools
+ACC_Schools[c(1, 3, 5)]
+```
+
+Logical operators check some condition on an object (equality, inequality, etc.) and return TRUE or FALSE.  Here are a few logical operators in R.  
+
+```{r}
+x[1] > 10  # Checks whether x[1] is >10
+x > 10 # Returns a logical vector, returning T/F for each element of x
+which( x > 10 )   # Returns the indices of elements of x for which the condition is true
+x[which(x > 10)]   # Returns the subset of x for which the condition is true
+```
+
+Other logical operators include <, <=, >=, ==, and !=.  Try these out to see what they do.
+
+```{r}
+y == 'red'
+# Add Your Own Lines of Code
+y != 'green'
+car_no < 11
+x > 12
+car_no >= 13
+x <= 9
+ACC_Schools == 'Clemson'
+```
+
+## Data Frames and (More) Subsetting
+
+A data frame is the object used to store rectangular data sets in R. It can hold a mix of numeric and categorical variables. When you read .csv files, they are automatically stored as data frames in your R workspace. You can also construct one out of vectors of the same length using the function "data.frame".
+
+```{r}
+results <- data.frame(size = x, color = y)
+results
+
+results <- data.frame(color = y, size = x)
+results
+```
+Use the $ to work with a single variable in the data frame.
+```{r}
+results$size
+results$color
+
+# Add a New Variable Called "diameter":
+results$diameter <- c(4.5, 6.2, 8.8, 9.0, 1.3)
+head(results)
+
+# Pull First 2 Results
+head(results, 2)
+```
+
+The subset function is one way to identify a subset of rows of the data frame that satisfy a logical condition. The first argument is the name of your data frame. The 2nd argument is a logical condition.
+
+```{r}
+small.results <- subset(results, size < 20)
+small.results
+```
+
+```{r}
+large.results <- subset(results, size > 20)
+large.results
+```
+
+Here is a second example of the subset function:
+```{r}
+green.results <- subset(results, color == 'green')
+green.results
+```
+
+```{r}
+notgreen.results <- subset(results, color != 'green')
+notgreen.results
+```
+
+An equivalent way of subsetting using a logical condition:
+```{r}
+which(results$color == 'green')  # This returns the rows for which the condition is true
+green.results2 <- results[which(results$color == 'green'), ]
+green.results2
+```
+
+
+# Exercises
+
+Answer the following questions in the space below.
+
+## Exercise 1
+View the documentation for the function "t.test".  The "Value" section describes all of the pieces of information that are stored in the output of the function. How many components are in the output?
+
+```{r}
+?t.test
+```
+
+**Answer:**
+10
+
+Note: Data in R will typically have a class such as integer, numeric, factor, and so forth.
+
+Statistical programmers can also define their own classes (called S3 classes) for the output of their functions. "t.test" is one function where this is the case: its output has a class called "htest". These "htest" objects will always have the components you counted up for this exercise.
+
+## Exercise 2
+
+1. Use the "read.csv" function to load the "insurance.csv" data set into a data frame called "insurance". Write your code in the chunk below. Also include code to set your working directory.
+
+
+**Code: **
+```{r, Exercise1}
+insurance <- read.csv("insurance.csv")
+```
+
+2. Print the first five rows of the insurance data using the "head" function.
+
+**Code: **
+```{r, Exercise2}
+head(insurance, 5)
+```
+
+## Exercise 3
+Answer the following questions about the insurance data set.
+
+1. How many rows does it have? How many columns?  The functions "dim," "nrow," and "ncol" might help. Create a new code chunk that returns the answer and type your answer below. 
+
+```{r, Exercise3 Part1}
+dim(insurance)
+nrow(insurance)
+ncol(insurance)
+```
+**Answer:**
+The insurance dataset has 47 rows and 7 columns.
+
+2. What type of variable is "region"?  What about "expenses"?  Use the "class" function.
+
+```{r, Exercise3 Part2}
+class(insurance$region)
+class(insurance$expenses)
+```
+
+**Answer:**
+The variable "Region" is a character. The variable "expenses" is numeric.
+
+3. Use the "hist" function to make a histogram of the variable "expenses". Customize the title using the argument "main".  
+
+
+**Answer:**
+```{r, Exercise3 Part3}
+hist(insurance$expenses, main = "Histogram of Expenses")
+```
+
+4. Use "boxplot" function to make a boxplot of the variable "age". Customize the scale of the y axis using the "ylim" argument. 
+
+**Answer:**
+```{r, Exercise3 Part4}
+boxplot(insurance$age,main = 'Age of Client', ylab = 'Age', ylim = c(0, 100))
+```
+
+## Exercise 4
+
+Suppose the data were collected in the following manner. An analyst at Statewide Insurance took a random sample from a database of all health insurance claims paid by the company in the year 2019. Each row of the data set represents one claim.
+
+Do you think these data can be used to find an unbiased estimate of the following quantities?  If you think there is potential for bias, give a brief explanation and state whether you think the quantity might be underestimated or overestimated.
+
+1. The average age of customers insured by Statewide Insurance.
+
+**Answer:**
+I think there is potential for bias in this data set when it comes to age. My reason for this is that older people are more likely to file insurance claims than younger people. When more claims are filed by older people, this drives up the average age of those customers of Statewide Insurance, thus overstating the average customer age.
+
+2. The average dollar amount of a claim.
+
+**Answer:**
+This data cannot be used to find an unbiased estimate. Insurance claims tend to be positively skewed due to unusually large expense amounts in a select few individuals. Therefore, it is likely that such a quantity is overestimated.*
+
+3. The proportion of smokers in the country where Statewide Insurance is located.
+
+**Answer:**
+I think these data can be used to find an unbiased estimate of the proportion of smokers in the country where Statewide Insurance is located.
