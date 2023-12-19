@@ -1,0 +1,837 @@
+---
+title: "NASCAR Racing: More Than Just Driving Fast and Turning Left?"
+author: "Blake Pappas"
+date: "17 October 2022"
+output: 
+  html_document:
+    df_print: paged
+    theme: cosmo
+    code_download: true
+runtime: shiny
+---
+
+**INTRODUCTION**
+=======================================================================
+
+<center>
+![**Watkins Glen International Road Course**](https://www.syracuse.com/resizer/7S15ydIrlyYui3a5L2adL0L4X4k=/800x0/smart/cloudfront-us-east-1.images.arcpublishing.com/advancelocal/2ZJLQZ7J4ZGNXF3XKLWDAMPNPQ.jpeg)
+</center>
+<br>
+</br>
+The National Association for Stock Car Auto Racing (NASCAR) is the largest auto racing sanctioning body in the United States. Each year, NASCAR organizes hundreds of races across 48 states, as well as in Canada, Mexico, and Europe. Known worldwide for its colorful paint schemes, banked turns, high speeds, and aggressive racing style, the sport has evolved greatly throughout its 74-year history.
+
+In recent years, NASCAR has imposed new rules and regulations regarding how teams may build and operate their cars, so much so that many critics of the sport have argued that it’s now easier than ever to be successful. Can driver success be defined by more than merely going fast and turning left?
+
+The following analysis examines data collected from the 2021 NASCAR Cup Series race at the Watkins Glen International road course. The goal of this analysis is to determine which factors go about best explaining success on the race track. For the context of this analysis, success will be evaluated by finishing position and points earned. The lower the finishing position, the better the driver performed. The more points earned, the better the driver performed.
+
+<br>
+</br>
+
+**DATA**
+=======================================================================
+
+The data used in this analysis originated from [nascar.com](https://www.nascar.com/results/racecenter/2021/nascar-cup-series/go-bowling-at-the-glen/stn/recap/). It was collected on Sunday, August 8, 2021. NASCAR's original purpose in collecting this data was to build an HTML tool to provide a live, side-by-side comparison of two drivers throughout the race. This tool reports on critical race statistics like starting position, lap time, lap speed, highest running position, lowest running position, and current running position.
+
+## **PACKAGES REQUIRED**
+
+The following packages were utilized to conduct the analysis:
+```{r warning = FALSE, message = FALSE}
+# Import All Appropriate Libraries and Packages
+library(tidyverse)
+library(ggplot2)
+library(DT)
+library(rmarkdown)
+```
+
+* **tidyverse:** This package was used to clean and transform the original data into a reporting-level quality. 
+* **ggplot2:** This package was used to create all appropriate graphs and visualizations for the analysis. 
+* **DT:** This package was used to create a condensed version of the final data. 
+* **rmarkdown:** This package was used to create the flexdashboard for the presentation portion of the analysis.
+
+## **DATA IMPORTATION**
+
+Contrary to much of the data for professional sporting events, the data for this analysis was not readily available. Because the data was used to create a highly interactive HTML tool, NASCAR did not conveniently advertise this kind of information. In order to retrieve the data needed for this analysis, a web scrape was necessary. This required the underlying HTML of [nascar.com](https://www.nascar.com/results/racecenter/2021/nascar-cup-series/go-bowling-at-the-glen/stn/recap/) to be inspected and parsed until all appropriate JSON files containing the data for the 2021 Watkins Glen race could be found. Once these JSON files were discovered and retrieved, they were converted into the following CSVs:
+
+* race.csv
+* team.csv
+* sponsor.csv
+* points.csv
+* manufacturer.csv
+* driver.csv
+
+These CSVs were then imported into R as follows:
+
+{.tabset .tabset-fade}
+-------------------------------
+### **race.csv**
+```{r, message = FALSE}
+race <- read_csv("race.csv")
+```
+
+```{r, echo = FALSE}
+print(race)
+```
+
+### **team.csv**
+```{r, message = FALSE}
+team <- read_csv("team.csv")
+```
+
+```{r, echo = FALSE}
+print(team)
+```
+
+### **sponsor.csv**
+```{r, message = FALSE}
+sponsor <- read_csv("sponsor.csv")
+```
+
+```{r, echo = FALSE}
+print(sponsor)
+```
+
+### **points.csv**
+```{r, message = FALSE}
+points <- read_csv("points.csv")
+```
+
+```{r, echo = FALSE}
+print(points)
+```
+
+### **manufacturer.csv**
+```{r, message = FALSE}
+manufacturer <- read_csv("manufacturer.csv")
+```
+
+```{r, echo = FALSE}
+print(manufacturer)
+```
+
+### **driver.csv**
+```{r, message = FALSE}
+driver <- read_csv("driver.csv")
+```
+
+```{r, echo = FALSE}
+print(driver)
+```
+
+## **TIDYING THE DATA**
+
+In general, the raw, underlying data for this analysis was very clean. Few steps were needed to tidy the data into a reporting-level quality. The first step taken to tidy the data was to join all six CSVs together to create a master data set. The base CSV for this master data set was ***race.csv***. The other five CSVs were consecutively left joined (through the pipe command) to ***race.csv*** to create the ***Watkins_Glen*** master data set. All CSVs were joined together by the `car_number` field, which was the unique identifier (primary key) in all six individual raw data sets.
+
+From there, the columns of the ***Watkins_Glen*** master data set were reordered to follow a better defined and structured format. The columns were ordered in such a way as to allow for more qualitative data fields to be presented first (i.e. car_number, driver, manufacturer), followed by more quantitative data fields (i.e. lap_time, lap_speed, points).
+
+
+
+{.tabset .tabset-fade}
+-------------------------------
+### **JOINING THE DATA SETS**
+```{r}
+# Joining All Data Sources Into a Single Data Frame
+Watkins_Glen <- race %>%
+  left_join(team, by = "car_number") %>%
+  left_join(sponsor, by = "car_number") %>%
+  left_join(points, by = "car_number") %>%
+  left_join(manufacturer, by = "car_number") %>%
+  left_join(driver, by = "car_number")
+```
+
+```{r, echo = FALSE}
+print(Watkins_Glen)
+```
+
+### **REORDERING THE COLUMNS**
+```{r}
+# Reorder of the Columns
+Watkins_Glen <- select(Watkins_Glen, car_number, driver, manufacturer, team, sponsor, start, finish, points, lap, lap_time, lap_speed, running_position)
+```
+
+```{r, echo = FALSE}
+print(Watkins_Glen)
+```
+
+
+## **CONDENSED MASTER DATA TABLE**
+
+In all, the finished data set contained 12 variables and 3,330 observations. This data set contained 138 instances of missing values, coming from only the `lap_time` and `lap_speed` variables. In order to keep the integrity of the data intact, missing values were not transformed in any way. In the event that these two variables were used in calculations, the argument `na.rm = TRUE` was applied.
+```{r}
+renderDataTable(paged_table(Watkins_Glen))
+```
+
+**What exactly does the data in this table mean?**
+
+Each row of the table provides an in-depth summary of any given lap for a particular driver. For example, consider row 1 from the data table, which has the following observations:
+
+* ***car_number: *** 5
+* ***driver: *** Kyle Larson
+* ***manufacturer: *** Chevrolet
+* ***team: *** Hendrick Motorsports
+* ***sponsor: *** HendrickCars.com
+* ***start: *** 4
+* ***finish: *** 1
+* ***points: *** 56
+* ***lap: *** 1
+* ***lap_time: *** 76.753
+* ***lap_speed: *** 114.914
+* ***running_position: *** 4
+
+This row represents the lap 1 results for Kyle Larson, the driver of the #5 Hendrick Motorsports HendrickCars.com Chevrolet. This lap took him 76.753 seconds to complete, equaling an overall speed of approximately 114.914 miles per hour. As he crossed the start/finish line to complete this first lap, Larson was in 4th place.
+
+<br>
+</br>
+
+**DATA ANALYSIS**
+=======================================================================
+
+## **VARIABLE DESCRIPTIONS, STATISTICS, AND DISTRIBUTIONS**
+
+{.tabset .tabset-fade}
+-------------------------------
+
+```{r echo = FALSE}
+# Variable Descriptions
+data_dictionary <- c(car_number = "The driver's car number", 
+           driver = "The first and last name of the driver", 
+           manufacturer = "The make of the car",
+           start = "The position where the driver started the race", 
+           finish = "The position where the driver finished the race", 
+           lap = "The lap number in the race", 
+           lap_time = "The overall time of the lap (in seconds)", 
+           lap_speed = "The overall speed of the lap (in miles per hour)", 
+           running_position = "The position the driver was scored in for that lap",
+           team = "The motorsport team to which the driver belongs",
+           sponsor = "The driver's primary sponsor(s) of the driver's race car",
+           points = "The total number of points that the driver earned throughout the race"
+           )
+```
+
+### `car_number`
+
+**Description: ** `r data_dictionary["car_number"]`  
+**Data Type: ** `r typeof(Watkins_Glen$car_number)`  
+**Minimum: ** `r min(Watkins_Glen$car_number)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$car_number, 0.25)`  
+**Median: ** `r median(Watkins_Glen$car_number)`  
+**Mean: ** `r mean(Watkins_Glen$start)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$car_number, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$car_number)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$car_number, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Car Number", xlab = "Car Numbers")
+text(x = fivenum(Watkins_Glen$car_number), labels = fivenum(Watkins_Glen$car_number), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$car_number, main = "Distribution of Car Number", xlab = "Car Numbers")
+```
+
+The `car_number` variable is a unique identifier representing the number on the car which the driver used during the race. Looking at this variable's boxplot and histogram, it is evident that `car_number` is positively-skewed, as 31 drivers had car numbers below 50, compared to only 6 drivers having car numbers above 50.
+
+### `driver`
+
+**Description: ** `r data_dictionary["driver"]`  
+**Data Type: ** `r typeof(Watkins_Glen$driver)`   
+**Number of Unique Drivers: ** `r n_distinct(Watkins_Glen$driver)`  
+**Drivers: ** `r unique(Watkins_Glen$driver)`  
+
+
+### `manufacturer`
+
+**Description: ** `r data_dictionary["manufacturer"]`  
+**Data Type: ** `r typeof(Watkins_Glen$manufacturer)`    
+**Number of Unique Manufacturers: ** `r n_distinct(Watkins_Glen$manufacturer)`   
+**Manufacturers: ** `r unique(Watkins_Glen$manufacturer)`  
+
+```{r, echo = FALSE, warning = FALSE}
+# Bar Chart
+ggplot(data = manufacturer, aes(x = manufacturer %>% fct_infreq() %>% fct_rev())) + # Order of Frequency
+             geom_bar() +
+             coord_flip() +
+             geom_text(aes(label = ..count..), stat = "count", hjust = -0.5, colour = "black") +
+             labs(title = "Distribution of Manufacturers", subtitle = "", caption = paste("Sample Size:", nrow(manufacturer), ", ", "Missing Value Count: ", sum(is.na(manufacturer$manufacturer)))) + 
+             ylab("Frequency") +
+             xlab("Manufacturer")
+```
+
+The `manufacturer` variable represents the make of the car being raced. According to the bar chart, only three manufacturers participated in the race: Chevrolet, Toyota, and Ford. The chart also indicates that Chevrolet and Ford were equally matched, with each having 16 cars in the race. Toyota, on the other hand, was the minority, having just 5 cars compete in the race.
+
+### `team`
+
+**Description: ** `r data_dictionary["team"]`  
+**Data Type: ** `r typeof(Watkins_Glen$team)`   
+**Number of Unique Teams: ** `r n_distinct(Watkins_Glen$team)`  
+**Teams: ** `r unique(Watkins_Glen$team)` 
+
+```{r, echo = FALSE}
+# Bar Chart
+ggplot(data = team, aes(x = team %>% fct_infreq() %>% fct_rev())) + # Order of frequency
+             geom_bar() +
+             coord_flip() +
+             geom_text(aes(label = ..count..), stat = "count", hjust = -0.5, colour = "black") +
+             labs(title = "Distribution of Teams", subtitle = "", caption = paste("Sample Size:", nrow(team), ", ", "Missing Value Count: ", sum(is.na(team$team)))) + 
+             ylab("Frequency") +
+             xlab("Team")
+```
+
+The `team` variable represents the motorsport team that participated in the race. According to the bar chart, there were 19 teams that competed in the race. The number of cars per team ranged from 1 to 4. Interestingly enough, three teams (Hendrick Motorsports, Joe Gibbs Racing, and Stewart-Haas Racing) had a combined 12 cars participate, constituting nearly 33% of all cars in the race.
+
+### `sponsor`
+
+**Description: ** `r data_dictionary["sponsor"]`  
+**Data Type: ** `r typeof(Watkins_Glen$sponsor)`   
+**Number of Unique Sponsors: ** `r n_distinct(Watkins_Glen$sponsor)`  
+**Sponsors: ** `r unique(Watkins_Glen$sponsor)`  
+
+
+### `start`
+
+**Description: ** `r data_dictionary["start"]`  
+**Data Type: ** `r typeof(Watkins_Glen$start)`   
+**Minimum: ** `r min(Watkins_Glen$start)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$start, 0.25)`  
+**Median: ** `r median(Watkins_Glen$start)`  
+**Mean: ** `r mean(Watkins_Glen$start)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$start, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$start)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$start, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Starting Position", xlab = "Starting Position")
+text(x = fivenum(Watkins_Glen$start), labels = fivenum(Watkins_Glen$start), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$start, main = "Distribution of Starting Position", xlab = "Starting Position")
+```
+
+The `start` variable represents the driver's starting position in the race. The boxplot and histogram indicate that this variable is unimodal, symmetric, and normally distributed. This should not be of much surprise, as each starting position can only be unique to one driver.
+
+### `finish`
+
+**Description: ** `r data_dictionary["finish"]`  
+**Data Type: ** `r typeof(Watkins_Glen$finish)`   
+**Minimum: ** `r min(Watkins_Glen$finish)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$finish, 0.25)`  
+**Median: ** `r median(Watkins_Glen$finish)`  
+**Mean: ** `r mean(Watkins_Glen$finish)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$finish, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$finish)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$finish, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Finishing Position", xlab = "Finishing Position")
+text(x = fivenum(Watkins_Glen$finish), labels = fivenum(Watkins_Glen$finish), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$finish, main = "Distribution of Finishing Position", xlab = "Finishing Position")
+```
+
+The `finish` variable represents the driver's finishing position in the race. The boxplot and histogram indicate that this variable is unimodal, symmetric, and normally distributed. This should not be of much surprise, as each finishing position can only be unique to one driver.
+
+### `points`
+
+**Description: ** `r data_dictionary["points"]`  
+**Data Type: ** `r typeof(Watkins_Glen$points)`  
+**Minimum: ** `r min(Watkins_Glen$points)`    
+**1st Quartile: ** `r quantile(Watkins_Glen$points, 0.25)`  
+**Median: ** `r median(Watkins_Glen$points)`  
+**Mean: ** `r round(mean(Watkins_Glen$points), digits = 2)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$points, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$points)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$points, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Points Earned", xlab = "Points")
+text(x = fivenum(Watkins_Glen$points), labels = fivenum(Watkins_Glen$points), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$points, main = "Distribution of Points Earned", xlab = "Points")
+```
+
+The `points` variable represents the total number of points that the driver earned during the race. Each race is broken into three stages: Stage 1, Stage 2, and the Final Stage. Drivers are eligible to receive points for their performances in Stages 1 and 2. Drivers running 1st through 10th at the conclusion of Stages 1 and 2 will receive points, starting with 10 points for 1st place, 9 points for 2nd place, down to 1 point for 10th place. Following the Final Stage, the driver in 1st (the race winner) receives 40 points, 2nd place 35, 3rd place 34, 4th place 33, and so on on a 35-to-2 scale. Those finishing 36th or greater are awarded 1 point. Points earned in Stages 1 and 2 are then added to what drivers earn after the Final Stage, summing to the total number of points earned during the race.
+
+Looking at the boxplot and histogram for `points`, this variable appears to be positively-skewed, as the mean of 20.86 points is slightly greater than the median of 20 points. This distribution can likely be explained by the 5-point differential that 1st place has over 2nd place in Final Stage scoring, compared to just a 1-point advantage between all other neighboring finishing positions.
+
+### `lap`
+
+**Description: ** `r data_dictionary["lap"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap)`   
+**Minimum: ** `r min(Watkins_Glen$lap)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$lap, 0.25)`  
+**Median: ** `r median(Watkins_Glen$lap)`  
+**Mean: ** `r mean(Watkins_Glen$lap)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$lap, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$lap)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Laps", xlab = "Lap Number")
+text(x = fivenum(Watkins_Glen$lap), labels = fivenum(Watkins_Glen$lap), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$lap, main = "Distribution of Laps", xlab = "Lap Number")
+```
+
+The `lap` variable represents the lap number in the race. The boxplot and histogram indicate that this variable is unimodal, symmetric, and normally distributed. Such a distribution is to be expected, as each lap had a total of 37 observations for each driver that competed.
+
+### `lap_time`
+
+**Description: ** `r data_dictionary["lap_time"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap_time)`   
+**Minimum: ** `r round(min(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**1st Quartile: ** `r round(quantile(Watkins_Glen$lap_time, 0.25, na.rm = TRUE), digits = 2)`  
+**Median: ** `r round(median(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**Mean: ** `r round(mean(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**3rd Quartile: ** `r round(quantile(Watkins_Glen$lap_time, 0.75, na.rm = TRUE), digits = 2)`  
+**Maximum: ** `r round(max(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap_time, horizontal = TRUE, col = "grey", add = FALSE, outline = FALSE, main = "Distribution of Lap Times", xlab = "Lap Time (in Seconds)")
+
+# Histogram
+hist(Watkins_Glen$lap_time, main = "Distribution of Lap Times", xlab = "Lap Time (in Seconds)")
+```
+
+The `lap_time` variable represents the overall time (in seconds) that it took the driver to complete a lap. Looking at the boxplot and histogram, this variable appears to be extremely positively skewed, as the mean of 88.93 seconds is significantly greater than the median of 75.83 seconds. This extreme skew can be explained by the cautions that occurred during the race. This race had a total of 4 cautions that lasted 6 laps. When a race is under caution, all cars are required to slow down and follow a pace car. The slow down causes their lap times to take much longer than if the race was under a green flag condition.
+
+**Note:** The boxplot was trimmed for outliers.
+
+### `lap_speed`
+
+**Description: ** `r data_dictionary["lap_speed"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap_speed)`   
+**Minimum: ** `r round(min(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**1st Quartile: ** `r round(quantile(Watkins_Glen$lap_speed, 0.25, na.rm = TRUE), digits = 2)`  
+**Median: ** `r round(median(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**Mean: ** `r round(mean(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**3rd Quartile: ** `r round(quantile(Watkins_Glen$lap_speed, 0.75, na.rm = TRUE), digits = 2)`  
+**Maximum: ** `r round(max(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap_speed, horizontal = TRUE, col = "grey", add = FALSE, outline = FALSE, main = "Distribution of Lap Speeds", xlab = "Lap Speed (mph)")
+
+# Histogram
+hist(Watkins_Glen$lap_speed, main = "Distribution of Lap Speeds", xlab = "Lap Speed (mph)")
+```
+
+The `lap_speed` variable represents the overall speed (in miles per hour) that it took the driver to complete a lap. Looking at the boxplot and histogram, this variable appears to be negatively skewed, as the mean of 108.08 miles per hour is significantly less than the median of 116.31 miles per hour. As with `lap_time`, this skew can also be explained by the cautions that occurred during the race. This race had a total of 4 cautions that lasted 6 laps. When a race is under caution, all cars are required to slow down and follow a pace car. The slow down causes their lap speeds to be much lower than if the race was under a green flag condition.
+
+**Note:** The boxplot was trimmed for outliers.
+
+### `running_position`
+
+**Description: ** `r data_dictionary["running_position"]`  
+**Data Type: ** `r typeof(Watkins_Glen$running_position)`   
+**Minimum: ** `r min(Watkins_Glen$running_position)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$running_position, 0.25)`  
+**Median: ** `r median(Watkins_Glen$running_position)`  
+**Mean: ** `r mean(Watkins_Glen$running_position)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$running_position, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$running_position)`
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$running_position, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Running Position", xlab = "Running Position")
+text(x = fivenum(Watkins_Glen$running_position), labels = fivenum(Watkins_Glen$running_position), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$running_position, main = "Distribution of Running Position", xlab = "Running Position")
+```
+
+The `running_position` variable represents the position in which a driver was scored on a given lap. The boxplot and histogram indicate that this variable is unimodal, symmetric, and normally distributed. Such a distribution is to be expected, as each running position per lap can only be unique to one driver.
+
+## **VARIABLE ANALYSIS**
+
+{.tabset .tabset-fade}
+-------------------------------
+
+### **Start vs. Finish**
+
+```{r Start vs Finish}
+# Correlation Coefficient
+cor_3 <- cor(Watkins_Glen$start, Watkins_Glen$finish)
+```
+
+```{r, echo = FALSE}
+print(cor_3)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_3 <- cor_3^2
+```
+
+```{r, echo = FALSE}
+print(rsq_3)
+```
+
+```{r}
+# Linear Model
+lmfit3 <- lm(finish ~ start, data = Watkins_Glen)
+summary(lmfit3)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Watkins_Glen, aes(x = start, y = finish)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Starting Position vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_3, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_3, digits = 2))) +
+  xlab("Starting Position") +
+  ylab("Finishing Position") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A simple linear regression was created using `start` as the lone predictor of `finish`. This yielded a regression equation of:
+
+<center>
+**`finish` = 6.76577 + 0.64391 x `start`**. 
+</center>
+<br>
+</br>
+6.76577 is the y-intercept ($\beta_0$). It represents a driver's finishing position when `start` ($\beta_1$) is equal to zero. The coefficient of the predictor, `start`, can be interpreted as a 0.64391 increase in finishing position for each additional positional increase in starting position.
+
+The null hypothesis was $H_0$ : $\beta$~start~ = 0, the alternative hypothesis was $H_A$ : $\beta$~start~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 2,357, and the p-value was 2.2 × 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 × 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~start~ is different from 0. 
+
+`start` and `finish` have a moderate, positive correlation coefficient of 0.6439071. The coefficient of determination between these two variables is 0.4146163, which means that approximately 41.46% of the variation in finishing position occurs because of changes in starting position. The weak predictive capability of `start` indicates there are many more variables which can explain the other 58.54% of variation in a driver's finishing position.
+
+
+### **Start vs. Points**
+
+```{r Starting Position vs Points}
+# Correlation Coefficient
+cor_1 <- cor(Watkins_Glen$start, Watkins_Glen$points)
+```
+
+```{r, echo = FALSE}
+print(cor_1)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_1 <- cor_1^2
+```
+
+```{r, echo = FALSE}
+print(rsq_1)
+```
+
+```{r}
+# Linear Model
+lmfit1 <- lm(points ~ start, data = Watkins_Glen)
+summary(lmfit1)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Watkins_Glen, aes(x = start, y = points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Starting Position vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_1, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_1, digits = 2))) +
+  xlab("Starting Position") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A simple linear regression was created using `start` as the lone predictor of `points`. This yielded a regression equation of:
+
+<center>
+**`points` = 38.4189 - 0.9239 x `start`**. 
+</center>
+<br>
+</br>
+38.4189 is the y-intercept ($\beta_0$). It represents the points a driver earns when `start` ($\beta_1$) is equal to zero. The coefficient of the predictor, `start`, can be interpreted as a 0.9239 decrease in points earned for each additional positional increase in starting position.
+
+The null hypothesis was $H_0$ : $\beta$~start~ = 0, the alternative hypothesis was $H_A$ : $\beta$~start~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 2,885, and the p-value was 2.2 × 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 × 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~start~ is different from 0. 
+
+`start` and `points` have a moderate, negative correlation coefficient of -0.6814047. The coefficient of determination between these two variables is 0.4643124, which means that approximately 46.43% of the variation in points earned occurs because of changes in starting position. The weak predictive capability of `start` indicates there are many more variables which can explain the other 53.57% of variation in the number of points that a driver earns.
+
+
+### **Average Speed vs. Points**
+
+```{r Average Speed vs. Points, warning = FALSE}
+# Average Speed per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean, na.rm = TRUE))
+Average_Speed <- arrange(select(by_driver, Driver, Average_Speed = lap_speed, Points = points), Points)
+```
+
+```{r}
+# Correlation Coefficient
+cor_7 <- cor(Average_Speed$Average_Speed, Average_Speed$Points)
+```
+
+```{r, echo = FALSE}
+print(cor_7)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_7 <- cor_7^2
+```
+
+```{r, echo = FALSE}
+print(rsq_7)
+```
+
+```{r}
+# Linear Model
+lmfit7 <- lm(Points ~ Average_Speed, data = Average_Speed)
+summary(lmfit7)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Speed, aes(x = Average_Speed, y = Points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Speed vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_7, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_7, digits = 2))) +
+  xlab("Average Speed (mph)") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A simple linear regression was created using `Average_Speed` as the lone predictor of `Points`. This yielded a regression equation of:
+
+<center>
+**`Points` = -802.8656 + 7.6282 x `Average_Speed`**. 
+</center>
+<br>
+</br>
+= -802.8656 is the y-intercept ($\beta_0$). It represents the number of points a driver earns when `Average_Speed` ($\beta_1$) is equal to zero. The coefficient of the predictor, `Average_Speed`, can be interpreted as a 7.6282 increase in points earned for each additional mile per hour increase in speed.
+
+The null hypothesis was $H_0$ : $\beta$~Average_Speed~ = 0, the alternative hypothesis was $H_A$ : $\beta$~Average_Speed~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 87.01, and the p-value was 5.072 × 10^-11^. Based on the results of the test, we reject the null hypothesis because the p-value of 5.072 × 10^-11^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~Average_Speed~ is different from 0. 
+
+`Average_Speed` and `Points` have an extremely strong, positive correlation coefficient of 0.8444691. The coefficient of determination between these two variables is 0.713128, which means that approximately 71.31% of the variation in points earned occurs because of changes in average speed. The moderate predictive capability of `Average_Speed` indicates there are several more variables which can explain the other 28.69% of variation in the number of points that a driver earns.
+
+
+### **Average Speed vs. Finish**
+
+```{r Finish vs. Average Speed, warning = FALSE}
+# Average Speed per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean, na.rm = TRUE))
+Average_Speed <- arrange(select(by_driver, Driver, Average_Speed = lap_speed, Finish = finish), Finish)
+```
+
+```{r}
+# Correlation Coefficient
+cor_5 <- cor(Average_Speed$Average_Speed, Average_Speed$Finish)
+```
+
+```{r, echo = FALSE}
+print(cor_5)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_5 <- cor_5^2
+```
+
+```{r, echo = FALSE}
+print(rsq_5)
+```
+
+```{r}
+# Linear Model
+lmfit5 <- lm(Finish ~ Average_Speed, data = Average_Speed)
+summary(lmfit5)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Speed, aes(x = Finish, y = Average_Speed)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Speed vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_5, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_5, digits = 2))) +
+  xlab("Finishing Position") +
+  ylab("Average Speed (mph)") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A simple linear regression was created using `Average_Speed` as the lone predictor of `Finish`. This yielded a regression equation of:
+
+<center>
+**`Finish` = 647.3762 - 5.8191 x `Average_Speed`**. 
+</center>
+<br>
+</br>
+647.3762 is the y-intercept ($\beta_0$). It represents a driver's finishing position when `Average_Speed` ($\beta_1$) is equal to zero. The coefficient of the predictor, `Average_Speed`, can be interpreted as a 5.8191 decrease in finishing position for each additional mile per hour increase in speed.
+
+The null hypothesis was $H_0$ : $\beta$~Average_Speed~ = 0, the alternative hypothesis was $H_A$ : $\beta$~Average_Speed~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 112.6, and the p-value was 1.75 × 10^-12^. Based on the results of the test, we reject the null hypothesis because the p-value of 1.75 × 10^-12^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~Average_Speed~ is different from 0. 
+
+`Average_Speed` and `Finish` have an extremely strong, negative correlation coefficient of -0.8734479. The coefficient of determination between these two variables is 0.7629112, which means that approximately 76.29% of the variation in finishing position occurs because of changes in average speed. The moderate predictive capability of `Average_Speed` indicates there are several more variables which can explain the other 23.71% of variation in a driver's finishing position.
+
+
+### **Average Running Position vs. Finish**
+
+```{r, warning = FALSE}
+# Average Running Position per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean))
+Average_Running_Position <- arrange(select(by_driver, Driver, Average_Running_Position = running_position, Finish = finish), Finish)
+```
+
+```{r}
+# Correlation Coefficient
+cor_4 <- cor(Average_Running_Position$Average_Running_Position, Average_Running_Position$Finish)
+```
+
+```{r, echo = FALSE}
+print(cor_4)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_4 <- cor_4^2
+```
+
+```{r, echo = FALSE}
+print(rsq_4)
+```
+
+```{r}
+# Linear Model
+lmfit4 <- lm(Finish ~ Average_Running_Position, data = Average_Running_Position)
+summary(lmfit4)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Running_Position, aes(x = Average_Running_Position, y = Finish)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Running Position vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_4, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_4, digits = 2))) +
+  xlab("Average Running Position") +
+  ylab("Finishing Position") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The average running position is an interesting key performance indicator (KPI) in that it is reflective of a driver's entire race, not just where they finished. It is calculated for each driver by summing their running positions for each lap dividing them by the total number of laps.
+
+A simple linear regression was created using `Average_Running_Position` as the lone predictor of `Finish`. This yielded a regression equation of:
+
+<center>
+**`Finish` = -3.556 + 1.187 x `Average_Running_Position`**. 
+</center>
+<br>
+</br>
+-3.556 is the y-intercept ($\beta_0$). It represents a driver's finishing position when Average_Running_Position ($\beta_1$) is equal to zero. The coefficient of the predictor, `Average_Running_Position`, can be interpreted as a 1.187 increase in finishing position for each additional positional increase in average running position.
+
+The null hypothesis was $H_0$ : $\beta$~Average_Running_Position~ = 0, the alternative hypothesis was $H_A$ : $\beta$~Average_Running_Position~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 279.6, and the p-value was 2.2 × 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 × 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~Average_Running_Position~ is different from 0. 
+
+`Average_Running_Position` and `Finish` have an extremely strong, positive correlation coefficient of 0.9427343. The coefficient of determination between these two variables is 0.8887479, which means that approximately 88.87% of the variation in finishing position occurs because of changes in average running position. The high predictive capability of `Average_Running_Position` indicates there are likely only a few more variables which can explain the other 11.13% of variation in a driver's finishing position.
+
+
+### **Average Running Position vs. Points**
+
+```{r, warning = FALSE}
+# Average Running Position per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean))
+Average_Running_Position <- arrange(select(by_driver, Driver, Average_Running_Position = running_position, Points = points), Points)
+```
+
+```{r}
+# Correlation Coefficient
+cor_9 <- cor(Average_Running_Position$Average_Running_Position, Average_Running_Position$Points)
+```
+
+```{r, echo = FALSE}
+print(cor_9)
+```
+
+```{r}
+# Coefficient of Determination
+rsq_9 <- cor_9^2
+```
+
+```{r, echo = FALSE}
+print(rsq_9)
+```
+
+```{r}
+# Linear Model
+lmfit9 <- lm(Points ~ Average_Running_Position, data = Average_Running_Position)
+summary(lmfit9)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Running_Position, aes(x = Average_Running_Position, y = Points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Running Position vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_9, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_9, digits = 2))) +
+  xlab("Average Running Position") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+A simple linear regression was created using `Average_Running_Position` as the lone predictor of `Points`. This yielded a regression equation of:
+
+<center>
+**`Points` = 51.498 - 1.612 x `Average_Running_Position`**. 
+</center>
+<br>
+</br>
+51.498 is the y-intercept ($\beta_0$). It represents the number of points a driver earns when Average_Running_Position ($\beta_1$) is equal to zero. The coefficient of the predictor, `Average_Running_Position`, can be interpreted as a 1.612 decrease in points earned for each additional positional increase in average running position.
+
+The null hypothesis was $H_0$ : $\beta$~Average_Running_Position~ = 0, the alternative hypothesis was $H_A$ : $\beta$~Average_Running_Position~ $\ne$ 0, the confidence level was 95% ($\alpha$ = 0.05), the F-statistic was 288, and the p-value was 2.2 × 10^-16^. Based on the results of the test, we reject the null hypothesis because the p-value of 2.2 × 10^-16^ is less than the alpha of 0.05. There is statistically significant evidence that suggests $\beta$~Average_Running_Position~ is different from 0. 
+
+`Average_Running_Position` and `Points` have an extremely strong, negative correlation coefficient of -0.9442708. The coefficient of determination between these two variables is 0.8916473, which means that approximately 89.16% of the variation in points earned occurs because of changes in average running position. The high predictive capability of `Average_Running_Position` indicates there are likely only a few more variables which can explain the other 10.84% of variation in the number of points that a driver earns.
+
+<br>
+</br>
+
+
+**CONCLUSION**
+=======================================================================
+
+## **SUMMARY**
+The overarching question for this analysis was "Which factors best explain driver success on the race track?, with success being defined in terms of finishing position and points earned. After some investigation, it is evident that the top factors explaining success are average speed and average running position. Average speed had the second best correlation coefficients for any variable, with values of -0.87 and 0.84 for finishing position and points earned, respectively. Average speed also had the second best coefficients of determination out of any variables, with values of 0.76 and 0.71 for finishing position and points earned, respectively. Average running position had the best correlation coefficients for any variable, with values of 0.94 and -0.94 for finishing position and points earned, respectively. Average running position also had the best coefficients of determination out of any variables, with values of 0.89 and 0.89 for finishing position and points earned, respectively.
+
+Although these two variables had extremely high correlations and R-squares, the results of the inferential analysis and hypothesis tests were a bit alarming. In every hypothesis test, the null hypothesis was rejected, meaning there was statistically significant evidence that suggested $\beta_1$ was different from 0. This was true whether $\beta_1$ was the starting position, average speed, or average running position. The implications of these results indicated that no lone predictor that was useful in predicting the response. Therefore, a simple linear regression was not an appropriate model to use in this data set.
+
+
+## **LIMITATIONS**
+The first limitation of this analysis was that it was conducted on a relatively small sample size. The data in this analysis was representative of only one of the thirty-six races that occurred during the 2021 NASCAR Cup Series season. At ninety laps total, this race also had the fewest number of scheduled laps for any race during the season. Having a smaller sample size made the central limit theorem less applicable to the data, as it was not as reasonable to assume normality or equal variance in the data. Something else worth noting is that this specific race took place on a road course. Therefore, the findings of this study likely aren't useful in assessing driver success at other types of tracks, such as short tracks, intermediate tracks, and superspeedways. The final limitation of this analysis is the season and time of day in which the race occurred. This race occurred on a sunny summer day, which means that the track was hotter and slicker than usual, making for less grip, worse handling, and a looser driving condition in the car. It would not be ideal to use this data to predict results in a race occurring during a different season and/or time of day.
+
+
+## **NEXT STEPS**
+This analysis could be improved by conducting a multiple linear regression to determine whether more than one variable is better at predicting driver success. It would be interesting to explore whether combining variables like average speed and average running position would improve the correlations and coefficients of determination for finishing position and points earned. It would also be interesting to conduct hypothesis testing on these multiple linear regressions to determine if the null hypothesis instead failed to be rejected. Such results could indicate that a multiple linear regression would be a more appropriate model to use on this data set. In conducting a multiple linear regression, it would be important to also conduct tests for multicollinearity and variance inflation factors in the predictor variables. Finally, this analysis could also be improved by applying the models to different races altogether to determine whether the same findings are prevalent. Making an adjustment like this would prove the analysis to be more scalable and robust.
+
+## **ABOUT THE AUTHOR**
+<center>
+![](https://media-exp1.licdn.com/dms/image/C4D03AQFl-x-ObCHTjg/profile-displayphoto-shrink_200_200/0/1548613993106?e=2147483647&v=beta&t=YF0k2vVw4UfVUXdKrAwRYORNzuLMp5DQZRq56nJYC0g)
+</center>
+
+**Blake Pappas** is a Lead Operations Analyst at Techtronic Industries (TTI). He graduated from Anderson University in 2021 with a Bachelors of Science in Financial Analysis. Blake currently attends Clemson University, where he is a graduate student in their Data Science and Analytics program. Born and raised in Egg Harbor Township, NJ, Blake is the youngest of five children. His favorite hobbies consist of running, reading, and sports. He has hopes to one day start his own consulting company that specializes in data analytics and information engineering for small businesses. He lives in Mauldin, SC.
+
+
+```{r, include = FALSE}
+# ![](https://1000logos.net/wp-content/uploads/2017/03/Nascar-logo.jpg)
+# ![](https://www.theglen.com/wp-content/uploads/sites/1009/2021/01/13/WGI-light-logo.jpg)
+```
+
+## **REFERENCES**
+1. “2021 Go Bowling at The Glen.” Racing Reference, https://www.racing-reference.info/race-results/2021_Go_Bowling_at_the_Glen/W/. Accessed 13 October 2022.
+2. “2021 NASCAR Cup Series Results.” Jayski, https://www.jayski.com/nascar-cup-series/2021-nascar-cup-series-results/. Accessed 13 October 2022.
+3. “Go Bowling at The Glen: Race Recap.” NASCAR, https://www.nascar.com/results/racecenter/2021/nascar-cup-series/go-bowling-at-the-glen/stn/recap/. Accessed 12 October 2022.
+4. Pfitzner, Barry C.  & Rishel, Tracy D. “Do Reliable Predictors Exist for the Outcomes of NASCAR Races?” The Sport Journal, https://thesportjournal.org/article/do-reliable-predictors-exist-for-the-outcomes-of-nascar-races/. Accessed 13 October 2022.
+5. “Watkins Glen International: Home.” Watkins Glen International, https://www.theglen.com/. Accessed 7 October 2022.
+6. "Watkins Glen International Road Course." syracuse.com, https://www.syracuse.com/resizer/7S15ydIrlyYui3a5L2adL0L4X4k=/800x0/smart/cloudfront-us-east-1.images.arcpublishing.com/advancelocal/2ZJLQZ7J4ZGNXF3XKLWDAMPNPQ.jpeg. Accessed 15 October 2022.

@@ -1,0 +1,129 @@
+---
+title: "R Markdown with Shiny"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+runtime: shiny
+---
+
+```{r, include = FALSE}
+library(tidyverse)
+Watkins_Glen <- read_csv("2021_Watkins_Glen.csv")
+```
+
+Inputs {.sidebar}
+------------------------------------
+### WATKINS GLEN DATA
+```{r}
+# Select a Variable
+selectInput(inputId = 'Variable', 
+            label = 'Select a variable from the data dictionary:', 
+            choices = names(Watkins_Glen))
+```
+
+### LINE GRAPH INPUTS
+```{r}
+Watkins_Glen_Lap <- select(Watkins_Glen, lap)
+Watkins_Glen_KPI <- select(Watkins_Glen, lap_time, lap_speed, running_position)
+selectInput(inputId = 'x_axis', 
+            label = 'Select a variable for the x-axis:', 
+            choices = names(Watkins_Glen_Lap))
+
+selectInput(inputId = 'y_axis', 
+            label = 'Select a variable for the y-axis:', 
+            choices = names(Watkins_Glen_KPI))
+```
+
+### HISTOGRAM INPUTS
+```{r}
+# Select a Variable
+selectInput(inputId = 'Histogram', 
+            label = 'Select a variable for the histogram:', 
+            choices = names(Watkins_Glen_KPI))
+```
+
+### SCATTER PLOT INPUTS
+```{r}
+# Select a Variable
+selectInput(inputId = 'Scatter_x', 
+            label = 'Select a variable for the x-axis:', 
+            choices = names(Watkins_Glen_KPI))
+
+selectInput(inputId = 'Scatter_y', 
+            label = 'Select a variable for the y-axis:', 
+            choices = names(Watkins_Glen_KPI))
+
+sliderInput(inputId = 'marker', 
+            label = 'Select a marker type:',
+            min = 0, max = 25, value = 19)
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### DATA DESCRIPTION
+```{r, echo = FALSE}
+# Data Dictionary
+descr <- c(car_number = "The driver's car number", 
+           driver = "The first and last name of the driver", 
+           manufacturer = "The make of the car", 
+           finish = "The position where the driver finished the race", 
+           lap = "The lap number in the race", 
+           lap_time = "The overall time of the lap (in seconds)", 
+           lap_speed = "The overall speed of the lap (in miles per hour)", 
+           running_position = "The position the driver was scored in for that lap"
+           )
+```
+
+```{r}
+# Data Description
+renderUI({
+  Descr <- "ABOUT THE DATA:" 
+  Info <- "This data comes from the August 8, 2021 NASCAR Cup Series race at the Watkins Glen International Road Course. It highlights eight key fields of race data for driver Martin Truex Jr."
+  varsel <- paste("VARIABLE:", input$Variable)
+  vardesc <- paste("DESCRIPTION:", descr[input$Variable])
+  bl <- paste(" ")
+  
+  HTML(paste(Descr, Info, bl, varsel, vardesc, sep = '<br/>'))
+})
+```
+
+### DATA TABLE
+```{r, warning = FALSE}
+library(htmlwidgets)
+library(DT)
+
+datatable(head(Watkins_Glen,100),
+          rownames = FALSE,
+          filter = 'top')
+```
+
+Column {.tabset data-width=350}
+-----------------------------------------------------------------------
+
+### LINE GRAPH 
+```{r}
+# Create Line Graphs from the Inputs
+renderPlot(ggplot(Watkins_Glen, 
+                  aes_string(x = input$x_axis, y = input$y_axis)) + 
+             geom_line(color = "orange", size = 2))
+```
+
+### HISTOGRAM
+```{r}
+# Create Histograms from the Inputs
+renderPlot(ggplot(Watkins_Glen, 
+                  aes_string(x = input$Histogram)) + 
+  geom_histogram(fill = "orange", col = "black"))
+```
+
+### SCATTERPLOT
+```{r}
+# Create Scatterplots from the Inputs
+renderPlot(ggplot(Watkins_Glen, 
+                  aes_string(x = input$Scatter_x, y = input$Scatter_y)) + 
+  geom_point(fill = "orange", color = "orange", size = 5, pch = input$marker))
+```

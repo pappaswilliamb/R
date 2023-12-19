@@ -1,0 +1,653 @@
+---
+author: "Blake Pappas"
+title: "NASCAR Racing: More Than Just Driving Fast and Turning Left?"
+date: "17 October 2022"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    code_download: true
+    source_code: embed
+  runtime: shiny
+---
+```{r, include = FALSE, warning = FALSE}
+# Import All Appropriate Libraries and Packages
+library(rmarkdown) # Needed to create the flex dashboard
+library(ggplot2) # Needed to plot the graphs
+library(tidyverse) # Needed to tidy the data
+library(DT) # Needed to show a condensed version of what the final data looks like
+library(knitr) # Needed to knit the underlying data into a PDF
+library(htmlwidgets) # Needed to place the data frame as HTML content into the flex dashboard
+```
+
+```{r, include = FALSE}
+# Data Importation and Tidying
+race <- read_csv("race.csv")
+team <- read_csv("team.csv")
+sponsor <- read_csv("sponsor.csv")
+points <- read_csv("points.csv")
+manufacturer <- read_csv("manufacturer.csv")
+driver <- read_csv("driver.csv")
+
+# Joining All Data Sources Into a Single Data Frame
+Watkins_Glen <- race %>%
+  left_join(team, by = "car_number") %>%
+  left_join(sponsor, by = "car_number") %>%
+  left_join(points, by = "car_number") %>%
+  left_join(manufacturer, by = "car_number") %>%
+  left_join(driver, by = "car_number")
+
+# Reorder the Columns
+Watkins_Glen <- select(Watkins_Glen, car_number, driver, manufacturer, team, sponsor, start, finish, points, lap, lap_time, lap_speed, running_position)
+```
+
+
+About
+=======================================================================
+
+<center>
+![](https://www.syracuse.com/resizer/7S15ydIrlyYui3a5L2adL0L4X4k=/800x0/smart/cloudfront-us-east-1.images.arcpublishing.com/advancelocal/2ZJLQZ7J4ZGNXF3XKLWDAMPNPQ.jpeg){width=50%}
+</center>
+<br>
+</br>
+**The National Association for Stock Car Auto Racing (NASCAR) is the largest auto racing sanctioning body in the United States. Each year, NASCAR organizes hundreds of races across 48 states, as well as in Canada, Mexico, and Europe. Known worldwide for its colorful paint schemes, banked turns, high speeds, and aggressive racing style, the sport has evolved greatly throughout its 74-year history.**
+
+**In recent years, NASCAR has imposed new rules and regulations regarding how teams may build and operate their cars, so much so that many critics of the sport have argued that it’s now easier than ever to be successful. Can driver success be defined by more than merely going fast and turning left?**
+
+**The following analysis examines data collected from the 2021 NASCAR Cup Series race at the Watkins Glen International road course. The goal of this analysis is to determine which factors go about best explaining success on the race track. For the context of this analysis, success will be evaluated by finishing position and points earned. The lower the finishing position, the better the driver performed. The more points earned, the better the driver performed.**
+
+
+Row {data-height = 600, .tabset .tabset-fade}
+-------------------------------
+
+Data
+=======================================================================
+
+Row {data-height=400}
+-------------------------------
+
+### **CONDENSED DATA TABLE**
+
+```{r}
+renderDataTable(paged_table(Watkins_Glen))
+```
+
+
+Row {data-height = 500, .tabset .tabset-fade}
+-------------------------------
+
+#### **VARIABLE DESCRIPTIONS, STATISTICS, AND DISTRIBUTIONS**
+
+```{r echo = FALSE}
+# Variable Descriptions
+data_dictionary <- c(car_number = "The driver's car number", 
+           driver = "The first and last name of the driver", 
+           manufacturer = "The make of the car",
+           start = "The position where the driver started the race", 
+           finish = "The position where the driver finished the race", 
+           lap = "The lap number in the race", 
+           lap_time = "The overall time of the lap (in seconds)", 
+           lap_speed = "The overall speed of the lap (in miles per hour)", 
+           running_position = "The position the driver was scored in for that lap",
+           team = "The motorsport team to which the driver belongs",
+           sponsor = "The driver's primary sponsor(s) of their race car",
+           points = "The total number of points that the driver earned throughout the race"
+           )
+```
+
+### **`car_number`**  
+
+**Description: ** `r data_dictionary["car_number"]`  
+**Data Type: ** `r typeof(Watkins_Glen$car_number)`   
+**Minimum: ** `r min(Watkins_Glen$car_number)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$car_number, 0.25)`  
+**Median: ** `r median(Watkins_Glen$car_number)`  
+**Mean: ** `r mean(Watkins_Glen$start)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$car_number, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$car_number)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$car_number, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Car Number", xlab = "Car Numbers")
+text(x = fivenum(Watkins_Glen$car_number), labels = fivenum(Watkins_Glen$car_number), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$car_number, main = "Distribution of Car Number", xlab = "Car Numbers")
+```
+
+
+### **`driver`**  
+
+**Description: ** `r data_dictionary["driver"]`  
+**Data Type: ** `r typeof(Watkins_Glen$driver)`   
+**Number of Unique Drivers: ** `r n_distinct(Watkins_Glen$driver)`  
+**Drivers: ** `r unique(Watkins_Glen$driver)`  
+
+```{r}
+
+```
+
+
+### **`manufacturer`**  
+
+**Description: ** `r data_dictionary["manufacturer"]`  
+**Data Type: ** `r typeof(Watkins_Glen$manufacturer)`    
+**Number of Unique Manufacturers: ** `r n_distinct(Watkins_Glen$manufacturer)`   
+**Manufacturers: ** `r unique(Watkins_Glen$manufacturer)`  
+
+```{r, warning = FALSE}
+# Bar Chart
+ggplot(data = manufacturer, aes(x = manufacturer %>% fct_infreq() %>% fct_rev())) + # Order of Frequency
+             geom_bar() +
+             coord_flip() +
+             geom_text(aes(label = ..count..), stat = "count", hjust = -0.5, colour = "black") +
+             labs(title = "Distribution of Manufacturers", subtitle = "", caption = paste("Sample Size:", nrow(manufacturer), ", ", "Missing Value Count: ", sum(is.na(manufacturer$manufacturer)))) + 
+             ylab("Frequency") +
+             xlab("Manufacturer")
+```
+
+### **`team`**
+
+**Description: ** `r data_dictionary["team"]`  
+**Data Type: ** `r typeof(Watkins_Glen$team)`   
+**Number of Unique Teams: ** `r n_distinct(Watkins_Glen$team)`  
+
+```{r}
+# Bar Chart
+ggplot(data = team, aes(x = team %>% fct_infreq() %>% fct_rev())) + # Order of frequency
+             geom_bar() +
+             coord_flip() +
+             geom_text(aes(label = ..count..), stat = "count", hjust = -0.5, colour = "black") +
+             labs(title = "Distribution of Teams", subtitle = "", caption = paste("Sample Size:", nrow(team), ", ", "Missing Value Count: ", sum(is.na(team$team)))) + 
+             ylab("Frequency") +
+             xlab("Team")
+```
+
+### **`sponsor`**
+
+**Description: ** `r data_dictionary["sponsor"]`  
+**Data Type: ** `r typeof(Watkins_Glen$sponsor)`   
+**Number of Unique Sponsors: ** `r n_distinct(Watkins_Glen$sponsor)`  
+**Sponsors: ** `r unique(Watkins_Glen$sponsor)`  
+
+```{r}
+
+```
+
+### **`start`**
+
+**Description: ** `r data_dictionary["start"]`  
+**Data Type: ** `r typeof(Watkins_Glen$start)`   
+**Minimum: ** `r min(Watkins_Glen$start)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$start, 0.25)`  
+**Median: ** `r median(Watkins_Glen$start)`  
+**Mean: ** `r mean(Watkins_Glen$start)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$start, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$start)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$start, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Starting Position", xlab = "Starting Position")
+text(x = fivenum(Watkins_Glen$start), labels = fivenum(Watkins_Glen$start), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$start, main = "Distribution of Starting Position", xlab = "Starting Position")
+```
+
+### **`finish`**
+
+**Description: ** `r data_dictionary["finish"]`  
+**Data Type: ** `r typeof(Watkins_Glen$finish)`   
+**Minimum: ** `r min(Watkins_Glen$finish)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$finish, 0.25)`  
+**Median: ** `r median(Watkins_Glen$finish)`  
+**Mean: ** `r mean(Watkins_Glen$finish)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$finish, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$finish)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$finish, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Finishing Position", xlab = "Finishing Position")
+text(x = fivenum(Watkins_Glen$finish), labels = fivenum(Watkins_Glen$finish), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$finish, main = "Distribution of Finishing Position", xlab = "Finishing Position")
+```
+
+### **`points`**
+
+**Description: ** `r data_dictionary["points"]`  
+**Data Type: ** `r typeof(Watkins_Glen$points)`  
+**Minimum: ** `r min(Watkins_Glen$points)`    
+**1st Quartile: ** `r quantile(Watkins_Glen$points, 0.25)`  
+**Median: ** `r median(Watkins_Glen$points)`  
+**Mean: ** `r round(mean(Watkins_Glen$points), digits = 2)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$points, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$points)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$points, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Points Earned", xlab = "Points")
+text(x = fivenum(Watkins_Glen$points), labels = fivenum(Watkins_Glen$points), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$points, main = "Distribution of Points Earned", xlab = "Points")
+```
+
+### **`lap`**
+
+**Description: ** `r data_dictionary["lap"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap)`   
+**Minimum: ** `r min(Watkins_Glen$lap)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$lap, 0.25)`  
+**Median: ** `r median(Watkins_Glen$lap)`  
+**Mean: ** `r mean(Watkins_Glen$lap)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$lap, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$lap)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Laps", xlab = "Lap Number")
+text(x = fivenum(Watkins_Glen$lap), labels = fivenum(Watkins_Glen$lap), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$lap, main = "Distribution of Laps", xlab = "Lap Number")
+```
+
+### **`lap_time`**
+
+**Description: ** `r data_dictionary["lap_time"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap_time)`   
+**Minimum: ** `r round(min(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**1st Quartile: ** `r round(quantile(Watkins_Glen$lap_time, 0.25, na.rm = TRUE), digits = 2)`  
+**Median: ** `r round(median(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**Mean: ** `r round(mean(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`  
+**3rd Quartile: ** `r round(quantile(Watkins_Glen$lap_time, 0.75, na.rm = TRUE), digits = 2)`  
+**Maximum: ** `r round(max(Watkins_Glen$lap_time, na.rm = TRUE), digits = 2)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap_time, horizontal = TRUE, col = "grey", add = FALSE, outline = FALSE, main = "Distribution of Lap Times", xlab = "Lap Time (in Seconds)")
+
+# Histogram
+hist(Watkins_Glen$lap_time, main = "Distribution of Lap Times", xlab = "Lap Time (in Seconds)")
+```
+
+### **`lap_speed`**
+
+**Description: ** `r data_dictionary["lap_speed"]`  
+**Data Type: ** `r typeof(Watkins_Glen$lap_speed)`   
+**Minimum: ** `r round(min(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**1st Quartile: ** `r round(quantile(Watkins_Glen$lap_speed, 0.25, na.rm = TRUE), digits = 2)`  
+**Median: ** `r round(median(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**Mean: ** `r round(mean(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`  
+**3rd Quartile: ** `r round(quantile(Watkins_Glen$lap_speed, 0.75, na.rm = TRUE), digits = 2)`  
+**Maximum: ** `r round(max(Watkins_Glen$lap_speed, na.rm = TRUE), digits = 2)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$lap_speed, horizontal = TRUE, col = "grey", add = FALSE, outline = FALSE, main = "Distribution of Lap Speeds", xlab = "Lap Speed (mph)")
+
+# Histogram
+hist(Watkins_Glen$lap_speed, main = "Distribution of Lap Speeds", xlab = "Lap Speed (mph)")
+```
+
+### **`running_position`**
+
+**Description: ** `r data_dictionary["running_position"]`  
+**Data Type: ** `r typeof(Watkins_Glen$running_position)`   
+**Minimum: ** `r min(Watkins_Glen$running_position)`  
+**1st Quartile: ** `r quantile(Watkins_Glen$running_position, 0.25)`  
+**Median: ** `r median(Watkins_Glen$running_position)`  
+**Mean: ** `r mean(Watkins_Glen$running_position)`  
+**3rd Quartile: ** `r quantile(Watkins_Glen$running_position, 0.75)`  
+**Maximum: ** `r max(Watkins_Glen$running_position)`
+
+```{r}
+par(mfrow = c(2, 1))
+
+# Boxplot
+boxplot(Watkins_Glen$running_position, horizontal = TRUE, range = 0, axes = FALSE, col = "grey", add = FALSE, staplewex = 1, main = "Distribution of Running Position", xlab = "Running Position")
+text(x = fivenum(Watkins_Glen$running_position), labels = fivenum(Watkins_Glen$running_position), y = 1.4)
+
+# Histogram
+hist(Watkins_Glen$running_position, main = "Distribution of Running Position", xlab = "Running Position")
+```
+
+
+Analysis
+=======================================================================
+
+Row {data-height = 600, .tabset .tabset-fade}
+-------------------------------
+
+### **Start vs. Finish**
+
+**Regression Equation: ** `finish` = 6.76577 + 0.64391 x `start`  
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~start~ = 0    
+**$H_A$: ** $\beta$~start~ $\ne$ 0       
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 2,357    
+**p-value: ** 2.2 × 10^-16^    
+**Conclusion: ** Reject $H_0$  
+
+```{r Start vs Finish, include = FALSE}
+# Correlation Coefficient
+cor_3 <- cor(Watkins_Glen$start, Watkins_Glen$finish)
+```
+
+```{r, include = FALSE}
+print(cor_3)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_3 <- cor_3^2
+```
+
+```{r, include = FALSE}
+print(rsq_3)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit3 <- lm(finish ~ start, data = Watkins_Glen)
+summary(lmfit3)
+```
+
+```{r, warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Watkins_Glen, aes(x = start, y = finish)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Starting Position vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_3, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_3, digits = 2))) +
+  xlab("Starting Position") +
+  ylab("Finishing Position") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### **Start vs. Points**
+
+**Regression Equation: ** `points` = 38.4189 - 0.9239 x `start`  
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~start~ = 0    
+**$H_A$: ** $\beta$~start~ $\ne$ 0       
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 2,885    
+**p-value: ** 2.2 × 10^-16^    
+**Conclusion: ** Reject $H_0$
+
+```{r Starting Position vs Points, include = FALSE}
+# Correlation Coefficient
+cor_1 <- cor(Watkins_Glen$start, Watkins_Glen$points)
+```
+
+```{r, include = FALSE}
+print(cor_1)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_1 <- cor_1^2
+```
+
+```{r, include = FALSE}
+print(rsq_1)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit1 <- lm(points ~ start, data = Watkins_Glen)
+summary(lmfit1)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Watkins_Glen, aes(x = start, y = points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Starting Position vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_1, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_1, digits = 2))) +
+  xlab("Starting Position") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### **Average Speed vs. Points**
+
+**Regression Equation: ** `Points` = -802.8656 + 7.6282 x `Average_Speed` 
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~Average_Speed~ = 0    
+**$H_A$: ** $\beta$~Average_Speed~ $\ne$ 0       
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 87.01    
+**p-value: ** 5.072 × 10^-11^     
+**Conclusion: ** Reject $H_0$
+
+```{r Average Speed vs. Points, include = FALSE}
+# Average Speed per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean, na.rm = TRUE))
+Average_Speed <- arrange(select(by_driver, Driver, Average_Speed = lap_speed, Points = points), Points)
+```
+
+```{r, include = FALSE}
+# Correlation Coefficient
+cor_7 <- cor(Average_Speed$Average_Speed, Average_Speed$Points)
+```
+
+```{r, include = FALSE}
+print(cor_7)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_7 <- cor_7^2
+```
+
+```{r, include = FALSE}
+print(rsq_7)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit7 <- lm(Points ~ Average_Speed, data = Average_Speed)
+summary(lmfit7)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Speed, aes(x = Average_Speed, y = Points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Speed vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_7, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_7, digits = 2))) +
+  xlab("Average Speed (mph)") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### **Average Speed vs. Finish**
+
+**Regression Equation: ** `Finish` = 647.3762 - 5.8191 x `Average_Speed` 
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~Average_Speed~ = 0    
+**$H_A$: ** $\beta$~Average_Speed~ $\ne$ 0       
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 112.6    
+**p-value: ** 1.75 × 10^-12^      
+**Conclusion: ** Reject $H_0$
+
+```{r Finish vs. Average Speed, include = FALSE}
+# Average Speed per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean, na.rm = TRUE))
+Average_Speed <- arrange(select(by_driver, Driver, Average_Speed = lap_speed, Finish = finish), Finish)
+```
+
+```{r, include = FALSE}
+# Correlation Coefficient
+cor_5 <- cor(Average_Speed$Average_Speed, Average_Speed$Finish)
+```
+
+```{r, include = FALSE}
+print(cor_5)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_5 <- cor_5^2
+```
+
+```{r, include = FALSE}
+print(rsq_5)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit5 <- lm(Finish ~ Average_Speed, data = Average_Speed)
+summary(lmfit5)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Speed, aes(x = Finish, y = Average_Speed)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Speed vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_5, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_5, digits = 2))) +
+  xlab("Finishing Position") +
+  ylab("Average Speed (mph)") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### **Average Running Position vs. Finish**
+
+**Regression Equation: ** `Finish` = -3.556 + 1.187 x `Average_Running_Position` 
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~Average_Running_Position~ = 0    
+**$H_A$: ** $\beta$~Average_Running_Position~ $\ne$ 0      
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 279.6    
+**p-value: ** 2.2 × 10^-16^      
+**Conclusion: ** Reject $H_0$
+
+```{r, include = FALSE}
+# Average Running Position per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean))
+Average_Running_Position <- arrange(select(by_driver, Driver, Average_Running_Position = running_position, Finish = finish), Finish)
+```
+
+```{r, include = FALSE}
+# Correlation Coefficient
+cor_4 <- cor(Average_Running_Position$Average_Running_Position, Average_Running_Position$Finish)
+```
+
+```{r, include = FALSE}
+print(cor_4)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_4 <- cor_4^2
+```
+
+```{r, include = FALSE}
+print(rsq_4)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit4 <- lm(Finish ~ Average_Running_Position, data = Average_Running_Position)
+summary(lmfit4)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Running_Position, aes(x = Average_Running_Position, y = Finish)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Running Position vs. Finishing Position", caption = paste("Correlation Coefficient:", round(cor_4, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_4, digits = 2))) +
+  xlab("Average Running Position") +
+  ylab("Finishing Position") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+### **Average Running Position vs. Points**
+
+**Regression Equation: ** `Points` = 51.498 - 1.612 x `Average_Running_Position` 
+
+**Hypothesis Test:**
+
+**$H_0$: ** $\beta$~Average_Running_Position~ = 0    
+**$H_A$: ** $\beta$~Average_Running_Position~ $\ne$ 0      
+**Confidence Level: ** $\alpha$ = 0.05    
+**F-statistic : ** 288   
+**p-value: ** 2.2 × 10^-16^      
+**Conclusion: ** Reject $H_0$
+
+```{r, include = FALSE}
+# Average Running Position per Driver
+by_driver <- tibble(aggregate(Watkins_Glen, list(Driver = Watkins_Glen$driver), mean))
+Average_Running_Position <- arrange(select(by_driver, Driver, Average_Running_Position = running_position, Points = points), Points)
+```
+
+```{r, include = FALSE}
+# Correlation Coefficient
+cor_9 <- cor(Average_Running_Position$Average_Running_Position, Average_Running_Position$Points)
+```
+
+```{r, include = FALSE}
+print(cor_9)
+```
+
+```{r, include = FALSE}
+# Coefficient of Determination
+rsq_9 <- cor_9^2
+```
+
+```{r, include = FALSE}
+print(rsq_9)
+```
+
+```{r, include = FALSE}
+# Linear Model
+lmfit9 <- lm(Points ~ Average_Running_Position, data = Average_Running_Position)
+summary(lmfit9)
+```
+
+```{r warning = FALSE, message = FALSE}
+# Scatterplot
+ggplot(data = Average_Running_Position, aes(x = Average_Running_Position, y = Points)) + 
+  geom_point(color = 'blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Average Running Position vs. Points Earned", caption = paste("Correlation Coefficient:", round(cor_9, digits = 2), ", ", "Coefficient of Determination: ", round(rsq_9, digits = 2))) +
+  xlab("Average Running Position") +
+  ylab("Points Earned") +
+  theme(plot.title = element_text(hjust = 0.5))
+```

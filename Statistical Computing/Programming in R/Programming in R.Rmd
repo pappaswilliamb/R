@@ -1,0 +1,105 @@
+---
+title: "Programming in R"
+author: "Blake Pappas"
+date: 'September 26, 2022'
+output:
+  pdf_document:
+    toc: false
+    toc_depth: 3
+    fig_width: 6
+    fig_height: 5
+    fig_caption: yes
+header-includes:
+   - \usepackage{animate}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load the Appropriate Packages
+
+```{r warning = FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Import and Tidy the Data
+
+```{r}
+gss <- select(gss_cat, marital, race, relig, age, tvhours) %>%
+  mutate(marital = marital %>% fct_infreq() %>% fct_rev()) %>% # Order of frequency
+  mutate(race = race %>% fct_infreq() %>% fct_rev()) %>% # Order of frequency
+  mutate(relig = relig %>% fct_infreq() %>% fct_rev()) # Order of frequency
+```
+
+## Assert That the Data Types Are Correct
+
+```{r}
+is.factor(gss$marital)
+is.factor(gss$race)
+is.factor(gss$relig)
+is.numeric(gss$age)
+is.numeric(gss$tvhours)
+```
+
+## Create the Factor Variable Function
+
+```{r}
+function_1 <- function(x) {
+  if (is.factor(x)) {
+    return(ggplot(data = gss, aes(x = x)) +
+             geom_bar() +
+             geom_text(aes(label = ..count..), stat = "count", vjust = -0.2, colour = "black") +
+             labs(title = "", subtitle = "", caption = paste("Sample Size:", nrow(gss), ", ", "Missing Value Count: ", sum(is.na(x)))) + 
+             ylab("Frequency")) +
+             xlab()
+  } else {
+    return("Error: Variable data type must be a factor")
+  }
+}
+```
+
+## Test the Factor Variable Function (`function_1`)
+
+```{r, warning = FALSE}
+function_1(gss$marital)
+function_1(gss$race)
+function_1(gss$relig)
+function_1(gss$age)
+function_1(gss$tvhours)
+```
+
+## Create the Numeric Variable Function
+
+```{r}
+function_2 <- function(x) {
+  if (nrow(gss) <= 10 && is.numeric(x) == TRUE) {
+    boxplot(x, horizontal = TRUE, range = 0, ylim = endaxis, axes = FALSE, col= "grey", add = FALSE, staplewex=1)
+text(x = fivenum(x), labels = fivenum(x), y = 1.25) # Labels for quartiles and median values
+  } else if (nrow(gss) <= 10 && is.numeric(x) == FALSE) {
+    return("Error: Variable data type must be numeric")
+  } else if (nrow(gss) > 10 && is.numeric(x) == TRUE) {
+    # Histogram
+    mean.x <- mean(x, na.rm = TRUE)
+    sd.x <- sd(x, na.rm = TRUE)
+    hist(x, main = "",xlab = "x", col = "blue", label = TRUE, plot = TRUE, freq = T)  
+    
+    # Labels for mean and standard deviation
+    text(x = c(round(mean.x, digits = 2), round(mean.x + sd.x, digits = 2), round(mean.x - sd.x, digits = 2), round(mean.x + 2 * sd.x, digits = 2), round(mean.x - 2 * sd.x, digits = 2)), labels = c(round(mean.x, digits = 2), round(mean.x + sd.x, digits = 2), round(mean.x - sd.x, digits = 2), round(mean.x + 2 * sd.x, digits = 2), round(mean.x - 2 * sd.x, digits = 2)), y = 2)
+  } else if (nrow(gss) > 10 && is.numeric(x) == FALSE) {
+    return("Error: Variable data type must be numeric")
+  }
+}
+```
+
+
+## Test the Numeric Variable Function (`function_2`)
+
+```{r}
+function_2(gss$marital)
+function_2(gss$race)
+function_2(gss$relig)
+function_2(gss$age)
+function_2(gss$tvhours)
+```
