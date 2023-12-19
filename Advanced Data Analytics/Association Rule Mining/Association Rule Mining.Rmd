@@ -1,0 +1,110 @@
+---
+title: "Association Rules Mining"
+author: "Blake Pappas"
+date: "`r Sys.Date()`"
+output: pdf_document
+bookmarks: false
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Association Rule Mining in R
+# Load the arules package
+
+```{r, warning = FALSE, message = FALSE}
+# install.packages("arules")
+
+library(arules)
+```
+
+# In this first exercise, we use the "supermarket.csv" file.
+# This dataset contains 8 shopping baskets.
+
+# P1: Import this dataset as transaction data
+# Think about parameters including format, sep, and rm.duplicates.
+
+```{r}
+supermarket = read.transactions("supermarket.csv",
+                           format = "basket",
+                           sep = ",",
+                           rm.duplicates = TRUE)
+```
+
+# P2: Understand the supermarket data
+# Which unique items are there in all shopping baskets?
+```{r}
+itemInfo(supermarket)
+```
+
+# P3: Understand the supermarket data.
+# How many transactions contain purchase of Butter?
+# Answer: 2 transactions contain purchase of Butter.
+```{r}
+itemFrequency(supermarket, type = "absolute")
+```
+
+# P4: Understand the supermarket data
+# Plot the frequency of each item
+```{r}
+itemFrequencyPlot(supermarket)
+
+itemFrequencyPlot(supermarket, type = "absolute")
+```
+
+# P5: Understand the supermarket data
+# Visualize the entire dataset, showing which items show up in which transactions.
+```{r}
+image(supermarket)
+```
+
+# P6: Mine association rules
+# Find all association rules with minsupp = 0.375 and minconf = 0.65.
+``` {r}
+rules = apriori(supermarket,
+                parameter = list(supp = 0.375, conf = 0.65))
+
+inspect(rules)
+```
+
+# P7: Mine association rules
+# Inspect the found rules, in the order of decreasing lift ratio.
+```{r}
+inspect(sort(rules, by = "lift"))
+```
+
+
+# In the second exercise, we use the "book.csv" file.
+# This dataset contains 2000 book purchases in binary matrix format.
+
+# P1: Import this dataset as transaction data
+# Think about the three steps of importing.
+```{r}
+book_data_frame = read.csv("book.csv")
+book_matrix = as.matrix(book_data_frame)
+book = as(book_matrix, "transactions")
+```
+
+# P2: Understand the book data
+# Plot the frequency of each book category, in absolute sales.
+# Which book category sells best?
+# Answer: The CookBks category sells the best.
+```{r}
+itemFrequency(book, type = "absolute")
+```
+
+# P3: Mine association rules
+# Find all association rules with minsupp = 0.1 and minconf = 0.8.
+```{r}
+rules = apriori(book,
+                parameter = list(supp = 0.1, conf = 0.8))
+
+inspect(sort(rules, by = "lift"))
+```
+
+# P4: Understand the found rules
+# Inspect the rules, and answer the following questions:
+# Which rule has the highest lift? What does it tell us?
+# Answer: The {ItalCook} -> {CookBks} rule has the highest lift. This tells us that customers who buy ItalCook are 1.320186x (132.0186%) more likely to buy CookBks than customers in general.
+# What can be done with this rule, if you were the bookstore manager?
+# Answer: If I were the bookstore manager, I could use this rule to situate ItalCook closer to CookBks in my store.

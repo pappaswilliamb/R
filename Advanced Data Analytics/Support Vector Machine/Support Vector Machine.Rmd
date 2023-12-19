@@ -1,0 +1,110 @@
+---
+title: "Support Vector Machine"
+author: "Blake Pappas"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+bookmarks: no
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Support Vector Machine in R
+# Load the following packages:
+```{r, warning = FALSE, message = FALSE}
+library(caret)
+library(dplyr)
+library(e1071)
+```
+
+# In this exercise, we use the "credit.csv" file. This file concerns credit card applications.
+# All attribute names and values have been changed to meaningless symbols to protect confidentiality of the data.
+# The outcome variable is A16, attributes are A1 - A15.
+
+
+# P1: Import the dataset. Split it to 80% training and 20% testing.
+```{r}
+credit = read.csv("credit.csv", stringsAsFactors = TRUE)
+
+train_rows = createDataPartition(y = credit$A16,
+                                 p = 0.80, list = FALSE)
+
+credit_train = credit[train_rows, ]
+credit_test = credit[-train_rows, ]
+```
+
+
+# Build a SVM model with a linear kernel
+```{r}
+svm_model_linear = svm(A16 ~ ., data = credit_train,
+                kernel = "linear")
+
+# Make Predictions
+pred_svm_model_linear = predict(svm_model_linear, credit_test)
+
+# Performance Evaluation
+# Confusion Matrix
+confusionMatrix(pred_svm_model_linear, credit_test$A16, mode = "prec_recall", positive = "+")
+```
+
+
+# Build a SVM model with a radial kernel
+```{r}
+svm_model_radial = svm(A16 ~ ., data = credit_train,
+                kernel = "radial")
+
+# Make Predictions
+pred_svm_model_radial = predict(svm_model_radial, credit_test)
+
+# Performance Evaluation
+# Confusion Matrix
+confusionMatrix(pred_svm_model_radial, credit_test$A16, mode = "prec_recall", positive = "+")
+```
+
+# Use 5-fold cross validation to evaluate each model. Find the model with the best f-measure for class "+". Report the model and the f-measure.
+```{r}
+# Linear Kernel SVM Model
+cv = createFolds(y = credit$A16, k = 5)
+
+rmse_cv = c()
+
+for (test_row in cv) {
+  
+  credit_train = credit[-test_row, ]
+  credit_test = credit[test_row, ]
+  
+  svm_model_linear = svm(A16 ~ ., data = credit_train,
+                         kernel = "linear")
+  
+  pred_svm_model_linear = predict(svm_model_linear, credit_test)
+  
+  cm = confusionMatrix(pred_svm_model_linear, credit_test$A16, mode = "prec_recall", positive = "+")
+  
+  print(cm$byClass[7])
+}
+```
+
+```{r}
+# Radial Kernel SVM Model
+cv = createFolds(y = credit$A16, k = 5)
+
+rmse_cv = c()
+
+for (test_row in cv) {
+  
+  credit_train = credit[-test_row, ]
+  credit_test = credit[test_row, ]
+  
+  svm_model_radial = svm(A16 ~ ., data = credit_train,
+                         kernel = "radial")
+  
+  pred_svm_model_radial = predict(svm_model_radial, credit_test)
+  
+  cm = confusionMatrix(pred_svm_model_radial, credit_test$A16, mode = "prec_recall", positive = "+")
+  
+  print(cm$byClass[7])
+}
+```

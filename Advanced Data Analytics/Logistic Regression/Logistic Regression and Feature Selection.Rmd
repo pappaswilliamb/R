@@ -1,0 +1,147 @@
+---
+title: "Logistic Regression and Feature Selection"
+author: "Blake Pappas"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+bookmarks: no
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Logistic Regression and Feature Selection in R
+# Load the following packages:
+```{r, warning = FALSE, message = FALSE}
+library(caret)
+library(dplyr)
+library(FSelectorRcpp)
+library(pROC)
+```
+
+# In this exercise, we use the "credit.csv" file. This file concerns credit card applications. All attribute names and values have been changed to meaningless symbols to protect the confidentiality of the data.
+# The goal is to predict the "A16" (credit decision) based on A1-A15 as features.
+
+
+# P1: Import the dataset. Split it to 80% training and 20% testing.
+```{r}
+credit = read.csv("credit.csv")
+
+train_rows = createDataPartition(y = credit$A16,
+                                 p = 0.80, list = FALSE)
+
+# Training Dataset
+credit_train = credit[train_rows, ]
+
+# Testing Dataset
+credit_test = credit[-train_rows, ]
+```
+
+
+# P2: Build logistic regression model with all features.
+```{r, warning = FALSE}
+# Build the Model
+credit_train$A16 = ifelse(credit_train$A16 == "+", 1, 0)
+logit_model = glm(A16 ~ ., data = credit_train,
+                  family = binomial(link = "logit"))
+
+# Examine the Model
+summary(logit_model)
+
+# Make Predictions
+
+# Log Odds
+pred = predict(logit_model, credit_test)
+
+# Predicted Probability
+pred_prob = predict(logit_model, credit_test,
+                    type = "response")
+
+# Binary Predictions
+pred_binary = ifelse(pred_prob > 0.5, "yes", "no")
+```
+
+
+# P3: Evaluate the performance of the logit model (confusion matrix, AUC, etc.).
+```{r}
+# Confusion Matrix
+confusionMatrix(factor(pred_binary), factor(ifelse(credit_test$A16 == "+", "yes", "no")),
+                mode = "prec_recall", positive = "yes")
+
+# AUC for class "+"
+library(pROC)
+roc_logit = roc(response = ifelse(credit_test$A16 == "+", 1, 0),
+                predictor = pred_prob)
+plot(roc_logit)
+auc(roc_logit)
+```
+
+# P4: Select the top 5 features by information gain. Then, build another model. Do you get better performance in terms of AUC?
+```{r, warning = FALSE}
+# Information Gain
+library(FSelectorRcpp)
+
+IG = information_gain(A16 ~ ., data = credit_train)
+
+# Select Top 5 Attributes
+topK = cut_attrs(IG, k = 5)
+
+credit_topK_train = credit_train %>% select(topK, A16)
+credit_topK_test = credit_test %>% select(topK, A16)
+
+# Build Logistic Regression Model
+library(pROC)
+
+logit_model2 = glm(A16 ~ ., data = credit_topK_train,
+                   family = binomial(link = "logit"))
+
+pred_prob = predict(logit_model2, credit_topK_test,
+                    type = "response")
+
+auc(ifelse(credit_topK_test$A16 == "+", 1, 0), pred_prob)
+```
+
+# Answer: Yes, the model gets better performance in terms of AUC.
+
+
+# P5: Implement Backward Elimination. Consider an AUC increase of any positive amount to be an improvement when selecting features. Report the selected features.
+```{r, warning = FALSE}
+model_all = glm(A16 ~ ., data = credit_train,
+                family = binomial(link = "logit"))
+
+pred_prob = predict(model_all, credit_test,
+                    type = "response")
+
+best_auc = auc(ifelse(credit_test$A16 == "+", 1, 0), pred_prob)
+
+selected_features = 1:15
+while (TRUE) {
+  feature_to_drop = -1
+  for (i in selected_features) {
+    train = credit_train %>% select(setdiff(selected_features, i), A16)
+    test = credit_test %>% select(setdiff(selected_features, i), A16)
+    
+    logit_model = glm(A16 ~ ., data = train,
+                      family = binomial(link = "logit"))
+    
+    pred_prob = predict(logit_model, test,
+                        type = "response")
+    
+    auc = auc(ifelse(test$A16 == "+", 1, 0), pred_prob)
+    
+    if (auc > best_auc) {
+      best_auc = auc
+      feature_to_drop = i
+    }
+  }
+  
+  if (feature_to_drop != -1) {
+    selected_features = setdiff(selected_features, feature_to_drop)
+    print(selected_features)
+    print(best_auc)
+  }
+  else break
+}
+```
