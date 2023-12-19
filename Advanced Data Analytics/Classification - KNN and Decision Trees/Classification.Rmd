@@ -1,0 +1,142 @@
+---
+title: "Classification"
+author: "Blake Pappas"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+bookmarks: no
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Classification in R
+# Load the following packages:
+
+```{r, warning = FALSE, message = FALSE}
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(class)
+library(dplyr)
+```
+
+# In this exercise, we use the "wine.csv" file.
+# The goal is to predict the wine "Type" based on the other attributes.
+# P1: Import the dataset:
+
+```{r}
+Wine = read.csv("wine.csv")
+```
+
+# P2: Split the dataset into 75% training and 25% testing.
+# Use createDataPartition() function to do it:
+```{r}
+library(caret)
+
+train_rows = createDataPartition(y = Wine$Type,
+                                 p = 0.75, list = FALSE)
+WineData_train = Wine[train_rows, ]
+WineData_test = Wine[-train_rows, ]
+```
+
+# P3: Build a decision tree model:
+```{r}
+library(rpart)
+
+tree = rpart(Type ~ ., data = WineData_train,
+             method = "class",
+             parms = list(split = "information"))
+```
+
+# P4: Plot the tree, and interpret a decision rule of your choice:
+```{r}
+library(rpart.plot)
+
+prp(tree, varlen = 0)
+```
+
+# Answer: IF (Flavanoids $\geq$ 1.6) AND (Proline $\geq$ 725) AND Alcohol $\geq$ 13 THEN Type A.
+
+# P5: Evaluate the performance of your tree.
+# Specifically, get the confusion matrix, and report the accuracy, precision, and recall.
+# Answer: The accuracy is 0.8837. The precision is 1.0000, 0.8000, and 0.9231 for Types A, B, and C, respectively. The recall is 0.7143, 0.9412, and 1.0000 for Types A, B, and C, respectively.
+```{r}
+pred_tree = predict(tree, WineData_test, type = "class")
+
+confusionMatrix(pred_tree, as.factor(WineData_test$Type), mode = "prec_recall")
+```
+
+# P6: Now, try K-NN.
+# The first thing is to consider whether or not to normalize your data.
+# Answer: Yes, the data needs to be normalized.
+```{r}
+library(dplyr)
+
+normalize = function(x) {
+  return ((x - min(x))/(max(x) - min(x)))
+  }
+
+Wine_normalized = Wine %>% mutate_at(2:14, normalize)
+
+train_rows = createDataPartition(y = Wine_normalized$Type,
+                                 p = 0.75, list = FALSE)
+
+Wine_normalized_train = Wine_normalized[train_rows, ]
+
+Wine_normalized_test = Wine_normalized[-train_rows, ]
+```
+
+# P7: Build a K-NN classifier. Use 5-fold cross-validation to evaluate its performance based on average accuracy. 
+# Report accuracy measure for k = 2, ..., 10.
+``` {r}
+# Cross-Validation
+cv = createFolds(y = Wine_normalized$Type, k = 5)
+
+# Make a Vector to Store Accuracy from Each Fold
+accuracy = c()
+
+# Loop Through Each Fold
+for (test_rows in cv) {
+  Wine_normalized_train = Wine_normalized[-test_rows, ]
+  Wine_normalized_test = Wine_normalized[test_rows, ]
+  
+  # Then, Train Your Model and Evaluate Its Performance
+  tree = rpart(Type ~ ., data = Wine_normalized_train,
+               method = "class", parms = list(split = "information"))
+  
+  pred_tree = predict(tree, Wine_normalized_test, type = "class")
+  
+  cm = confusionMatrix(pred_tree, as.factor(Wine_normalized_test$Type))
+  
+  # Add the Accuracy of Current Fold
+  accuracy = c(accuracy, cm$overall[1])
+  print(accuracy)
+}
+
+# Average Accuracy Across Folds
+print(mean(accuracy))
+```
+
+# P8: Imagine that you forgot to normalize the data.
+# Build a K-NN model without normalization.
+# Pick any k value.
+# Answer: I picked a k value of three, for the three nearest neighbors.
+# What happens to performance?
+# Answer: By building a K-NN model without normalization, performance degrades, as is evidenced by a lower accuracy number in relation to the accuracy number for the model that uses normalization.
+```{r}
+library(caret)
+
+train_rows = createDataPartition(y = Wine$Type,
+                                 p = 0.75, list = FALSE)
+WineData_train = Wine[train_rows, ]
+WineData_test = Wine[-train_rows, ]
+
+pred_knn = knn(train = WineData_train[, 2:14],
+               test = WineData_test[, 2:14],
+               cl = WineData_train$Type, k = 3)
+
+confusionMatrix(pred_knn, as.factor(WineData_test$Type))
+```

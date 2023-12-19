@@ -1,0 +1,125 @@
+---
+title: "Text Mining"
+author: "Blake Pappas"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+bookmarks: no
+---
+  
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Text Mining in R
+# Load the following packages:
+```{r, warning = FALSE, message = FALSE}
+library(tm)
+library(wordcloud)
+```
+
+# In this exercise, we use the "superbowl.csv" file. It contains 2000 tweets about the Super Bowl.
+
+# Import the dataset as a corpus:
+```{r, warning = FALSE}
+superbowl_text = read.csv("superbowl.csv")
+
+superbowl_corpus = Corpus(VectorSource(superbowl_text$Tweet))
+```
+
+
+# Examine the 100th tweet in this corpus. What does it say?
+```{r, warning = FALSE}
+superbowl_corpus[[100]]$content
+```
+
+
+# Pre-Processing: Remove Punctuation
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, removePunctuation)
+```
+
+
+# Pre-Processing: Lower-Casing
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, tolower)
+```
+
+
+# Pre-Processing: Remove Stopwords
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, removeWords,
+                     stopwords('english'))
+```
+
+
+# Pre-Processing: Word Stemming
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, stemDocument)
+```
+
+
+# Pre-Processing: Remove Excessive Blank Spaces
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, stripWhitespace)
+```
+
+
+# Obtain the Term-Document Matrix:
+```{r}
+dtm = DocumentTermMatrix(superbowl_corpus)
+
+dtm_matrix = as.matrix(dtm)
+```
+
+
+# Find the top 5 most popular words in these tweets:
+```{r}
+word_freq = colSums(as.matrix(dtm))
+
+word_freq_sorted = sort(word_freq, decreasing = TRUE)
+
+word_freq_sorted[1:5]
+```
+
+
+# Now look at top 10 most popular words.
+# Do you see anything unusual?
+```{r}
+word_freq_sorted[1:10]
+```
+
+# Answer: Yes, I see something unusual. The tenth most popular word isn't a word. It's more of an error message called "00000unknownunknownunknownunknownunknown".
+
+
+# Run the following lines of code to get rid of the unusual word:
+```{r, warning = FALSE}
+superbowl_corpus = tm_map(superbowl_corpus, removeWords, 
+                          "00000unknownunknownunknownunknownunknown")
+```
+
+
+# Update the word_freq variable:
+```{r}
+dtm = DocumentTermMatrix(superbowl_corpus)
+
+dtm_matrix = as.matrix(dtm)
+
+word_freq = colSums(as.matrix(dtm))
+
+word_freq_sorted = sort(word_freq, decreasing = TRUE)
+
+word_freq_sorted[1:10]
+```
+
+
+# Plot a WordCloud of top 50 most popular words.
+# Fill in the first two parameters: "words" and "freq".
+# The last two parameters specify the size of words to display and how many words to show.
+```{r}
+wordcloud(words = names(word_freq_sorted),
+          freq = word_freq_sorted,
+          scale = c(2, 0.25), 
+          max.words = 50)
+```
