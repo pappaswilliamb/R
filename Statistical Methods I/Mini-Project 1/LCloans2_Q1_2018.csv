@@ -1,0 +1,488 @@
+"X","funded_amnt","int_rate","installment","emp_title","emp_length","home_ownership","annual_inc","purpose","addr_state","dti","application_type","open_act_il","open_il_12m","open_il_24m","mths_since_recent_bc","tot_hi_cred_lim"
+45470,15000,11.06,491.51,"RN","2 years","RENT",90000,"debt_consolidation","WA",4.41,"Individual",1,2,4,62,23520
+103048,8000,7.84,250.11,"Manager","10+ years","MORTGAGE",80000,"home_improvement","GA",9.21,"Individual",2,2,2,88,124605
+20438,23675,22.35,658.6,"Dental Assistant","10+ years","MORTGAGE",45500,"debt_consolidation","NV",47.82,"Joint App",10,2,4,14,101590
+125383,7200,16.91,256.38,"Server","4 years","RENT",60000,"debt_consolidation","FL",9.66,"Individual",1,1,1,9,38292
+2228,5000,11.06,163.84,"","n/a","RENT",60000,"debt_consolidation","IN",13.86,"Individual",2,1,1,5,39525
+117330,6000,7.21,185.84,"Therapist","10+ years","MORTGAGE",73000,"credit_card","FL",9.75,"Individual",1,1,1,40,95078
+37380,40000,10.08,1292.2,"Mortgage Underwriter","2 years","MORTGAGE",90000,"home_improvement","NC",12.45,"Individual",2,2,5,17,270333
+40883,16000,18.94,586.02,"","< 1 year","OWN",38481,"credit_card","CO",32.03,"Individual",1,0,0,52,38504
+95314,8000,13.56,271.72,"Registered nurse","3 years","OWN",80000,"debt_consolidation","TX",24.18,"Individual",5,1,1,4,288622
+104326,30000,18.45,1091.36,"Management Analyst","7 years","MORTGAGE",90000,"debt_consolidation","VA",6.13,"Individual",0,0,0,2,436263
+43519,11000,7.21,340.71,"Travel Nurse ","1 year","OWN",60000,"credit_card","OH",11.9,"Individual",3,0,0,1,268482
+114090,22000,16.46,540.39,"Superintendent ","8 years","MORTGAGE",103000,"debt_consolidation","LA",20.11,"Individual",3,2,3,40,83265
+94577,15000,16.91,534.12,"Manager","10+ years","MORTGAGE",46000,"debt_consolidation","MD",52.91,"Joint App",4,0,0,37,496090
+27362,10000,16.14,243.93,"Machine operator","10+ years","MORTGAGE",42000,"debt_consolidation","NJ",5.29,"Individual",0,0,0,4,106850
+79026,10300,7.84,322.01,"","< 1 year","RENT",35000,"debt_consolidation","TX",1.13,"Joint App",0,0,0,13,11900
+94984,12600,20.89,340.1,"Customer Service Rep","7 years","RENT",33000,"debt_consolidation","MA",8.95,"Individual",0,0,0,17,17600
+102190,40000,8.46,1261.97,"Advocate (Wouded Warrior Program","3 years","MORTGAGE",125000,"debt_consolidation","NY",28.37,"Individual",5,0,2,144,376956
+78067,8500,10.08,274.6,"QA Tech","5 years","RENT",36000,"credit_card","KS",31.17,"Individual",2,0,1,356,60730
+22715,17500,10.08,372.52,"Service Coordinator","4 years","MORTGAGE",65000,"debt_consolidation","NH",15.21,"Individual",1,0,0,40,280240
+96963,14000,20.89,526.67,"optician","4 years","RENT",52000,"debt_consolidation","TX",32.84,"Joint App",2,0,2,21,56767
+20536,8000,6.67,245.82,"Service technician ","3 years","RENT",55000,"debt_consolidation","CA",19.27,"Individual",2,0,1,17,59855
+59328,15000,17.97,380.66,"builder","4 years","OWN",38000,"debt_consolidation","MI",12.1,"Individual",1,1,1,10,34100
+92648,12000,16.14,422.72,"mechanic","4 years","RENT",54000,"credit_card","CA",2.42,"Joint App",0,0,0,25,6400
+45925,14000,10.47,454.84,"jr mecanic","< 1 year","RENT",48500,"debt_consolidation","NY",26.61,"Individual",2,1,3,12,64372
+122441,20000,7.84,625.26,"Triage nurse","5 years","MORTGAGE",140000,"debt_consolidation","NV",19.07,"Individual",2,0,0,6,416342
+92152,6000,16.14,211.36,"Real Estate Sales","10+ years","RENT",85000,"debt_consolidation","NV",11.61,"Individual",1,0,1,127,52807
+121729,21000,17.47,753.63,"General Sales Manager","7 years","MORTGAGE",188000,"home_improvement","MD",14.33,"Individual",3,1,2,7,104035
+115507,13000,6.83,400.4,"","n/a","RENT",56280,"credit_card","CA",22.81,"Individual",1,0,1,7,89718
+114686,6000,15.02,208.06,"operations manager","10+ years","RENT",40000,"debt_consolidation","FL",28.47,"Individual",3,0,0,49,50113
+124936,20000,6.19,610.17,"Chef","2 years","MORTGAGE",65000,"credit_card","KY",6.17,"Individual",0,0,0,24,201800
+22448,5600,19.92,207.89,"mechanic","2 years","RENT",60000,"medical","PA",23.32,"Individual",8,0,2,30,67750
+15298,12600,26.31,379.57,"Nurse","5 years","MORTGAGE",50000,"debt_consolidation","WA",44.29,"Joint App",3,2,3,27,379119
+15715,1500,12.73,50.35,"Meat Dpt supervisor ","10+ years","MORTGAGE",65000,"home_improvement","FL",17.32,"Individual",2,1,1,39,190076
+60359,36000,11.55,1188,"IT Manager","8 years","MORTGAGE",142000,"home_improvement","FL",13.03,"Individual",1,0,0,50,47900
+39764,6500,7.84,203.21,"","n/a","RENT",42000,"major_purchase","TX",30.09,"Individual",2,0,1,7,102644
+34490,10000,14.47,235.13,"Doctor's Office","4 years","RENT",27000,"other","NJ",3.29,"Joint App",0,0,0,15,12336
+23262,35000,8.46,1104.22,"Elevator Operator","10+ years","RENT",55000,"debt_consolidation","NY",16.41,"Individual",1,0,1,200,31600
+19793,25000,17.97,903.44,"Programmer Analyst","4 years","RENT",120000,"debt_consolidation","TX",20.97,"Individual",3,0,2,15,142651
+76766,20000,10.47,649.77,"","< 1 year","RENT",145000,"debt_consolidation","NY",12.48,"Individual",3,0,0,13,257344
+114415,16000,6.11,310.15,"Audiologist","7 years","MORTGAGE",120000,"credit_card","VA",6.21,"Individual",0,1,1,33,469800
+51973,13000,7.84,406.42,"Office Manager","6 years","MORTGAGE",40500,"debt_consolidation","MN",26.46,"Individual",3,1,1,6,134034
+92419,40000,10.47,859.17,"Quality and Data Specialist","3 years","MORTGAGE",87000,"home_improvement","MN",26.08,"Joint App",1,0,2,11,557930
+118320,5500,17.97,198.76,"Insurance Sales","5 years","RENT",2e+05,"debt_consolidation","PA",12.73,"Individual",7,1,4,16,120625
+101888,12000,11.55,396,"Bureau Admin ","< 1 year","RENT",60000,"debt_consolidation","CA",16.88,"Individual",2,0,1,8,50708
+61935,10000,11.55,220.18,"Delivery Driver","3 years","RENT",25200,"credit_card","MA",15.33,"Individual",1,1,1,35,25145
+12571,30000,15.02,714.02,"RN","4 years","RENT",120000,"credit_card","HI",11.26,"Individual",3,1,1,27,70288
+96817,10000,13.56,339.65,"RPM/Engineer","1 year","RENT",22000,"credit_card","CA",55.59,"Joint App",2,0,1,14,57516
+49237,20000,10.08,425.73,"Facility Engineer","10+ years","MORTGAGE",120000,"debt_consolidation","TX",18.05,"Individual",7,1,2,50,369483
+77961,10000,11.55,330,"Nurse Practitioner","< 1 year","MORTGAGE",140000,"home_improvement","CA",10.74,"Individual",2,1,2,2,400071
+32790,24000,17.97,867.3,"Record clerk","10+ years","MORTGAGE",53000,"credit_card","OH",34.99,"Joint App",6,1,5,3,273009
+39167,30000,12.73,678.46,"Assistant Director of Disability","3 years","MORTGAGE",70000,"credit_card","TX",19.08,"Joint App",1,0,1,90,80286
+30312,8000,6.11,243.78,"Psychiatric Social Worker","2 years","RENT",69575,"credit_card","CA",14.68,"Individual",2,1,1,24,144564
+114307,16000,25.34,472.82,"medical assistant","5 years","OWN",35000,"debt_consolidation","SC",17.59,"Individual",1,0,0,45,36988
+16297,15000,16.91,372.07,"","n/a","OWN",50000,"credit_card","PA",7.15,"Individual",2,2,2,1,40633
+100438,20000,12.73,452.31,"Wireman","2 years","MORTGAGE",88000,"debt_consolidation","MD",33.83,"Individual",3,0,1,72,492883
+40994,15000,10.47,487.33,"Digital projectors ","10+ years","RENT",52000,"debt_consolidation","WA",19.13,"Individual",0,0,0,23,35000
+98579,8400,8.46,265.02,"Teacher","10+ years","MORTGAGE",61000,"credit_card","AZ",2.7,"Individual",0,0,0,89,147927
+27553,6000,8.46,189.3,"Rural Carrier","10+ years","MORTGAGE",167000,"car","FL",13.37,"Joint App",3,0,2,13,385431
+70462,3000,11.55,99,"","n/a","RENT",14000,"debt_consolidation","NY",26.67,"Individual",1,1,2,1,31900
+61776,5000,10.47,162.45,"Safety and Environmental Manager","5 years","MORTGAGE",95000,"other","TX",35.95,"Individual",11,1,3,29,311763
+58711,10000,16.91,356.08,"Server","5 years","RENT",45000,"credit_card","MA",13.01,"Individual",1,0,0,4,19918
+104845,10000,23.4,389.19,"Owner","10+ years","RENT",120000,"medical","CA",17.65,"Individual",4,2,3,23,99011
+126821,10000,7.84,312.63,"Warehouse manager ","2 years","OWN",55000,"debt_consolidation","PA",18.35,"Individual",2,1,1,26,87072
+36515,10000,18.94,366.26,"Teacher","2 years","RENT",120000,"debt_consolidation","CA",13.99,"Joint App",3,2,4,18,111422
+37695,13000,10.08,419.97,"RADIOLOGIC TECHNOLOGIST","10+ years","RENT",52000,"debt_consolidation","GA",39.81,"Individual",4,2,3,93,100335
+57620,6000,17.97,216.83,"Claims ","10+ years","RENT",80000,"car","PA",8.28,"Individual",1,1,1,26,45623
+107983,40000,11.55,880.71,"Production Specialist","1 year","MORTGAGE",45000,"debt_consolidation","GA",20.38,"Joint App",1,0,0,6,72331
+113718,35000,7.84,707,"RN BSN","10+ years","MORTGAGE",130000,"debt_consolidation","OH",16.07,"Individual",3,1,1,3,314516
+75638,25000,10.08,807.62,"Radiographer","6 years","RENT",96000,"debt_consolidation","MI",33.49,"Individual",8,2,4,45,157546
+73447,6500,6.67,199.73,"Security Officer","1 year","OWN",18822,"credit_card","NY",10.52,"Individual",0,0,0,23,22600
+47764,30000,11.55,660.54,"Driver","9 years","OWN",135000,"debt_consolidation","AL",6.25,"Individual",0,0,0,34,63200
+38746,25000,6.67,768.17,"Donation program educator","2 years","MORTGAGE",96000,"debt_consolidation","AZ",22.83,"Individual",3,2,2,42,611192
+101822,10000,12.73,226.16,"","n/a","RENT",25000,"debt_consolidation","AL",10.18,"Individual",0,0,0,16,12300
+52958,24000,10.08,510.88,"Teacher","10+ years","MORTGAGE",56000,"house","CO",39.48,"Joint App",6,1,2,8,515864
+28206,12000,6.67,368.72,"Finance Manager","2 years","MORTGAGE",120000,"other","MI",12.21,"Joint App",3,1,1,6,442729
+38128,35000,19.92,925.73,"Business Operations Lead","10+ years","MORTGAGE",107000,"debt_consolidation","WA",24.91,"Individual",3,3,3,146,382626
+115673,35000,16.91,1246.28,"Project Site Quality Control Manager","1 year","MORTGAGE",155000,"debt_consolidation","TX",27.25,"Individual",5,0,2,12,319749
+80629,15000,7.84,468.94,"FSM","10+ years","MORTGAGE",87125,"credit_card","FL",19.88,"Individual",2,1,3,8,361449
+51585,30000,12.73,678.46,"Aviation Resouce Manager","5 years","RENT",65000,"debt_consolidation","NE",12.9,"Individual",2,2,3,56,44825
+22276,12000,16.14,422.72,"oilfield","3 years","RENT",80000,"debt_consolidation","CO",21.99,"Individual",3,1,1,28,79744
+109653,9000,6.67,276.54," Principal","10+ years","MORTGAGE",84000,"debt_consolidation","CO",17.59,"Individual",8,0,2,22,288157
+68787,12000,15.02,285.61,"Security Officer","10+ years","OWN",43228,"credit_card","AZ",34.59,"Individual",2,1,2,22,67307
+108133,20000,11.06,655.35,"Driver","10+ years","RENT",95000,"credit_card","NC",19.59,"Individual",2,0,2,60,58913
+2160,7200,7.84,225.1,"Corrosion Technician ","5 years","OWN",110000,"home_improvement","NM",21.33,"Individual",4,2,4,32,162348
+88240,10000,6.11,193.84,"Teacher/Coach","10+ years","OWN",70000,"debt_consolidation","TX",7.06,"Individual",2,0,1,3,69875
+40734,12000,11.06,393.21,"Office manager","2 years","RENT",55000,"credit_card","TX",10.91,"Individual",1,0,0,27,21400
+96861,7000,10.47,227.42,"Child Nutrition Manager","10+ years","MORTGAGE",25000,"debt_consolidation","NC",13.3,"Individual",0,0,0,13,22700
+82849,30000,14.47,1032.2,"facility engineer","8 years","RENT",85000,"credit_card","NY",17.52,"Individual",1,0,0,3,64264
+57574,2800,13.56,95.11,"Mortgage loan Clerk","2 years","RENT",28000,"credit_card","TX",16.72,"Individual",2,0,2,45,35230
+341,20000,15.02,476.01,"Correctional Officer","3 years","RENT",42000,"debt_consolidation","KS",8.51,"Individual",0,0,0,11,36800
+28336,33425,16.14,815.32,"City carrier","1 year","RENT",50000,"debt_consolidation","NY",23.55,"Individual",3,0,2,10,96864
+90978,20000,10.47,649.77,"Caregiver","4 years","RENT",103000,"debt_consolidation","CA",17.44,"Individual",3,1,3,8,76237
+52320,20000,6.67,614.53,"Sr Mgr Reporting","10+ years","MORTGAGE",145000,"credit_card","AZ",20.98,"Individual",2,3,3,34,375489
+51863,10000,22.35,383.72,"","n/a","RENT",50000,"other","CA",5.59,"Individual",1,1,2,44,6900
+101522,10000,8.08,313.74,"delivery driver","10+ years","RENT",50000,"credit_card","MD",10.56,"Individual",0,0,0,6,23600
+65234,40000,11.55,1320,"president","10+ years","MORTGAGE",250000,"debt_consolidation","FL",19,"Joint App",3,2,3,7,676952
+82046,10000,17.97,361.38,"CTA","10+ years","MORTGAGE",62000,"debt_consolidation","CT",26.42,"Individual",3,0,2,26,231830
+54215,10000,7.21,309.74,"Supervisor ","10+ years","RENT",95000,"debt_consolidation","CA",14.17,"Individual",2,0,1,23,62479
+48120,18000,18.94,659.27,"Receptionist","5 years","RENT",39000,"debt_consolidation","MA",26.34,"Individual",15,2,3,12,96418
+105720,19350,30.79,635.47,"CMO","6 years","MORTGAGE",215000,"debt_consolidation","TX",28.56,"Individual",4,1,2,6,446378
+30434,30000,24.37,869.5,"Director of Bldg & Facility Maint","10+ years","MORTGAGE",1e+05,"debt_consolidation","HI",20.83,"Joint App",2,1,6,26,667458
+105076,9400,8.46,296.57,"Nurse Practitioner ","2 years","OWN",1e+05,"other","KY",8.57,"Individual",4,2,4,125,285398
+36424,8000,14.47,275.26,"Senior Reimbursement Specialist","10+ years","MORTGAGE",42000,"debt_consolidation","TN",5.86,"Individual",0,1,1,17,180800
+76255,13000,13.56,441.54,"TRUCK DRIVER","< 1 year","RENT",35000,"debt_consolidation","MO",38.17,"Joint App",3,0,2,4,42985
+98204,40000,12.73,904.61,"Manager of Human Resources & Risk","10+ years","RENT",92500,"debt_consolidation","WA",25.09,"Individual",2,3,4,20,202718
+113287,24000,17.97,609.06,"Senior Accountant","5 years","OWN",76000,"debt_consolidation","PA",16.3,"Individual",5,6,6,4,403872
+63877,2800,7.84,87.54,"Office Manager","10+ years","RENT",147500,"medical","MD",13.78,"Individual",2,0,0,123,81239
+27136,8400,19.92,311.84,"Foreman","8 years","RENT",77800,"debt_consolidation","CO",22.54,"Individual",7,2,5,16,96502
+12064,25000,6.11,761.8,"Engineer","3 years","MORTGAGE",150000,"debt_consolidation","FL",1.16,"Individual",0,0,0,35,264320
+49303,10000,6.67,307.27,"Manager","10+ years","RENT",102000,"credit_card","CA",8.2,"Individual",1,1,1,11,290513
+116559,35000,18.94,1281.9,"Registered Nurse","10+ years","MORTGAGE",115000,"credit_card","NY",17.78,"Joint App",2,0,0,54,254749
+11867,10000,6.11,304.72,"","n/a","MORTGAGE",29232,"debt_consolidation","CO",18.88,"Joint App",1,0,0,25,487664
+50554,8000,16.14,281.81,"","< 1 year","MORTGAGE",95000,"medical","MA",15.56,"Individual",1,0,1,7,372096
+86678,4500,8.46,141.98,"Account Manager","2 years","RENT",40000,"debt_consolidation","CA",20.82,"Individual",2,1,2,53,43011
+81960,15000,7.21,464.6,"Director of operations","1 year","MORTGAGE",188000,"debt_consolidation","TX",13.07,"Individual",3,2,3,4,527629
+11400,20000,11.06,655.35,"Sales Manager","< 1 year","RENT",76000,"credit_card","NH",22.99,"Individual",2,0,1,5,110590
+42792,10000,17.97,361.38,"installer","4 years","RENT",36620,"debt_consolidation","NY",5.6,"Individual",0,0,0,31,6800
+19226,21200,23.4,825.08,"President","3 years","MORTGAGE",1e+06,"debt_consolidation","FL",2.04,"Individual",1,0,0,1,903693
+117045,12000,10.08,387.66,"Hairstylist ","10+ years","RENT",54000,"credit_card","NV",31.58,"Individual",2,1,2,3,83297
+81251,40000,6.11,1218.88,"Business Practices & Project Consultant","9 years","MORTGAGE",120000,"credit_card","KS",20.89,"Individual",2,0,1,23,265696
+9931,3200,6.11,97.51,"Registered Nurse","10+ years","MORTGAGE",87000,"vacation","FL",8.86,"Individual",1,1,1,79,382963
+68786,28000,15.02,666.42,"warehouse lead","4 years","RENT",62000,"credit_card","CA",28.53,"Individual",2,0,1,32,102336
+48933,6000,10.08,193.83,"Assistant Food Service Director","10+ years","OWN",62669,"home_improvement","NJ",15.07,"Individual",2,1,2,17,89676
+76227,6000,10.08,193.83,"Framer","3 years","RENT",40000,"credit_card","AZ",7.18,"Individual",0,0,0,18,26500
+123766,40000,7.84,808,"Sneior Advisor Business Enterprise","10+ years","MORTGAGE",175000,"debt_consolidation","MD",23.98,"Individual",4,0,0,23,186438
+104831,40000,11.06,870.9,"Director of Sales","5 years","OWN",180000,"credit_card","IL",20.89,"Individual",3,2,3,21,652198
+34682,4200,16.14,147.95,"","n/a","RENT",17232,"debt_consolidation","GA",16.78,"Individual",1,1,3,3,4093
+87562,3200,19.92,118.8,"customer service","10+ years","MORTGAGE",65000,"other","OK",25.92,"Individual",3,0,1,33,134074
+9292,20000,13.56,460.82,"","n/a","MORTGAGE",60000,"credit_card","MI",28.84,"Individual",5,0,0,28,145807
+102255,20000,20.89,752.38,"","n/a","MORTGAGE",40000,"home_improvement","TX",23.67,"Individual",1,1,1,7,79240
+95979,6000,13.56,203.79,"teacher","9 years","RENT",71000,"medical","IL",22.63,"Individual",2,1,1,12,44223
+39261,20000,11.55,660,"Sanding Operator","3 years","RENT",50000,"debt_consolidation","MI",13.15,"Individual",0,0,0,19,24700
+103852,8000,12.73,268.52,"Salon Manager","3 years","RENT",47000,"debt_consolidation","FL",20.21,"Individual",2,1,2,18,31668
+816,13000,6.67,255.4,"Customer Service ","1 year","MORTGAGE",94000,"debt_consolidation","IL",13.62,"Individual",3,1,2,7,127176
+10376,20000,18.94,732.52,"Finance Manager","5 years","MORTGAGE",85000,"home_improvement","CT",16.01,"Individual",4,3,6,46,234760
+10416,21000,6.11,407.07,"Chief Dispatcher ","10+ years","MORTGAGE",70000,"credit_card","GA",20.59,"Individual",5,0,0,31,221083
+61874,3000,14.47,103.22,"Librarian","6 years","MORTGAGE",54000,"house","MI",29.47,"Individual",3,1,1,60,141440
+88763,30000,16.14,731.78,"Teacher","10+ years","OWN",90000,"debt_consolidation","NY",14.33,"Individual",2,0,1,28,101824
+25628,16000,16.91,396.87,"Dept. Manager","7 years","MORTGAGE",58000,"debt_consolidation","GA",19.06,"Individual",2,3,5,3,34494
+28522,24000,12.73,542.77,"owner","10+ years","RENT",72000,"credit_card","CA",29.98,"Individual",3,0,0,10,81275
+36633,5300,6.67,162.86,"Senior Account Manager","7 years","RENT",51750,"debt_consolidation","CA",28.97,"Individual",6,2,2,58,100350
+105195,7500,15.02,260.07,"secretart","10+ years","MORTGAGE",46800,"debt_consolidation","SC",38.13,"Individual",3,1,3,12,200690
+23450,24000,13.56,552.98,"Inventory management specialist ","7 years","RENT",58932,"credit_card","NC",20.4,"Individual",1,1,1,44,51899
+7416,2500,6.67,76.82,"Concierge Supervisor","6 years","RENT",58000,"debt_consolidation","NV",2.4,"Individual",0,0,0,6,23700
+6454,15000,11.55,495,"Nurse Manager ","3 years","MORTGAGE",103000,"home_improvement","NY",33.55,"Joint App",4,2,2,15,326559
+20217,25000,15.02,595.02,"Loan Officer Assistant ","8 years","MORTGAGE",65000,"credit_card","VA",23.84,"Individual",3,1,3,6,288290
+52431,40000,6.11,1218.88,"","n/a","MORTGAGE",23160,"debt_consolidation","FL",55.96,"Joint App",0,0,0,23,431500
+48993,9000,11.06,294.91,"Linguist","3 years","RENT",50000,"moving","MN",24.65,"Individual",19,3,4,51,153582
+25727,22000,10.08,710.71,"","< 1 year","MORTGAGE",118488,"debt_consolidation","TN",10.23,"Individual",1,0,1,21,53570
+66649,14000,16.91,347.26,"Nurse - Registered Nurse (RN)","2 years","RENT",90000,"debt_consolidation","TX",31.52,"Individual",5,3,4,36,269708
+55979,17000,11.55,561,"Nuclear Control Room Operator","9 years","MORTGAGE",137300,"debt_consolidation","VA",16.62,"Individual",7,2,2,5,465744
+59399,20000,6.11,609.44,"District Manager","6 years","MORTGAGE",160000,"debt_consolidation","PA",10.01,"Individual",2,2,2,12,458109
+84663,35000,16.91,868.15,"School Psychologist","10+ years","MORTGAGE",80000,"credit_card","AZ",32.49,"Joint App",3,0,0,1,182636
+96786,13000,6.11,396.14,"Teacher","< 1 year","OWN",40000,"credit_card","CA",13.86,"Individual",6,0,0,25,34500
+102517,25000,7.21,774.34,"assistant budget director","10+ years","MORTGAGE",129000,"credit_card","GA",20.23,"Joint App",1,0,0,22,805177
+48146,25000,16.14,880.66,"owner","10+ years","OWN",60000,"debt_consolidation","NY",27.42,"Individual",1,1,1,7,219715
+96891,13000,7.84,406.42,"Diet clerk","10+ years","RENT",45000,"debt_consolidation","MN",21.01,"Individual",2,0,1,29,43369
+62424,30000,22.35,1151.16,"Machnic","2 years","RENT",38000,"debt_consolidation","AR",16.36,"Individual",2,1,2,6,26546
+12565,10000,11.06,327.68,"Psychiatric Nursing Supervisor","2 years","OWN",98000,"credit_card","TX",2.35,"Individual",0,0,0,2,11900
+62654,25000,24.37,985.69,"Service Delivery Coordinator","4 years","RENT",70000,"debt_consolidation","CA",30.34,"Individual",9,0,0,29,111487
+48189,10000,14.47,235.13,"conductor","2 years","RENT",80000,"debt_consolidation","NY",4.67,"Individual",1,0,1,34,10000
+79306,3500,16.14,123.3,"Program Assistant","2 years","RENT",55000,"debt_consolidation","PA",23.09,"Individual",15,1,5,3,75900
+91234,35000,11.55,1155,"Marketing Analytics Manager","7 years","RENT",105000,"debt_consolidation","CA",13.71,"Individual",1,1,1,29,40378
+29849,10000,14.47,344.07,"Claims Adjuster","2 years","RENT",46000,"debt_consolidation","AZ",23.3,"Individual",2,0,0,30,85900
+15209,2000,15.02,69.36,"Sheet Fabrication","< 1 year","RENT",23040,"debt_consolidation","MD",6.3,"Individual",0,0,0,134,3100
+110641,20000,6.67,392.92,"Project Manager","9 years","MORTGAGE",59000,"debt_consolidation","OK",17.37,"Individual",1,0,0,84,183033
+20501,24000,16.91,595.31,"Sr Analyst","2 years","RENT",85000,"credit_card","CT",30.68,"Individual",7,1,3,4,159916
+25954,4200,26.31,169.92,"","n/a","RENT",20000,"debt_consolidation","NY",6.96,"Individual",0,0,0,27,3300
+51161,35000,10.47,751.77,"SrDM","10+ years","MORTGAGE",95804,"debt_consolidation","VA",18.97,"Individual",5,3,6,7,504477
+72048,20000,11.55,440.36,"Vice President Sales","5 years","MORTGAGE",80000,"credit_card","FL",14.18,"Individual",2,1,2,6,76919
+64166,5000,7.21,154.87,"Office Manager","2 years","RENT",50000,"credit_card","CA",12.48,"Individual",1,1,1,15,24675
+39095,3025,16.14,106.56,"service manager","< 1 year","OWN",55000,"vacation","GA",14.6,"Individual",1,0,1,98,169797
+44749,7000,12.73,234.95,"Retail Manager","2 years","RENT",48000,"debt_consolidation","CA",12.03,"Individual",1,0,1,25,26100
+63404,26875,16.91,956.97,"Production Associate","4 years","MORTGAGE",37000,"debt_consolidation","OH",33.6,"Joint App",6,3,3,71,161057
+31146,10000,13.56,339.65,"Certified Nursing Assistant","10+ years","RENT",44000,"credit_card","NJ",30.17,"Individual",1,0,0,22,70600
+23029,8400,11.06,275.25,"","3 years","RENT",20000,"debt_consolidation","CO",8.94,"Individual",2,0,0,7,28372
+98522,5500,7.84,171.95,"Mediator","10+ years","MORTGAGE",86000,"debt_consolidation","OH",5.55,"Individual",2,1,1,59,168174
+19746,24000,11.55,528.43,"Materials Manager","4 years","MORTGAGE",85500,"home_improvement","TX",24.06,"Individual",3,1,2,3,555368
+3683,12000,20.89,451.43,"General Manager","5 years","MORTGAGE",35000,"debt_consolidation","KY",31.55,"Joint App",9,0,2,9,76160
+74780,2000,23.4,77.84,"sales manager","2 years","RENT",72000,"home_improvement","FL",0.42,"Individual",0,0,0,6,300
+16847,10000,18.94,259.08,"","n/a","OWN",6000,"other","CA",157,"Joint App",0,0,0,28,36900
+38459,14000,7.84,282.8,"Project manager ","7 years","OWN",72971,"credit_card","VA",18.36,"Individual",5,3,3,18,145516
+16191,10000,17.97,361.38,"Labor","2 years","RENT",60000,"other","CA",18.54,"Individual",2,0,2,9,31221
+90477,14000,19.92,519.72,"","n/a","MORTGAGE",67484,"debt_consolidation","UT",26.8,"Individual",5,2,5,1,338523
+31220,5000,12.73,167.83,"","n/a","RENT",18000,"other","NY",0,"Individual",0,0,0,612,19900
+53526,32000,14.47,1101.01,"Safety Specialist","7 years","OWN",150000,"debt_consolidation","NH",13.97,"Individual",15,2,4,1,556852
+23055,20000,16.14,704.53,"","< 1 year","RENT",45000,"debt_consolidation","FL",16.88,"Joint App",2,0,0,48,49885
+118558,11000,17.97,397.52,"Dental hygienist","2 years","RENT",55000,"debt_consolidation","IL",22.1,"Individual",3,0,3,6,71298
+104105,34000,11.06,740.27,"","n/a","MORTGAGE",170000,"debt_consolidation","LA",12.76,"Individual",2,0,0,87,452315
+53142,35000,15.02,1213.63,"Xerox Division Manager","8 years","RENT",220000,"other","GA",8.69,"Individual",3,1,3,2,89813
+54391,10000,8.46,315.5,"Mechanic","2 years","MORTGAGE",53000,"credit_card","NJ",12.68,"Individual",1,1,1,30,182770
+76117,20000,16.14,704.53,"Sales Rep","10+ years","RENT",55000,"debt_consolidation","CA",37.7,"Individual",1,0,0,8,56675
+80492,15000,16.14,528.4,"RN NURSE","< 1 year","MORTGAGE",80000,"debt_consolidation","GA",19.44,"Individual",3,0,1,74,100919
+49858,16000,26.31,481.99,"Director, Resources","9 years","RENT",40000,"home_improvement","NY",3.9,"Joint App",0,0,0,NA,0
+94944,5000,10.47,162.45,"","n/a","MORTGAGE",24000,"credit_card","NC",0,"Joint App",0,0,0,17,145550
+124948,16000,6.83,492.8,"Sign shop ","10+ years","OWN",48000,"debt_consolidation","MA",19.6,"Individual",2,1,2,2,187600
+96881,35000,11.55,1155,"Advanced Video Engineer 4","10+ years","MORTGAGE",98000,"home_improvement","CO",11.25,"Individual",1,0,0,26,386411
+26243,3500,20.89,131.67,"Barista","4 years","MORTGAGE",45500,"debt_consolidation","NY",6.7,"Individual",1,0,0,10,11237
+74071,10400,12.73,235.2,"Practice Administrator","8 years","MORTGAGE",70000,"debt_consolidation","CA",24.26,"Individual",3,1,1,32,268427
+119231,6000,23.4,233.52,"Fraud Analyst","2 years","OWN",40000,"debt_consolidation","IL",21.21,"Individual",1,1,1,64,30200
+86734,13000,17.97,329.91,"Operations Supervisor ","10+ years","OWN",82000,"credit_card","TX",19.16,"Individual",1,0,1,7,73730
+9940,17000,10.47,552.31,"QA Director","6 years","MORTGAGE",108900,"debt_consolidation","UT",14.34,"Individual",2,0,1,35,259985
+105175,12000,8.46,378.59,"Coordinator","7 years","MORTGAGE",75000,"debt_consolidation","SC",28.5,"Individual",23,0,2,1,467114
+91894,15000,24.37,591.42,"Truck driver","6 years","RENT",70000,"credit_card","TX",37.06,"Individual",3,1,3,1,130650
+120727,18500,6.11,563.73,"Senior Engineer","10+ years","RENT",114000,"credit_card","NY",13.6,"Individual",4,0,0,5,191415
+46798,11000,6.67,338,"","n/a","OWN",50000,"credit_card","MA",2.52,"Joint App",0,0,0,9,121500
+127801,30000,14.52,1032.93,"Finisher ","2 years","MORTGAGE",65500,"other","CA",13.76,"Individual",1,0,0,19,289571
+98043,12900,16.91,319.98,"Senior Vice President","6 years","MORTGAGE",185000,"credit_card","AL",19.78,"Individual",3,1,2,6,579761
+90906,29575,8.46,933.07,"MEDICAL CLAIMS","5 years","MORTGAGE",30000,"debt_consolidation","OH",71.28,"Joint App",2,0,1,24,321167
+45479,14000,12.73,316.62,"Senior Project Coordinator ","10+ years","MORTGAGE",75000,"credit_card","WA",22.46,"Individual",2,1,1,7,168806
+67405,7375,16.14,259.8,"Mental Health Technician ","1 year","MORTGAGE",22000,"debt_consolidation","PA",30.28,"Individual",12,1,4,4,161728
+83355,27600,18.94,715.05,"Bartender","4 years","RENT",33000,"debt_consolidation","WA",16.36,"Individual",1,0,0,9,34550
+46628,7000,8.46,220.85,"Registration/Scheduler ","< 1 year","RENT",30873,"debt_consolidation","AZ",25.12,"Individual",2,1,1,14,72074
+30992,30000,10.47,974.65,"Senior Associate ","2 years","RENT",145000,"credit_card","CA",9.73,"Individual",1,0,0,11,113107
+120105,15000,19.42,553.04,"HEAVY EQUIPMENT OPERATOR","1 year","RENT",98000,"debt_consolidation","NC",13.31,"Individual",2,0,2,21,47844
+87105,17650,7.21,546.68,"Director of IT Operations","1 year","MORTGAGE",143000,"home_improvement","FL",14.03,"Individual",3,0,2,3,366940
+88504,9000,6.11,274.25,"Economic Development Director","2 years","MORTGAGE",2e+05,"debt_consolidation","CA",9.18,"Individual",2,1,1,1,668601
+117193,25000,6.11,761.8,"director ofe events","6 years","MORTGAGE",90000,"home_improvement","TX",10.29,"Individual",2,3,3,4,259242
+19973,20000,6.11,609.44,"Team member","10+ years","MORTGAGE",90000,"debt_consolidation","IN",20.64,"Individual",1,2,2,12,150827
+2648,20000,18.94,732.52,"Account Executive","< 1 year","RENT",42000,"debt_consolidation","NY",28.8,"Individual",2,0,0,4,55824
+45743,20000,6.11,609.44,"","n/a","MORTGAGE",30000,"credit_card","TN",50.16,"Joint App",1,0,0,1,347146
+106293,13000,16.14,317.11,"Quality Control Supervisor","7 years","RENT",49000,"debt_consolidation","ME",29.78,"Individual",3,1,4,58,71594
+87951,10000,12.73,335.65,"Shop mechanic ","8 years","MORTGAGE",80000,"debt_consolidation","WY",14.97,"Individual",1,0,1,9,229750
+118009,6000,6.11,182.84,"Nurse","4 years","MORTGAGE",70000,"credit_card","VA",11.45,"Individual",2,1,1,8,273009
+20388,33000,6.67,1013.98,"Medical Coder","< 1 year","MORTGAGE",53000,"credit_card","CO",32.54,"Joint App",0,0,0,64,254800
+48592,13000,6.11,396.14,"Registered Nurse","1 year","MORTGAGE",64500,"debt_consolidation","KS",18.72,"Individual",3,1,1,50,165063
+13670,24000,10.47,779.72,"Pest Control Technician ","1 year","RENT",36000,"debt_consolidation","WA",2.57,"Individual",0,0,0,3,7600
+95671,7000,16.14,246.59,"COA","2 years","RENT",45000,"credit_card","FL",19.84,"Individual",4,1,1,25,65091
+13724,20000,18.94,518.16,"Desktop Support","< 1 year","RENT",41600,"debt_consolidation","PA",20.54,"Individual",1,0,0,14,42515
+55973,16000,15.02,554.81,"Shipping Manager","7 years","RENT",70000,"debt_consolidation","OK",19.78,"Individual",2,0,0,23,59062
+1422,36000,6.11,1096.99,"Vice President ","3 years","MORTGAGE",160000,"credit_card","TX",17.93,"Individual",5,2,4,16,671661
+127808,10000,13.06,337.23,"Senior Recruiter","6 years","OWN",140000,"major_purchase","CO",2.31,"Individual",0,0,1,54,291400
+72706,9600,11.06,314.57,"School Safety ","10+ years","RENT",75500,"other","NY",27.81,"Individual",1,1,1,16,61300
+128078,10000,24.84,396.76,"CEO","5 years","RENT",20000,"debt_consolidation","NY",5.34,"Joint App",0,0,0,25,4600
+79966,14000,16.91,498.52,"","n/a","MORTGAGE",91000,"major_purchase","VA",17.14,"Individual",2,1,1,154,471864
+99746,20000,14.47,688.13,"truck driver","10+ years","RENT",84000,"major_purchase","NJ",15.07,"Individual",3,2,2,23,64194
+83129,5200,7.84,162.57,"Data Analyst","< 1 year","RENT",50000,"credit_card","OR",2.4,"Individual",0,0,0,17,5500
+32392,5500,12.73,184.61,"Produce Manager","3 years","MORTGAGE",56000,"credit_card","NJ",37.06,"Joint App",2,0,2,14,259379
+41454,13000,8.46,410.14,"Analyst","9 years","RENT",70000,"debt_consolidation","IL",17.62,"Individual",2,1,2,24,48334
+86386,35000,10.08,745.03,"Senior Auto Body Tech","10+ years","RENT",78800,"debt_consolidation","GA",0.53,"Individual",0,0,0,45,81600
+87881,14400,16.91,357.19,"Manager","3 years","MORTGAGE",150000,"car","WI",15.3,"Individual",3,1,2,30,527540
+103787,17400,13.56,400.91,"Associate director clinical oncology ","2 years","MORTGAGE",148000,"debt_consolidation","PA",16.2,"Individual",5,1,4,8,577061
+31518,7000,7.21,216.82,"Teacher","10+ years","MORTGAGE",110000,"credit_card","NJ",22.07,"Joint App",5,1,3,71,523129
+3135,15000,10.47,487.33,"","n/a","OWN",46000,"debt_consolidation","GA",21.08,"Joint App",2,0,1,12,53042
+72199,6000,16.14,211.36,"claims validator","10+ years","MORTGAGE",20000,"home_improvement","MN",20.71,"Joint App",1,0,0,NA,21371
+57411,30000,11.55,660.54,"Asst superintendent","5 years","RENT",144000,"credit_card","TX",7.05,"Individual",1,0,1,8,61454
+80503,12000,11.06,393.21,"CIS","2 years","RENT",52000,"credit_card","TX",39.16,"Individual",2,0,1,39,93157
+6514,14000,6.67,275.05,"Contact Representative","3 years","RENT",41000,"debt_consolidation","CA",24.91,"Individual",2,0,2,4,71981
+4835,21000,13.56,713.26,"4th shift lead","7 years","OWN",40000,"debt_consolidation","WA",9.87,"Individual",1,0,0,24,19702
+50512,14000,11.06,458.74,"Scale Attendant","7 years","RENT",40200,"debt_consolidation","WA",20.66,"Individual",2,0,1,39,33782
+110101,25500,7.84,515.1,"Electrical Superintendent","4 years","MORTGAGE",140000,"home_improvement","MN",7.33,"Individual",2,0,1,13,362552
+74696,10000,18.94,366.26,"IT Tech Support","1 year","RENT",59000,"debt_consolidation","TX",21.42,"Individual",4,1,1,37,48347
+11910,14000,12.73,469.9,"","n/a","MORTGAGE",39000,"debt_consolidation","MA",27.35,"Joint App",1,1,1,13,443670
+116006,12500,13.56,424.56,"project manager","5 years","OWN",94500,"debt_consolidation","WA",14.53,"Individual",2,1,2,51,47200
+114433,9800,16.91,348.96,"Lead","3 years","MORTGAGE",50000,"debt_consolidation","IL",18.77,"Individual",1,1,2,12,175176
+104068,35000,26.31,1415.96,"CEO","10+ years","MORTGAGE",350000,"home_improvement","CA",4.17,"Joint App",0,0,0,60,118865
+62620,7200,11.55,237.6,"Integration Support Specialist","< 1 year","RENT",62000,"credit_card","OR",20.89,"Individual",3,2,3,59,55173
+112072,16500,11.55,363.3,"Departmental Information System Tech","6 years","RENT",72000,"credit_card","CA",16.15,"Individual",1,1,1,4,54250
+82557,6000,11.06,196.61,"Minister","7 years","OWN",50000,"debt_consolidation","CA",8.55,"Individual",1,2,2,11,14266
+82838,15000,7.21,464.6,"Police Officer","10+ years","OWN",115000,"credit_card","NY",12.28,"Individual",2,1,2,31,83225
+2416,30000,10.47,644.38,"Inventory Management Specialist","10+ years","MORTGAGE",93000,"credit_card","MD",6.13,"Individual",0,0,0,25,344754
+49922,7200,12.73,241.67,"Prep Foods Manager","5 years","RENT",24000,"debt_consolidation","MI",24.75,"Individual",2,0,1,14,40359
+20343,3000,6.11,91.42,"Branch manager ","10+ years","MORTGAGE",75000,"debt_consolidation","TX",10.62,"Individual",2,0,1,154,186484
+56345,17000,6.11,518.03,"IT Manager","2 years","MORTGAGE",205000,"credit_card","WA",8.44,"Individual",3,3,5,8,654883
+84647,24000,13.56,552.98,"Editor","5 years","RENT",90000,"debt_consolidation","MD",21.67,"Individual",2,0,1,3,321637
+92922,16000,7.46,497.41,"Owner","5 years","MORTGAGE",247000,"credit_card","MO",8.4,"Individual",3,3,6,18,265223
+86406,4800,12.73,161.11,"","< 1 year","RENT",50000,"credit_card","FL",11.19,"Individual",1,0,1,25,20509
+91280,12000,17.97,433.65,"Manager","6 years","MORTGAGE",139000,"debt_consolidation","NJ",15.63,"Individual",3,0,0,2,302043
+71317,5000,8.46,157.75,"","n/a","OWN",63180,"debt_consolidation","CA",5.75,"Individual",1,2,4,5,147075
+56017,15000,6.67,460.9,"President, CEO","8 years","MORTGAGE",150000,"debt_consolidation","MA",8.26,"Individual",1,1,1,3,251917
+21044,5000,11.55,165,"Grievances and Appeals Analyst 2","10+ years","RENT",61038,"other","CT",17.73,"Individual",3,0,0,73,83419
+29202,32425,8.46,1022.98,"laboratory technologist","2 years","MORTGAGE",41000,"debt_consolidation","TX",16.1,"Joint App",2,0,2,54,346149
+96838,3000,19.92,111.37,"Residential Coordinator","10+ years","MORTGAGE",50000,"vacation","MO",30.2,"Individual",2,0,1,7,186231
+111372,12500,16.14,440.33,"General Manager","8 years","RENT",60000,"debt_consolidation","TX",21.52,"Individual",2,0,0,8,76476
+91711,14400,17.97,365.44,"Supervisor","10+ years","RENT",70000,"debt_consolidation","MN",20.64,"Individual",3,0,0,24,55433
+73700,15000,7.84,468.94,"","n/a","OWN",82000,"home_improvement","PA",17.2,"Individual",3,2,4,2,142293
+87618,2700,16.91,96.15,"Operations Support Analyst","9 years","RENT",65864,"other","OR",8.55,"Individual",1,0,3,58,14275
+77005,10000,10.47,324.89,"Manager","2 years","MORTGAGE",60000,"vacation","FL",44.3,"Joint App",4,0,3,19,570847
+98915,7000,10.08,226.14,"Produce Team","9 years","RENT",20400,"credit_card","MO",12.29,"Individual",0,0,0,75,1000
+87614,25000,7.84,781.57,"Graphic Designer","< 1 year","RENT",65000,"credit_card","CA",4.19,"Individual",0,0,0,3,54500
+106825,35000,6.67,687.61,"Flight Dispatcher","10+ years","MORTGAGE",130000,"debt_consolidation","MS",17.4,"Individual",0,0,0,42,323450
+117043,8000,11.06,262.14,"Medical Assistant","6 years","MORTGAGE",40000,"debt_consolidation","KY",21.81,"Individual",2,0,2,47,42290
+92306,40000,11.55,1320,"GENERAL SALES MANAGER","10+ years","OWN",2e+05,"credit_card","CA",14.27,"Individual",2,0,1,3,159174
+128090,20200,16.46,714.77,"Sales Manager","9 years","RENT",210000,"debt_consolidation","FL",21.14,"Individual",5,2,3,24,161084
+60975,10000,10.47,324.89,"animal technician","10+ years","MORTGAGE",25000,"credit_card","CA",14.74,"Individual",0,0,0,1,18600
+107984,15000,17.97,542.07,"","n/a","OWN",50000,"debt_consolidation","CA",16.61,"Individual",1,0,0,5,34582
+83963,19500,16.14,686.92,"Sales","1 year","RENT",105000,"debt_consolidation","TX",19.93,"Individual",2,1,3,22,111545
+49498,24800,12.73,560.86,"pediatric biller","10+ years","MORTGAGE",46000,"debt_consolidation","NJ",14.22,"Joint App",1,0,1,5,32800
+85510,10000,11.55,330,"Broker ","10+ years","RENT",50000,"debt_consolidation","CO",36.03,"Individual",2,0,1,17,65414
+49256,4675,14.47,160.85,"","n/a","MORTGAGE",32000,"home_improvement","GA",34.81,"Individual",2,0,1,5,54373
+18881,23000,12.73,520.15,"Mail carrier","10+ years","OWN",65000,"debt_consolidation","MN",23.47,"Joint App",2,1,2,38,159581
+33797,10000,17.97,253.78,"","n/a","MORTGAGE",62000,"debt_consolidation","NY",18.52,"Joint App",0,0,0,15,300600
+119622,12000,6.67,368.72,"Hospital Concierge ","4 years","RENT",44000,"debt_consolidation","NY",6.06,"Individual",2,0,0,20,26839
+52681,16000,16.14,563.62,"Order Selector","4 years","MORTGAGE",51200,"debt_consolidation","ND",6.84,"Individual",0,0,0,0,94651
+92433,6450,25.34,257.62,"Accounts Receivable","3 years","MORTGAGE",35000,"debt_consolidation","FL",30.76,"Individual",2,0,1,12,172764
+116264,5000,11.06,163.84,"Associate Vice President","4 years","RENT",215000,"credit_card","FL",14.41,"Individual",3,1,2,9,115121
+73248,4000,13.56,135.86,"Occupational therapist","9 years","RENT",60000,"medical","PA",20.76,"Individual",1,0,1,10,53300
+113477,9600,22.35,368.37,"Assistant Store Manager ","4 years","OWN",65000,"debt_consolidation","NY",13.74,"Individual",3,1,1,2,83748
+26793,40000,6.11,1218.88,"lawyer","6 years","RENT",499000,"debt_consolidation","NY",6.68,"Individual",2,0,0,1,263529
+85785,25000,13.56,849.11,"Teacher","10+ years","MORTGAGE",85766,"debt_consolidation","IL",27,"Individual",2,1,2,111,539497
+113053,20000,10.08,425.73,"Sales Manager ","< 1 year","MORTGAGE",126000,"credit_card","MA",14.43,"Individual",7,4,6,10,307192
+63583,10000,17.97,361.38,"director of pr","< 1 year","MORTGAGE",65000,"debt_consolidation","VA",20.96,"Individual",2,1,2,23,54293
+86408,8000,16.91,284.87,"EMT","< 1 year","OWN",25000,"debt_consolidation","LA",13.44,"Individual",1,0,0,9,15800
+36600,15000,10.47,487.33,"FINANCE MANAGER","10+ years","RENT",90000,"credit_card","CA",36.64,"Individual",6,0,1,12,133544
+114838,10000,8.46,315.5,"Distributer ","< 1 year","RENT",23000,"debt_consolidation","CA",15.61,"Individual",4,0,0,44,18831
+80309,15000,16.91,372.07,"Personal Trainer","< 1 year","RENT",50000,"credit_card","NY",24.7,"Individual",1,0,0,10,78380
+104524,10000,16.14,243.93,"FS account specialist 3","10+ years","MORTGAGE",63542.33,"debt_consolidation","PA",15.05,"Individual",4,5,5,12,180573
+103281,4000,11.55,132,"Truck Driver","10+ years","MORTGAGE",62276,"home_improvement","MI",1.35,"Individual",0,0,0,NA,186615
+63515,24000,18.94,621.79,"Operations Manager","1 year","MORTGAGE",45000,"debt_consolidation","IN",12.53,"Joint App",1,1,1,26,162311
+89846,8000,16.14,281.81,"","n/a","OWN",30000,"debt_consolidation","OH",24.6,"Individual",2,0,2,7,42700
+113780,40000,17.97,1015.09,"","n/a","RENT",0,"credit_card","CA",NA,"Joint App",0,0,0,56,20100
+67214,12000,6.11,365.67,"Route Driver","10+ years","MORTGAGE",70000,"debt_consolidation","WA",19.66,"Individual",2,0,0,5,77372
+55483,10000,15.02,346.76,"Dental Asst","10+ years","RENT",36000,"debt_consolidation","CA",28.4,"Individual",1,1,3,40,35000
+122795,30000,10.07,638.45,"","n/a","MORTGAGE",50000,"debt_consolidation","NH",22.88,"Joint App",2,1,2,11,222710
+16652,8400,12.73,281.94,"Asset Protection","1 year","RENT",40000,"credit_card","TX",20.07,"Individual",1,0,1,5,56768
+24918,25000,12.73,565.38,"LIVESTOCK PROCUREMENT","10+ years","MORTGAGE",125444,"debt_consolidation","TX",16.39,"Individual",3,0,1,28,89201
+58292,5300,11.55,174.9,"General Assembly ","10+ years","MORTGAGE",65000,"debt_consolidation","OH",7.79,"Individual",1,1,2,20,139450
+101682,24000,6.67,737.44,"Store Manager","5 years","MORTGAGE",40000,"debt_consolidation","SC",34.53,"Joint App",1,1,1,15,321520
+24650,36000,12.73,1208.31,"Sr. Customer Success Manager","3 years","MORTGAGE",101000,"debt_consolidation","TX",20.33,"Joint App",17,0,0,9,153111
+27485,5000,11.06,163.84,"Engineer","5 years","RENT",90000,"debt_consolidation","IL",10.52,"Individual",5,2,4,46,55500
+97335,7500,6.67,230.45,"Direct Care Worker","4 years","MORTGAGE",24000,"debt_consolidation","MI",7.35,"Individual",0,0,0,29,10700
+88900,16000,13.56,368.66,"HR asst.","10+ years","OWN",50000,"debt_consolidation","MD",26.14,"Joint App",1,0,0,114,167958
+132,40000,11.55,880.71,"Technical Account Manager","2 years","MORTGAGE",150000,"debt_consolidation","TX",13.08,"Individual",2,1,3,3,504677
+41026,12000,15.02,285.61,"Mail carrier ","8 years","MORTGAGE",80000,"debt_consolidation","LA",18.11,"Individual",1,0,0,9,290584
+100470,2300,10.47,74.73,"Owner","1 year","RENT",33800,"credit_card","FL",37.89,"Individual",4,3,3,3,86947
+47621,8400,14.47,289.02,"Dental assistant","3 years","RENT",25000,"credit_card","CA",15.36,"Individual",5,2,3,18,33000
+39994,16000,7.84,500.21,"Social Strategist","2 years","RENT",75000,"debt_consolidation","NY",26.53,"Joint App",6,1,2,3,121063
+76332,10000,8.46,315.5,"Server","10+ years","RENT",45000,"credit_card","CA",27.76,"Individual",1,0,2,28,59232
+59500,16000,12.73,537.03,"Planning Section Manager","10+ years","MORTGAGE",90000,"debt_consolidation","FL",36.15,"Individual",4,1,1,36,241216
+84863,15000,11.06,326.59,"General manager ","8 years","OWN",97000,"credit_card","CT",16.72,"Individual",2,1,2,4,144146
+93404,30000,8.46,946.48,"Manager","4 years","RENT",38150,"debt_consolidation","CA",22.52,"Individual",1,1,2,10,103040
+67830,10000,12.73,335.65,"Route Manager","7 years","RENT",55000,"credit_card","TX",10.6,"Individual",0,0,0,21,112600
+37796,24000,7.84,484.8,"programmer","10+ years","OWN",180000,"other","TX",8.33,"Individual",2,1,2,12,205518
+46377,30000,6.67,921.8,"owner operator","6 years","OWN",84996,"debt_consolidation","IL",19.34,"Individual",2,0,1,10,168583
+91237,10000,11.55,330,"Founder","5 years","MORTGAGE",67000,"other","MD",5.62,"Individual",1,0,0,NA,257665
+64710,8000,17.97,289.1,"Analyst ","10+ years","MORTGAGE",60000,"debt_consolidation","CA",21.3,"Individual",2,0,2,20,243276
+71163,40000,7.84,1250.51,"FACILITY SECURITY OFFICER","10+ years","MORTGAGE",130000,"debt_consolidation","GA",30.47,"Individual",2,0,0,30,272608
+30883,30000,13.56,691.23,"Teacher","5 years","MORTGAGE",37000,"debt_consolidation","KY",25.56,"Joint App",4,2,2,10,211694
+59988,12000,8.46,378.59,"Counselor ","6 years","RENT",60000,"credit_card","TX",29.68,"Individual",12,0,1,2,193263
+103321,24000,17.97,867.3,"","n/a","MORTGAGE",39228,"debt_consolidation","CO",21.6,"Individual",2,1,2,3,39932
+101406,6000,7.84,187.58,"TSO","1 year","MORTGAGE",32600,"credit_card","TN",23.8,"Individual",1,0,1,16,166980
+5832,4700,7.84,146.94,"Medical Laboratory Scientist ","4 years","MORTGAGE",155000,"small_business","PA",16.28,"Individual",21,1,3,3,212235
+73557,5000,17.97,180.69,"Employee","1 year","RENT",35669,"debt_consolidation","TX",38.19,"Individual",2,1,2,10,115378
+97555,20000,16.14,487.86,"Welder/Mechanic","4 years","RENT",72000,"debt_consolidation","WY",25.93,"Individual",8,0,1,36,100682
+53392,10000,6.67,307.27,"Assembly line associate","< 1 year","MORTGAGE",30000,"credit_card","MI",15.8,"Joint App",4,0,0,19,109298
+29975,40000,13.56,921.64,"Project Manager","3 years","RENT",86000,"debt_consolidation","VA",32.88,"Joint App",15,0,1,15,135438
+123606,5000,10.08,161.53,"","n/a","RENT",9000,"debt_consolidation","NJ",10.53,"Joint App",0,0,0,16,11400
+95194,8500,7.21,263.28,"Operations Analyst","5 years","RENT",45500,"debt_consolidation","MN",30.76,"Individual",5,1,2,8,80744
+105371,15000,20.89,564.28,"Housekeeper","7 years","RENT",42000,"debt_consolidation","DC",33.27,"Individual",3,1,2,14,64107
+114338,11000,13.56,373.61,"Maintenance Technician","< 1 year","RENT",35006,"debt_consolidation","CO",24.79,"Individual",8,4,6,18,62086
+44504,10000,22.35,278.19,"Sr. Service Engineer - Microsoft","3 years","OWN",107000,"debt_consolidation","AZ",2.52,"Individual",0,0,0,7,7325
+8927,4000,6.67,122.91,"stocker overnight","10+ years","MORTGAGE",21000,"major_purchase","OH",11.66,"Individual",1,0,0,2,47000
+113629,2000,15.02,69.36,"ELECTRICIAN","10+ years","MORTGAGE",80000,"other","OH",16.86,"Joint App",1,1,2,24,136896
+36590,10000,11.06,327.68,"Property Manager","10+ years","RENT",92000,"debt_consolidation","PA",25.54,"Individual",4,4,5,8,108239
+82365,8000,8.46,252.4,"CNA","3 years","MORTGAGE",40000,"credit_card","CA",7.26,"Joint App",0,0,0,9,29300
+116668,32000,14.47,752.41,"Squadron Superintendent ","10+ years","RENT",88000,"debt_consolidation","IL",15.1,"Individual",2,0,0,14,56990
+68504,14800,6.67,454.76,"Director, LNHA","2 years","MORTGAGE",113000,"debt_consolidation","NC",16.67,"Individual",3,2,2,25,261177
+28003,15000,6.11,457.08,"Manager","10+ years","RENT",47000,"credit_card","SC",7.28,"Individual",1,0,1,31,83800
+42248,20000,15.02,476.01,"Support Specialist","10+ years","MORTGAGE",80000,"debt_consolidation","IL",8.01,"Individual",1,0,1,4,306198
+26376,12000,6.11,365.67,"Data Entry Clerk","7 years","OWN",23000,"credit_card","SD",44,"Joint App",1,0,0,20,156114
+803,10000,7.21,309.74,"LVN","< 1 year","MORTGAGE",51000,"credit_card","CA",19.44,"Individual",5,0,1,19,57638
+21079,8000,6.11,243.78,"Bilingual Customer Service Senior","1 year","MORTGAGE",52500,"credit_card","TX",11.77,"Individual",0,0,0,3,169758
+124701,15000,11.55,330.27,"","n/a","OWN",43000,"credit_card","CA",22.36,"Individual",1,0,1,14,42195
+104233,13000,7.84,406.42,"Teacher ","< 1 year","OWN",60000,"credit_card","NY",15.5,"Individual",3,0,2,19,92349
+43336,35000,13.56,1188.76,"Paraprofessional ","6 years","RENT",30000,"home_improvement","NY",46.04,"Joint App",1,0,1,8,51309
+79784,10000,28.72,315.72,"department assistant","10+ years","MORTGAGE",40800,"home_improvement","IL",15.65,"Individual",1,2,2,10,197854
+117924,6400,10.56,208.2,"Stationary engineer","2 years","RENT",80000,"moving","IL",4.34,"Individual",1,0,0,4,50703
+33234,7200,10.08,232.6,"Sales rep","10+ years","MORTGAGE",110000,"debt_consolidation","PA",10.55,"Individual",2,0,1,12,55310
+40814,10000,6.11,304.72,"Certified nurse assistant","6 years","MORTGAGE",80000,"other","CA",4.14,"Individual",0,0,0,3,422724
+41203,40000,6.11,1218.88,"CEO","4 years","MORTGAGE",1e+05,"credit_card","OR",9.38,"Joint App",1,0,0,37,271259
+24733,8000,11.06,262.14,"Process operator ","2 years","RENT",20000,"credit_card","NY",11.58,"Individual",1,1,1,2,18400
+15147,12000,11.55,264.22,"Plumber ","4 years","MORTGAGE",78000,"debt_consolidation","CA",17.57,"Individual",1,1,1,NA,368083
+17645,10000,19.92,264.5,"Operator ","10+ years","RENT",62800,"credit_card","CA",33.92,"Individual",3,0,3,4,73996
+38183,10000,20.89,376.19,"RN and Teacher","10+ years","RENT",65000,"moving","IL",20.55,"Individual",7,3,6,NA,48990
+34609,38000,12.73,1275.44,"Paralegal","8 years","RENT",82000,"debt_consolidation","FL",37.11,"Individual",2,0,1,8,138194
+99774,10400,10.47,223.39,"","n/a","MORTGAGE",95000,"home_improvement","NY",10.6,"Individual",2,1,2,5,520132
+25081,25000,7.21,774.34,"Senior Analyst","2 years","RENT",91300,"debt_consolidation","NY",7.32,"Individual",12,0,0,7,96300
+119782,10000,7.21,309.74,"service mgr","10+ years","OWN",89000,"debt_consolidation","CA",15.47,"Individual",2,2,5,32,78689
+3678,9600,11.55,316.8,"","n/a","MORTGAGE",110000,"debt_consolidation","CT",28.98,"Individual",3,2,2,7,436381
+41263,14000,7.21,433.63,"Accounting Associate","8 years","MORTGAGE",43000,"debt_consolidation","NY",22.13,"Joint App",2,3,3,2,95616
+43796,22000,12.73,497.54,"Sales Manager","10+ years","OWN",50000,"debt_consolidation","MI",19.23,"Individual",1,0,0,16,67500
+115712,35000,11.06,1146.85,"","n/a","OWN",70000,"debt_consolidation","NC",23.61,"Joint App",1,0,1,44,269965
+125444,14500,6.11,441.85,"CSR","< 1 year","RENT",75000,"credit_card","OR",17.49,"Individual",2,1,1,8,68414
+44819,12000,10.08,387.66,"Toolmaker","5 years","MORTGAGE",75000,"home_improvement","CT",7.14,"Joint App",0,0,0,22,241357
+63607,11000,11.06,360.44,"Driver","1 year","MORTGAGE",50000,"credit_card","IL",9.17,"Individual",0,0,0,1,181129
+3726,9000,6.11,274.25,"electrician","3 years","OWN",91000,"home_improvement","WV",12.09,"Individual",1,1,2,13,100995
+65129,1200,24.37,47.32,"Machine operator","10+ years","RENT",48000,"debt_consolidation","CA",31.65,"Individual",2,1,2,29,58911
+54281,19000,7.21,588.5,"Health inspector","10+ years","MORTGAGE",54000,"debt_consolidation","SD",29.07,"Joint App",3,1,2,24,363185
+44788,21600,18.94,559.61,"auto damage adjuster","10+ years","MORTGAGE",80000,"debt_consolidation","PA",44.94,"Joint App",2,0,0,1,346531
+90386,35000,16.14,853.74,"","n/a","MORTGAGE",27318,"home_improvement","MT",30.27,"Joint App",2,1,4,80,1032642
+109314,12800,11.55,422.4,"Senior Communications Coordinator","2 years","RENT",71700,"credit_card","NJ",30.64,"Individual",4,0,1,1,171732
+76727,5000,20.89,188.1,"Asst Project Manager","1 year","RENT",52416,"debt_consolidation","TX",33.84,"Individual",7,1,2,40,63814
+43252,10000,18.94,259.08,"","n/a","MORTGAGE",27027.96,"debt_consolidation","PA",21.89,"Individual",0,0,2,29,183282
+61111,8500,11.55,280.5,"Senior Producer ","4 years","MORTGAGE",58000,"debt_consolidation","MI",25.74,"Joint App",4,2,3,35,263402
+93157,6000,6.11,182.84,"Technology Support Specialist","10+ years","RENT",65000,"credit_card","IL",7.85,"Individual",0,0,1,13,24100
+25674,10000,7.84,202,"Floater","3 years","OWN",42000,"debt_consolidation","PA",14.8,"Individual",1,0,0,8,41271
+40483,21000,6.11,639.91,"Counselor","10+ years","RENT",62000,"credit_card","NM",24.4,"Individual",1,1,1,51,74870
+73265,1000,24.37,39.43,"Admin Associate ","10+ years","MORTGAGE",75000,"debt_consolidation","MD",13.06,"Individual",4,1,4,11,266159
+72690,35000,6.11,1066.52,"Classroom Aide - Special Ed.","1 year","MORTGAGE",31000,"debt_consolidation","NJ",37.46,"Joint App",8,1,1,22,150157
+6618,16000,30.17,519.33,"Maint","10+ years","RENT",60000,"house","GA",25.6,"Joint App",3,1,3,4,58654
+44826,12000,20.89,323.9,"Cashier","10+ years","MORTGAGE",22000,"debt_consolidation","OH",51.45,"Joint App",1,1,1,9,195574
+84385,8500,22.35,326.16,"Teacher","3 years","RENT",57000,"debt_consolidation","NY",24.44,"Individual",7,0,1,119,95200
+111325,12000,13.56,276.49,"Owner ","10+ years","RENT",38000,"credit_card","CA",19.3,"Individual",0,0,0,36,33100
+126757,40000,6.83,788.85,"engineering","10+ years","OWN",110000,"credit_card","CO",38.32,"Individual",4,1,2,129,473455
+37538,2700,16.14,95.12,"Manager","10+ years","OWN",100890,"home_improvement","TX",27.52,"Individual",5,1,5,2,158811
+109399,16000,20.89,601.9,"Technology Relationship Manager","10+ years","MORTGAGE",149000,"home_improvement","NC",15.3,"Individual",3,1,3,18,190606
+122027,21000,10.08,678.4,"Crane leader","10+ years","RENT",59000,"debt_consolidation","VA",26.4,"Individual",2,1,3,7,84000
+114279,12000,13.56,407.58,"Director Reimbursement Operations","10+ years","RENT",120000,"major_purchase","MD",9.64,"Individual",1,1,1,4,46100
+46261,28000,16.14,683,"Insurance Services Supervisor","5 years","MORTGAGE",68000,"debt_consolidation","FL",25.22,"Joint App",2,0,1,8,243923
+122375,12000,11.06,393.21,"Dealer","3 years","RENT",42000,"debt_consolidation","MS",12.51,"Individual",1,0,1,16,19553
+94543,40000,10.08,851.46,"Owner/Agent","10+ years","MORTGAGE",110000,"other","IL",14.6,"Individual",9,1,2,35,513072
+6656,4000,7.84,125.06,"CREDIT ADMIN","10+ years","MORTGAGE",38292.8,"other","CO",16.17,"Individual",1,1,2,13,253250
+125767,13600,8.08,426.68,"SharePoint Systems Engineer","< 1 year","MORTGAGE",75000,"house","KS",14.59,"Individual",2,2,6,2,367347
+28860,2000,10.47,64.98,"","n/a","OWN",22984,"debt_consolidation","MI",29.82,"Individual",1,0,0,49,33654
+67619,20000,18.94,732.52,"Senior Director of Grants & Contracts","< 1 year","MORTGAGE",95000,"debt_consolidation","MD",14.59,"Individual",2,0,0,16,144550
+51026,24000,18.94,879.02,"Register Nurse ","< 1 year","MORTGAGE",146400,"debt_consolidation","CA",20.01,"Joint App",6,3,4,34,681170
+27780,16000,7.21,495.58,"Postdoctoral Fellow ","3 years","RENT",48000,"credit_card","OH",24.98,"Individual",2,0,0,23,53600
+11254,24000,17.97,609.06,"Director","< 1 year","MORTGAGE",170000,"home_improvement","PA",22.34,"Joint App",7,3,3,10,407744
+85391,8400,10.47,272.91,"Ramp Agent","1 year","RENT",30200,"debt_consolidation","CA",32.03,"Individual",1,1,1,17,51717
+7015,15000,11.06,491.51,"","n/a","MORTGAGE",71000,"credit_card","NC",4.82,"Individual",0,0,0,8,289700
+116074,5500,11.06,180.22,"Senior Care Coordinator ","4 years","RENT",32000,"credit_card","AK",4.31,"Individual",0,0,0,4,10400
+54911,13500,20.89,364.39,"Inside Sales","5 years","MORTGAGE",44000,"debt_consolidation","IL",11.1,"Individual",1,0,0,6,22064
+21146,10000,6.67,307.27,"Director of Admissions","2 years","MORTGAGE",52000,"debt_consolidation","NY",17.29,"Individual",1,0,1,36,387183
+41403,25000,17.97,903.44,"Case Manager Specialist RN ","6 years","RENT",88000,"home_improvement","TX",1.77,"Individual",0,0,0,3,12100
+43704,27000,11.55,594.48,"senior loan officer ","1 year","RENT",125000,"debt_consolidation","FL",15.45,"Individual",3,0,1,45,239759
+53455,16000,29.69,514.62,"branch banker associate","1 year","MORTGAGE",23000,"debt_consolidation","MO",45.93,"Joint App",7,2,2,43,62304
+49493,5000,16.14,176.14,"Budget Technician","10+ years","RENT",48000,"credit_card","FL",3.58,"Individual",1,0,0,13,15035
+73874,6000,14.47,206.44,"General Manager ","2 years","RENT",52000,"other","NY",17.98,"Individual",5,2,2,1,55546
+29092,10000,11.06,327.68,"Assistant Client Manager","6 years","OWN",45000,"debt_consolidation","MA",14.77,"Individual",1,0,1,58,30446
+28656,21000,12.73,704.85,"Team Coordinator ","10+ years","MORTGAGE",50000,"debt_consolidation","TN",35.09,"Individual",2,0,2,7,70300
+13450,23000,16.91,570.5,"Office Manager","4 years","RENT",71000,"debt_consolidation","NY",18.86,"Individual",3,1,1,44,57762
+100087,12000,15.02,416.11,"Owner","10+ years","MORTGAGE",65000,"debt_consolidation","MI",2.77,"Individual",0,0,0,18,7200
+13079,12000,7.21,371.68,"Project Manager","4 years","MORTGAGE",150000,"debt_consolidation","TX",16.14,"Individual",3,1,3,13,295094
+56467,15600,18.94,404.16,"Respiratory Therapist ","10+ years","RENT",48000,"debt_consolidation","AL",18.55,"Individual",3,1,3,NA,32780
+26370,10000,16.14,243.93,"Contracting Officer","10+ years","MORTGAGE",105000,"other","IN",15.31,"Individual",5,4,9,48,70353
+74190,16000,8.46,504.79,"Parts","10+ years","MORTGAGE",70000,"debt_consolidation","CA",15.07,"Individual",1,1,3,5,243215
+118293,16000,13.56,543.43,"Project Coordinator ","1 year","RENT",72000,"debt_consolidation","AZ",10.53,"Individual",1,0,1,118,30129
+22575,17000,11.06,557.05,"LCAM/Realtor","1 year","RENT",50000,"debt_consolidation","FL",32.55,"Individual",2,0,1,9,98177
+109187,3000,10.08,96.92,"Payroll Administrator","10+ years","MORTGAGE",70000,"debt_consolidation","NJ",22.34,"Individual",3,1,2,4,361628
+124022,13000,15.02,450.78,"Retail","9 years","OWN",57000,"debt_consolidation","WA",22,"Individual",1,0,1,189,45113
+124379,18000,13.56,611.36,"Float Phlebotomist ","10+ years","OWN",55000,"debt_consolidation","NJ",6.55,"Individual",1,0,0,71,22975
+9499,25600,20.89,690.99,"Mental Health Therapist","6 years","MORTGAGE",65000,"debt_consolidation","TX",28.36,"Joint App",4,1,1,13,349655
+98401,6000,17.97,216.83,"Emergency Medical Technician","1 year","MORTGAGE",63000,"debt_consolidation","OH",14.44,"Individual",2,0,2,12,152192
+120464,21000,10.47,451.06,"Client Service Specialist","10+ years","OWN",85000,"debt_consolidation","TX",8.23,"Individual",5,1,7,17,301186
+29500,22000,17.97,795.03,"supervisor","10+ years","RENT",75400,"debt_consolidation","FL",31.03,"Individual",3,1,3,11,113632
+49157,10000,7.21,309.74,"","n/a","MORTGAGE",39000,"credit_card","AZ",18.65,"Individual",1,0,0,20,211900
+123028,18000,11.06,391.91,"Security Officer","4 years","RENT",65000,"debt_consolidation","TX",22.84,"Individual",1,0,0,3,78116
+101282,2000,10.47,64.98,"Desktop Support Analyst","6 years","RENT",51000,"debt_consolidation","NJ",4.52,"Individual",0,2,5,13,63730
+32852,20000,7.84,404,"Manager, HRIS","10+ years","RENT",100000.16,"debt_consolidation","GA",20.54,"Individual",3,0,1,12,229294
+80618,5000,19.92,185.62,"Manager","6 years","MORTGAGE",75000,"small_business","NC",5.09,"Individual",3,0,0,8,262681
+14748,9000,7.84,281.37,"Legal secretary ","2 years","RENT",44000,"debt_consolidation","NJ",16.88,"Individual",1,0,1,62,49248
+114221,17000,12.73,384.46,"Elementary School Teacher","10+ years","MORTGAGE",105000,"debt_consolidation","MA",12.32,"Individual",2,1,1,16,269032
+18275,15000,6.67,460.9,"","n/a","RENT",41184,"credit_card","WA",26.75,"Joint App",1,0,1,8,43373
+53919,5000,6.67,153.64,"Supervisor ","8 years","MORTGAGE",48000,"credit_card","TN",11.05,"Individual",1,0,1,136,83068
+48771,10000,16.14,243.93,"VP Relationship Management","5 years","MORTGAGE",160000,"debt_consolidation","TN",11.61,"Individual",5,5,7,29,356248
+23863,24400,15.02,580.74,"Manager","10+ years","MORTGAGE",55000,"debt_consolidation","IN",27.67,"Joint App",5,0,1,10,169813
+87186,9600,11.06,314.57,"Customer Service Manager","10+ years","MORTGAGE",38000,"credit_card","WV",8.78,"Individual",1,0,1,0,100472
+65025,19200,10.47,412.4,"Purchasing manager ","10+ years","MORTGAGE",56200,"debt_consolidation","TX",24.71,"Joint App",2,0,0,43,94859
+16244,28000,25.34,827.43,"Office Administrator","3 years","RENT",101000,"debt_consolidation","CO",36.01,"Individual",3,0,2,22,166797
+84942,7000,10.08,226.14,"Internet Sales Manager","3 years","RENT",40000,"debt_consolidation","NV",18,"Individual",1,0,1,8,28764
+87900,10000,7.21,199.01,"Correctional Sergeant","10+ years","OWN",1e+05,"debt_consolidation","CA",11.93,"Individual",1,1,1,8,270398
+104540,9000,16.91,320.48,"Manager ","5 years","RENT",87000,"debt_consolidation","CO",29.05,"Individual",4,1,4,1,103526
+31741,5000,10.08,161.53,"Table Games Supervisor","2 years","RENT",95000,"other","NV",5.26,"Individual",2,0,3,48,39807
+354,30000,6.11,914.16,"Sales Manager","9 years","MORTGAGE",135000,"debt_consolidation","MI",23.68,"Joint App",8,1,2,86,622953
+22373,15000,6.67,460.9,"Painter ","10+ years","MORTGAGE",60000,"debt_consolidation","KS",0,"Joint App",0,0,0,4,299826
+126758,12000,19.92,445.48,"Mechanic","3 years","MORTGAGE",62000,"debt_consolidation","CA",17.54,"Individual",2,1,2,3,56595
+109680,25000,7.84,505,"Senior Chief","10+ years","MORTGAGE",90000,"home_improvement","SC",14.91,"Joint App",3,2,2,83,593134
+118251,9000,7.21,278.76,"Sr. Account Executive","3 years","RENT",85000,"credit_card","TX",8.32,"Individual",3,0,0,3,82976
+61633,31000,14.47,728.9,"Project manager","4 years","RENT",83600,"debt_consolidation","NY",14.74,"Individual",2,0,0,76,66686
+110584,25000,20.89,674.79,"","n/a","MORTGAGE",45000,"credit_card","IL",47.92,"Joint App",2,2,2,84,71893
+5337,10000,15.02,238.01,"","n/a","RENT",40000,"debt_consolidation","IL",27.66,"Individual",1,1,1,23,69329
+75760,15000,17.97,542.07,"","n/a","MORTGAGE",44400,"credit_card","CA",38.43,"Individual",3,0,0,52,44153
+66921,10000,13.56,339.65,"human resource","5 years","MORTGAGE",61000,"debt_consolidation","IN",18.41,"Individual",4,2,6,3,326235
+74786,1000,7.21,30.98,"","n/a","MORTGAGE",30000,"debt_consolidation","PA",8.92,"Individual",0,0,1,6,132500
+21854,15000,7.21,464.6,"senior instructor","6 years","MORTGAGE",80000,"credit_card","MI",30.15,"Individual",2,0,1,250,203204
+63681,12000,12.73,402.77,"Biomedical Equipment Support Specialist ","2 years","MORTGAGE",89400,"debt_consolidation","ME",33.37,"Individual",4,3,5,16,372661
+18204,3500,18.94,128.19,"","< 1 year","MORTGAGE",114852,"home_improvement","TX",17.17,"Individual",4,2,4,17,171230
+10366,15000,6.11,290.76,"Acting Asst. Dir Support Services - IT","10+ years","MORTGAGE",66600,"credit_card","IN",6.13,"Individual",0,0,0,44,294200
+125889,10000,6.11,304.72,"Tech","2 years","RENT",47855,"credit_card","NJ",20.14,"Individual",1,0,0,28,61876
+125997,22000,14.52,757.48,"Sr. Therapy Program Assistant ","10+ years","MORTGAGE",65000,"debt_consolidation","NJ",17.51,"Joint App",3,1,4,25,114176
+78632,14000,7.84,437.68,"Lieutenant/firefighter ","10+ years","MORTGAGE",1e+05,"credit_card","IL",16.52,"Individual",4,0,1,5,601341
+24276,10000,6.11,304.72,"Quality Assurance ","9 years","RENT",75000,"debt_consolidation","NJ",12.11,"Individual",1,0,0,15,54786
+1536,11350,20.89,426.98,"Market Recruiter","3 years","MORTGAGE",40000,"medical","OK",36.33,"Joint App",1,0,1,14,279009
+21059,10000,8.46,315.5,"Territory Manager","10+ years","MORTGAGE",80000,"credit_card","TX",35.81,"Individual",4,1,3,2,418692
+10836,18000,7.21,557.52,"Manager","6 years","RENT",120000,"debt_consolidation","CA",7.99,"Individual",1,0,0,16,66733
+82777,8000,6.11,243.78,"Audio Engineer","3 years","RENT",51480,"debt_consolidation","FL",10.84,"Individual",1,0,0,1,42103
+101236,30000,10.47,644.38,"Teacher","10+ years","MORTGAGE",73000,"debt_consolidation","GA",8.4,"Individual",1,0,0,61,425160
